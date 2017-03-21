@@ -214,7 +214,7 @@ public class PluginMap extends MyPlugin {
   @SuppressWarnings("unused")
   private void centerToBounds(JSONArray args, CallbackContext callbackContext) throws JSONException {
     JSONObject bounds = args.getJSONObject(1);
-    int padding = args.getInt(1);
+    int padding = args.getInt(2);
 
     JSONObject northeastData = bounds.getJSONObject("northeast");
     JSONObject southwestData = bounds.getJSONObject("southwest");
