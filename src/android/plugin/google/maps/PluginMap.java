@@ -209,6 +209,26 @@ public class PluginMap extends MyPlugin {
   }
   
   /**
+   * Centers the camera location so the boudns are in view
+   */
+  @SuppressWarnings("unused")
+  private void centerToBounds(JSONArray args, CallbackContext callbackContext) throws JSONException {
+    JSONObject bounds = args.getJSONObject(1);
+    int padding = args.getInt(1);
+
+    JSONObject northeastData = bounds.getJSONObject('northeast');
+    JSONObject southwestData = bounds.getJSONObject('southwest');
+
+    LatLng northeast = new LatLng(northeastData.getDouble('lat'), northeastData.getDouble('lng'));
+    LatLng southwest = new LatLng(southwestData.getDouble('lat'), southwestData.getDouble('lng'));
+
+    LatLngBounds latlngBoudns = new LatLngBounds(northeast, southwest);
+
+    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latlngBounds, padding);
+    this.myMoveCamera(cameraUpdate, callbackContext);
+  }
+
+  /**
    * Set center location of the marker
    * @param args
    * @param callbackContext
