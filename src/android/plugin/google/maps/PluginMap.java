@@ -222,7 +222,7 @@ public class PluginMap extends MyPlugin {
     LatLng northeast = new LatLng(northeastData.getDouble("lat"), northeastData.getDouble("lng"));
     LatLng southwest = new LatLng(southwestData.getDouble("lat"), southwestData.getDouble("lng"));
 
-    LatLngBounds latlngBoudns = new LatLngBounds(northeast, southwest);
+    LatLngBounds latlngBounds = new LatLngBounds(northeast, southwest);
 
     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latlngBounds, padding);
     this.myMoveCamera(cameraUpdate, callbackContext);
