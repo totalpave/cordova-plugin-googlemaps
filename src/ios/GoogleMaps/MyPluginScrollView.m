@@ -21,6 +21,7 @@ UIView *myView = nil;
 
 - (void)attachView:(UIView *)view {
   myView = view;
+  [self setScrollEnabled:NO];
   [self addSubview:view];
   [self addSubview:self.debugView];
 }
