@@ -462,7 +462,7 @@ App.prototype.setOptions = function(options) {
     cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Map.setOptions', this.deleteFromObject(options,'function')]);
 };
 
-App.prototype.centerToBounds = function(latLngBounds, padding) {
+App.prototype.centerToBounds = function(latLngBounds, padding, duration) {
     var ne = latLngBounds.northeast;
     var bounds = {
         northeast : {
@@ -475,7 +475,7 @@ App.prototype.centerToBounds = function(latLngBounds, padding) {
         }
     };
 
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Map.centerToBounds', bounds, padding || 0]);
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Map.centerToBounds', bounds, padding || 0, duration || 0]);
 };
 
 App.prototype.setCenter = function(latLng) {
