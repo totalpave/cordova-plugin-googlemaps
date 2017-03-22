@@ -471,7 +471,7 @@ App.prototype.centerToBounds = function(latLngBounds, padding) {
         },
         southwest : {
             lat : latLngBounds.southwest.lat,
-            lng : latLngBOunds.southwest.lng
+            lng : latLngBounds.southwest.lng
         }
     };
 

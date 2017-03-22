@@ -222,6 +222,13 @@ public class PluginMap extends MyPlugin {
     LatLng northeast = new LatLng(northeastData.getDouble("lat"), northeastData.getDouble("lng"));
     LatLng southwest = new LatLng(southwestData.getDouble("lat"), southwestData.getDouble("lng"));
 
+    if (southeast.lat() > northeast.lat()) {
+      //swap coordinates
+      LatLng t = northeast;
+      northeast = southwest;
+      southwest = t;
+    }
+
     LatLngBounds latlngBounds = new LatLngBounds(northeast, southwest);
 
     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latlngBounds, padding);
