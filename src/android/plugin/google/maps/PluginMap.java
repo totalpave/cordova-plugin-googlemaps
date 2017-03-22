@@ -215,6 +215,7 @@ public class PluginMap extends MyPlugin {
   private void centerToBounds(JSONArray args, CallbackContext callbackContext) throws JSONException {
     JSONObject bounds = args.getJSONObject(1);
     int padding = args.getInt(2);
+    int duration = args.getInt(3);
 
     JSONObject northeastData = bounds.getJSONObject("northeast");
     JSONObject southwestData = bounds.getJSONObject("southwest");
@@ -235,7 +236,12 @@ public class PluginMap extends MyPlugin {
     LatLngBounds latlngBounds = new LatLngBounds(northeast, southwest);
 
     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latlngBounds, padding);
-    this.myMoveCamera(cameraUpdate, callbackContext);
+    if (duration == 0) {
+      this.myMoveCamera(cameraUpdate, callbackContext);
+    }
+    else {
+      this.myAnimateCamera(cameraUpdate, duration, callbackContext);  
+    }
   }
 
   /**
