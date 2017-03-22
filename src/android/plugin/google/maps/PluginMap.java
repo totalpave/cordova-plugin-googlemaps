@@ -225,7 +225,7 @@ public class PluginMap extends MyPlugin {
     Log.e("coordinates-n", northeast.toString());
     Log.e("coordinates-s", southwest.toString());
 
-    if (southwest.latitude > northeast.latitude) {
+    if (southwest.latitude < northeast.latitude) {
       //swap coordinates
       LatLng t = northeast;
       northeast = southwest;
