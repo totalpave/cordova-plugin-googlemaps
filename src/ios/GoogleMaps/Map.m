@@ -32,8 +32,8 @@
 
 - (void)centerToBounds:(CDVInvokedUrlCommand *)command {
   NSDictionary *bounds = [command.arguments objectAtIndex:1];
-  int padding [command.arguments objectAtIndex:2];
-  int duration [command.arguments objectAtIndex:3];
+  int padding = [[command.arguments objectAtIndex:2] intValue];
+  int duration = [[command.arguments objectAtIndex:3] intValue];
 
   NSDictionary *northeastData = [bounds objectForKey:@"northeast"];
   NSDictionary *southwestData = [bounds objectForKey:@"southwest"];
@@ -41,13 +41,13 @@
   CLLocationCoordinate2D northeast = CLLocationCoordinate2DMake([[northeastData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
   CLLocationCoordinate2D southwest = CLLocationCoordinate2DMake([[southwestData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
 
-  if ([southwest latitude] < [northeast latitude]) {
+  if (southwest.latitude < northeast.latitude) {
     CLLocationCoordinate2D t = northeast;
     northeast = southwest;
     southwest = t;
   }
 
-  GMSCoordinateBounds latlngBounds = [[GMSCoordinateBounds new] initWithCoordinate:northeast coordinate:southwest];
+  GMSCoordinateBounds *latlngBounds = [[GMSCoordinateBounds new] initWithCoordinate:northeast coordinate:southwest];
 
   GMSCameraUpdate *cameraUpdate = [GMSCameraUpdate fitBounds:latlngBounds withPadding:padding];
 
@@ -58,11 +58,11 @@
     [CATransaction begin]; {
       [CATransaction setAnimationDuration: duration];
 
-      [CATransaction setAnimationTImingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+      [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
 
       [CATransaction setCompletionBlock:^{
         [self.mapCtrl.map animateWithCameraUpdate:cameraUpdate];
-      }]
+      }];
     }[CATransaction commit];
   }
 
