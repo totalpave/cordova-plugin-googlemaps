@@ -30,6 +30,48 @@
   [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
+- (void)centerToBounds:(CDVInvokedUrlCommand *)command {
+  NSDictionary *bounds = [command.arguments objectAtIndex:1];
+  int padding [command.arguments objectAtIndex:2];
+  int duration [command.arguments objectAtIndex:3];
+
+  NSDictionary *northeastData = [bounds objectForKey:@"northeast"];
+  NSDictionary *southwestData = [bounds objectForKey:@"southwest"];
+
+  CLLocationCoordinate2D northeast = CLLocationCoordinate2DMake([[northeastData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
+  CLLocationCoordinate2D southwest = CLLocationCoordinate2DMake([[southwestData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
+
+  if ([southwest latitude] < [northeast latitude]) {
+    CLLocationCoordinate2D t = northeast;
+    northeast = southwest;
+    southwest = t;
+  }
+
+  GMSCoordinateBounds latlngBounds = [[GMSCoordinateBounds new] initWithCoordinate:northeast coordinate:southwest];
+
+  GMSCameraUpdate *cameraUpdate = [GMSCameraUpdate fitBounds:latlngBounds withPadding:padding];
+
+  if (duration == 0) {
+    [self.mapCtrl.map moveCamera:cameraUpdate];
+  }
+  else {
+    [CATransaction begin]; {
+      [CATransaction setAnimationDuration: duration];
+
+      [CATransaction setAnimationTImingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
+
+      [CATransaction setCompletionBlock:^{
+        [self.mapCtrl.map animateWithCameraUpdate:cameraUpdate];
+      }]
+    }[CATransaction commit];
+  }
+
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+  [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+
+  // [self.mapCtrl.map moveCamera:[GMSCameraUpdate fitBounds:cameraBounds withPadding:10 * scale]];
+}
+
 - (void)setMyLocationEnabled:(CDVInvokedUrlCommand *)command {
   Boolean isEnabled = [[command.arguments objectAtIndex:1] boolValue];
   self.mapCtrl.map.settings.myLocationButton = isEnabled;

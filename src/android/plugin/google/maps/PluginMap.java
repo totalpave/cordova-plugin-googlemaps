@@ -223,9 +223,6 @@ public class PluginMap extends MyPlugin {
     LatLng northeast = new LatLng(northeastData.getDouble("lat"), northeastData.getDouble("lng"));
     LatLng southwest = new LatLng(southwestData.getDouble("lat"), southwestData.getDouble("lng"));
 
-    Log.e("coordinates-n", northeast.toString());
-    Log.e("coordinates-s", southwest.toString());
-
     if (southwest.latitude < northeast.latitude) {
       //swap coordinates
       LatLng t = northeast;
