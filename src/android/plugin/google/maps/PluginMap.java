@@ -222,7 +222,7 @@ public class PluginMap extends MyPlugin {
     LatLng northeast = new LatLng(northeastData.getDouble("lat"), northeastData.getDouble("lng"));
     LatLng southwest = new LatLng(southwestData.getDouble("lat"), southwestData.getDouble("lng"));
 
-    if (southeast.lat() > northeast.lat()) {
+    if (southwest.lat() > northeast.lat()) {
       //swap coordinates
       LatLng t = northeast;
       northeast = southwest;
