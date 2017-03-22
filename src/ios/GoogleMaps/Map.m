@@ -38,7 +38,7 @@
   NSDictionary *northeastData = [bounds objectForKey:@"northeast"];
   NSDictionary *southwestData = [bounds objectForKey:@"southwest"];
 
-  CLLocationCoordinate2D northeast = CLLocationCoordinate2DMake([[northeastData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
+  CLLocationCoordinate2D northeast = CLLocationCoordinate2DMake([[northeastData valueForKey:@"lat"] floatValue], [[northeastData valueForKey:@"lng"] floatValue]);
   CLLocationCoordinate2D southwest = CLLocationCoordinate2DMake([[southwestData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
 
   if (southwest.latitude < northeast.latitude) {
@@ -55,15 +55,10 @@
     [self.mapCtrl.map moveCamera:cameraUpdate];
   }
   else {
-    [CATransaction begin]; {
-      [CATransaction setAnimationDuration: duration];
-
-      [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
-
-      [CATransaction setCompletionBlock:^{
-        [self.mapCtrl.map animateWithCameraUpdate:cameraUpdate];
-      }];
-    }[CATransaction commit];
+    [CATransaction begin];
+      [CATransaction setValue:[NSNumber numberWithFloat:(duration/1000.0f)]  forKey:kCATransactionAnimationDuration];
+      [self.mapCtrl.map animateWithCameraUpdate:cameraUpdate];
+    [CATransaction commit];
   }
 
   CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
