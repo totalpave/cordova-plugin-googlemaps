@@ -835,7 +835,7 @@ var _append_child = function(event) {
         return;
     }
 
-    if (target.hasAttribute('gms-exclude')) {
+    if (target.hasAttribute('data-gms-exclude')) {
         return;
     }
 
