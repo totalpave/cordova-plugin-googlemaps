@@ -827,12 +827,18 @@ var _append_child = function(event) {
     event = event || window.event;
     event = event || {};
     var target = event.srcElement;
+
     if (!target || "nodeType" in target == false) {
         return;
     }
     if (target.nodeType != 1) {
         return;
     }
+
+    if (target.hasAttribute('gms-exclude')) {
+        return;
+    }
+
     var size = getDivRect(target);
     var elemId = "pgm" + Math.floor(Math.random() * Date.now());
     target.setAttribute("__pluginDomId", elemId);
