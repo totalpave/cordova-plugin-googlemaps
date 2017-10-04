@@ -143,6 +143,7 @@ var App = function() {
         value: "Map",
         writable: false
     });
+    this.platform = cordova.platformId;
 };
 App.prototype = new BaseClass();
 
@@ -1146,6 +1147,8 @@ App.prototype.addPolyline = function(polylineOptions, callback) {
     polylineOptions.zIndex = polylineOptions.zIndex || 4;
     polylineOptions.geodesic = polylineOptions.geodesic  === true;
 
+    var fn = this.platform === 'android' ? 'Polyline.createPolyline' : 'GmapsPolyline.createPolyline';
+
     cordova.exec(function(result) {
         var polyline = new Polyline(self, result.id, polylineOptions);
         OVERLAYS[result.id] = polyline;
@@ -1155,7 +1158,7 @@ App.prototype.addPolyline = function(polylineOptions, callback) {
         if (typeof callback === "function") {
             callback.call(self, polyline, self);
         }
-    }, self.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.createPolyline', self.deleteFromObject(polylineOptions,'function')]);
+    }, self.errorHandler, PLUGIN_NAME, 'exec', [fn, self.deleteFromObject(polylineOptions,'function')]);
 };
 //-------------
 // Polygon
@@ -1692,21 +1695,24 @@ Polyline.prototype.setPoints = function(points) {
             "lng": points[i].lng
         });
     }
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.setPoints', this.getId(), path]);
+    var fn = this.platform === 'android' ? 'Polyline.setPoints' : 'GmapsPolyline.setPoints';
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', [fn, this.getId(), path]);
 };
 Polyline.prototype.getPoints = function() {
     return this.get("points");
 };
 Polyline.prototype.setColor = function(color) {
     this.set('color', color);
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.setColor', this.getId(), HTMLColor2RGBA(color, 0.75)]);
+    var fn = this.platform === 'android' ? 'Polyline.setColor' : 'GmapsPolyline.setColor';
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', [fn, this.getId(), HTMLColor2RGBA(color, 0.75)]);
 };
 Polyline.prototype.getColor = function() {
     return this.get('color');
 };
 Polyline.prototype.setWidth = function(width) {
     this.set('width', width);
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.setWidth', this.getId(), width]);
+    var fn = this.platform === 'android' ? 'Polyline.setWidth' : 'GmapsPolyline.setWidth';
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', [fn, this.getId(), width]);
 };
 Polyline.prototype.getWidth = function() {
     return this.get('width');
@@ -1714,7 +1720,8 @@ Polyline.prototype.getWidth = function() {
 Polyline.prototype.setVisible = function(visible) {
     visible = parseBoolean(visible);
     this.set('visible', visible);
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.setVisible', this.getId(), visible]);
+    var fn = this.platform === 'android' ? 'Polyline.setVisible' : 'GmapsPolyline.setVisible';
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', [fn, this.getId(), visible]);
 };
 Polyline.prototype.getVisible = function() {
     return this.get('visible');
@@ -1722,20 +1729,23 @@ Polyline.prototype.getVisible = function() {
 Polyline.prototype.setGeodesic = function(geodesic) {
     geodesic = parseBoolean(geodesic);
     this.set('geodesic', geodesic);
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.setGeodesic', this.getId(), geodesic]);
+    var fn = this.platform === 'android' ? 'Polyline.setGeodesic' : 'GmapsPolyline.setGeodesic';
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', [fn, this.getId(), geodesic]);
 };
 Polyline.prototype.getGeodesic = function() {
     return this.get('geodesic');
 };
 Polyline.prototype.setZIndex = function(zIndex) {
     this.set('zIndex', zIndex);
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.setZIndex', this.getId(), zIndex]);
+    var fn = this.platform === 'android' ? 'Polyline.setZIndex' : 'GmapsPolyline.setZIndex';
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', [fn, this.getId(), zIndex]);
 };
 Polyline.prototype.getZIndex = function() {
     return this.get('zIndex');
 };
 Polyline.prototype.remove = function() {
-    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['GmapsPolyline.remove', this.getId()]);
+    var fn = this.platform === 'android' ? 'Polyline.remove' : 'GmapsPolyline.remove';
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', [fn, this.getId()]);
     this.off();
 };
 
