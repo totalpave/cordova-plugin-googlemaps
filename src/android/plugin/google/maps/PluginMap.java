@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.PluginResult;
+import org.apache.cordova.LOG;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,6 +36,7 @@ public class PluginMap extends MyPlugin {
   private final String ANIMATE_CAMERA_CANCELED = "animate_camera_canceled";
   private JSONArray _saveArgs = null;
   private CallbackContext _saveCallbackContext = null;
+  private static final String TAG = "CordovaGoogleMapsPluginMap";
 
   /**
    * @param args
@@ -223,7 +225,10 @@ public class PluginMap extends MyPlugin {
     LatLng northeast = new LatLng(northeastData.getDouble("lat"), northeastData.getDouble("lng"));
     LatLng southwest = new LatLng(southwestData.getDouble("lat"), southwestData.getDouble("lng"));
 
-    if (southwest.latitude < northeast.latitude) {
+    if (southwest.latitude < northeast.latitude || 
+      (southwest.latitude == northeast.latitude && 
+        southwest.longitude < northeast.longitude
+      )) {
       //swap coordinates
       LatLng t = northeast;
       northeast = southwest;
@@ -231,6 +236,9 @@ public class PluginMap extends MyPlugin {
     }
 
     LatLngBounds latlngBounds = new LatLngBounds(northeast, southwest);
+
+    LOG.w(TAG, "LatLngBounds northeast: " + latlngBounds.northeast.toString());
+    LOG.w(TAG, "LatLngBounds southwest: " + latlngBounds.southwest.toString());
 
     CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latlngBounds, padding);
     if (duration == 0) {
