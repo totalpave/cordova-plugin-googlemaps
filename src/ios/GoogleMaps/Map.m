@@ -41,7 +41,11 @@
   CLLocationCoordinate2D northeast = CLLocationCoordinate2DMake([[northeastData valueForKey:@"lat"] floatValue], [[northeastData valueForKey:@"lng"] floatValue]);
   CLLocationCoordinate2D southwest = CLLocationCoordinate2DMake([[southwestData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
 
-  if (southwest.latitude < northeast.latitude) {
+  // if (southwest.latitude < northeast.latitude) {
+  if (southwest.latitude < northeast.latitude || 
+      (southwest.latitude == northeast.latitude && 
+        southwest.longitude < northeast.longitude
+      )) {
     CLLocationCoordinate2D t = northeast;
     northeast = southwest;
     southwest = t;
