@@ -150,7 +150,6 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
   private LinearLayout windowLayer = null;
   private ViewGroup root;
   private final int CLOSE_LINK_ID = 0x7f999990;  //random
-  private final int LICENSE_LINK_ID = 0x7f99991; //random
   private MyPluginLayout mPluginLayout = null;
   public boolean isDebug = false;
   private GoogleApiClient googleApiClient = null;
@@ -714,8 +713,7 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
 
   @SuppressWarnings("unused")
   private Boolean getLicenseInfo(JSONArray args, CallbackContext callbackContext) {
-    String msg = GooglePlayServicesUtil.getOpenSourceSoftwareLicenseInfo(activity);
-    callbackContext.success(msg);
+    callbackContext.success();
     return true;
   }
 
@@ -815,18 +813,6 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
     closeLink.setOnClickListener(GoogleMaps.this);
     closeLink.setId(CLOSE_LINK_ID);
     buttonFrame.addView(closeLink);
-
-    //license button
-    TextView licenseLink = new TextView(activity);
-    licenseLink.setText("Legal Notices");
-    licenseLink.setTextColor(Color.BLUE);
-    licenseLink.setLayoutParams(buttonParams);
-    licenseLink.setTextSize(20);
-    licenseLink.setGravity(Gravity.RIGHT);
-    licenseLink.setPadding((int)(10 * density), (int)(20 * density), (int)(10 * density), (int)(10 * density));
-    licenseLink.setOnClickListener(GoogleMaps.this);
-    licenseLink.setId(LICENSE_LINK_ID);
-    buttonFrame.addView(licenseLink);
 
     //webView.getView().setVisibility(View.INVISIBLE);
     root.addView(windowLayer);
@@ -1282,11 +1268,6 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
     });
   }
 
-  private void showLicenseText() {
-    AsyncLicenseInfo showLicense = new AsyncLicenseInfo(activity);
-    showLicense.execute();
-  }
-
   /********************************************************
    * Callbacks
    ********************************************************/
@@ -1414,6 +1395,7 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
     String key;
     LatLngBounds bounds;
 
+
     // Polyline
     PluginEntry polylinePlugin = this.plugins.get("Polyline");
     if(polylinePlugin != null) {
@@ -1423,12 +1405,6 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
       Polyline polyline;
       Point origin = new Point();
       Point hitArea = new Point();
-      hitArea.x = 1;
-      hitArea.y = 1;
-      Projection projection = map.getProjection();
-      double threshold = this.calculateDistance(
-          projection.fromScreenLocation(origin),
-          projection.fromScreenLocation(hitArea));
 
       for (HashMap.Entry<String, Object> entry : polylineClass.objects.entrySet()) {
         key = entry.getKey();
@@ -1441,6 +1417,14 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
             points = polyline.getPoints();
 
             if (polyline.isGeodesic()) {
+              hitArea.x = (int)(polyline.getWidth() * density);
+              hitArea.y = hitArea.x;
+              Projection projection = map.getProjection();
+
+              double threshold = this.calculateDistance(
+                  projection.fromScreenLocation(origin),
+                  projection.fromScreenLocation(hitArea));
+
               if (this.isPointOnTheGeodesicLine(points, point, threshold)) {
                 hitPoly = true;
                 this.onPolylineClick(polyline, point);
@@ -1832,10 +1816,6 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
     int viewId = view.getId();
     if (viewId == CLOSE_LINK_ID) {
       closeWindow();
-      return;
-    }
-    if (viewId == LICENSE_LINK_ID) {
-      showLicenseText();
       return;
     }
   }
