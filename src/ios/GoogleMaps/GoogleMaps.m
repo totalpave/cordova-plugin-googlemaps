@@ -229,6 +229,11 @@
 
 - (void)exec:(CDVInvokedUrlCommand *)command {
 
+    if (!self.mapCtrl) {
+        NSLog(@"(WARN)Map not initalized yet!");
+        return;
+    }
+
     [self.commandDelegate runInBackground:^{
 
         CDVPluginResult* pluginResult = nil;
