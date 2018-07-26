@@ -431,6 +431,7 @@
         NSArray *rgbColor = icon;
         NSMutableDictionary *iconDic = [[NSMutableDictionary alloc] init];
         [iconDic setObject:[rgbColor parsePluginColor] forKey:@"iconColor"];
+        iconProperty = iconDic;
     }
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
