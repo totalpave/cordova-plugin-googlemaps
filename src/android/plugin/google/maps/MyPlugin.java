@@ -11,6 +11,8 @@ import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import android.util.Log;
+
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 
@@ -96,6 +98,13 @@ public class MyPlugin extends CordovaPlugin implements MyPluginInterface  {
   
   private void setValue(String methodName, Class<?> methodClass, String id, Object value, final CallbackContext callbackContext) throws JSONException {
     Object object = this.objects.get(id);
+    if (object == null) {
+      Log.w("MAP_DESTROYED_CHECK", "Could not find Object with ID: " + id + ". Assuming Map was destroyed. ");
+      this.sendNoResult(callbackContext);
+      return;
+    }
+
+
     try {
       Method method = object.getClass().getDeclaredMethod(methodName, methodClass);
       method.invoke(object, value);
