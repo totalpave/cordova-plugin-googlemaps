@@ -1322,16 +1322,16 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
           disableAutoPan = properties.getBoolean("disableAutoPan");
         } catch (JSONException e) {}
         if (disableAutoPan) {
-          marker.showInfoWindow();
+          //marker.showInfoWindow();
           return true;
         } else {
-          marker.showInfoWindow();
+          //marker.showInfoWindow();
           return false;
         }
       }
     }
 
-    marker.showInfoWindow();
+    //marker.showInfoWindow();
     return true;
     //return false;
   }
