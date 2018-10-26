@@ -2519,67 +2519,53 @@ Geocoder.geocode = function(geocoderRequest, callback) {
  * Watch dog timer for child elements
  *****************************************************************************/
 var _mapInstance = new App();
+window._runWatchDog = false;
+var prevSize = null;
+var prevChildrenCnt = 0;
 
-window._watchDogTimer = null;
-_mapInstance.addEventListener("keepWatching_changed", function(oldValue, newValue) {
-    if (newValue !== true) {
-        return;
-    }
-    var prevSize = null;
+function watchDogCheck() {
     var children;
-    var prevChildrenCnt = 0;
     var divSize, childCnt = 0;
-    if (window._watchDogTimer) {
-        clearInterval(window._watchDogTimer);
-    }
 
-    function init() {
-        window._watchDogTimer = window.setInterval(function() {
-            myFunc();
-        }, _mapInstance.getWatchDogTimer());
-    }
-
-    function myFunc() {
-        var div = module.exports.Map.get("div");
-        if (div) {
-            children = getAllChildren(div);
-            childCnt = children.length;
-            if (childCnt != prevChildrenCnt) {
-                onMapResize();
-                prevChildrenCnt = childCnt;
-                watchDogTimer = setTimeout(myFunc, 100);
-                return;
-            }
+    var div = module.exports.Map.get("div");
+    if (div) {
+        children = getAllChildren(div);
+        childCnt = children.length;
+        if (childCnt != prevChildrenCnt) {
+            onMapResize();
             prevChildrenCnt = childCnt;
-            divSize = getDivRect(div);
-            if (prevSize) {
-                if (divSize.left != prevSize.left ||
-                    divSize.top != prevSize.top ||
-                    divSize.width != prevSize.width ||
-                    divSize.height != prevSize.height) {
-                    onMapResize();
-                }
-            }
-            prevSize = divSize;
+            requestAnimationFrame(watchDogCheck);
+            return;
         }
-        div = null;
-        divSize = null;
-        childCnt = null;
-        children = null;
-        clearInterval(window._watchDogTimer);
-        init();
+        prevChildrenCnt = childCnt;
+        divSize = getDivRect(div);
+        if (prevSize) {
+            if (divSize.left != prevSize.left ||
+                divSize.top != prevSize.top ||
+                divSize.width != prevSize.width ||
+                divSize.height != prevSize.height) {
+                onMapResize();
+            }
+        }
+        prevSize = divSize;
     }
-    init();
-});
+    div = null;
+    divSize = null;
+    childCnt = null;
+    children = null;
+    if (_runWatchDog) {
+        requestAnimationFrame(watchDogCheck);
+    }
+}
 
 _mapInstance.addEventListener("keepWatching_changed", function(oldValue, newValue) {
-    if (newValue !== false) {
-        return;
+    if (newValue === false) {
+        _runWatchDog = false;
+    } 
+    else if (newValue === true) {
+        _runWatchDog = true;
+        requestAnimationFrame(watchDogCheck);
     }
-    if (window._watchDogTimer) {
-        clearInterval(window._watchDogTimer);
-    }
-    window._watchDogTimer = null;
 });
 
 /*****************************************************************************
