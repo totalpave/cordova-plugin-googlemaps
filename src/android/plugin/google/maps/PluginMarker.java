@@ -416,6 +416,13 @@ public class PluginMarker extends MyPlugin {
     String id = args.getString(1);
     LatLng position = new LatLng(args.getDouble(2), args.getDouble(3));
     Marker marker = this.getMarker(id);
+
+    if (marker == null) {
+      Log.w("MAP_DESTROYED_CHECK", "Could not find Marker with ID: " + id + ". Assuming Map was destroyed. ");
+      this.sendNoResult(callbackContext);
+      return;
+    }
+    
     marker.setPosition(position);
     this.sendNoResult(callbackContext);
   }
@@ -622,6 +629,13 @@ public class PluginMarker extends MyPlugin {
   private void setIcon(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
     String id = args.getString(1);
     Marker marker = this.getMarker(id);
+
+    if (marker == null) {
+      Log.w("MAP_DESTROYED_CHECK", "Could not find Marker with ID: " + id + ". Assuming Map was destroyed. ");
+      this.sendNoResult(callbackContext);
+      return;
+    }
+
     Object value = args.get(2);
     Bundle bundle = null;
     if (JSONObject.class.isInstance(value)) {

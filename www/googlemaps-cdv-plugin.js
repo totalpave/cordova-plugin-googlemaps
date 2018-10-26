@@ -1514,11 +1514,11 @@ Marker.prototype.setIcon = function(url) {
     cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Marker.setIcon', this.getId(), url]);
 };
 Marker.prototype.setTitle = function(title) {
-    if (!title) {
+    /*if (!title) {
         console.log('missing value for title');
         return false;
-    }
-    this.set('title', String(title));
+    }*/
+    this.set('title', title ? String(title) : undefined);
     cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Marker.setTitle', this.getId(), title]);
 };
 Marker.prototype.setVisible = function(visible) {
