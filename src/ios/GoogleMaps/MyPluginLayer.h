@@ -1,26 +1,38 @@
 //
 //  MyPluginLayer.h
-//  DevApp
+//  cordova-googlemaps-plugin v2
 //
-//  Created by masashi on 8/13/14.
+//  Created by Masashi Katsumata.
 //
 //
 
 #import <UIKit/UIKit.h>
-#import <GoogleMaps/GoogleMaps.h>
-#import "GoogleMapsViewController.h"
+#import "PluginMapViewController.h"
+#import "MyPluginScrollView.h"
 
-@interface MyPluginLayer : UIView
+@interface OverflowCSS : NSObject
+@property BOOL cropX;
+@property BOOL cropY;
+@property CGRect rect;
+@end
+
+@interface MyPluginLayer : UIView<UIScrollViewDelegate>
 
 @property (nonatomic) UIView *webView;
-@property (nonatomic) GoogleMapsViewController* mapCtrl;
-@property (nonatomic) NSDictionary *embedRect;
-@property (nonatomic) BOOL debuggable;
-@property (nonatomic) BOOL clickable;
-@property (nonatomic) NSMutableDictionary *HTMLNodes;
+@property (nonatomic) MyPluginScrollView *pluginScrollView;
+@property (atomic) NSTimer *redrawTimer;
+@property (nonatomic) BOOL isSuspended;
+@property (nonatomic) NSOperationQueue *executeQueue;
+@property (atomic, strong) NSObject *_lockObject;
+@property (atomic, strong) NSMutableDictionary *CACHE_FIND_DOM;
 
-- (id)initWithFrame:(CGRect)aRect;
-- (void)putHTMLElement:(NSString *)domId size:(NSDictionary *)size;
-- (void)removeHTMLElement:(NSString *)domId;
-- (void)clearHTMLElement;
+- (id)initWithWebView:(UIView *)webView;
+- (void)resizeTask:(NSTimer *)timer;
+- (void)clearHTMLElements;
+- (void)putHTMLElements:(NSDictionary *)elementsDic;
+- (void)addPluginOverlay:(PluginViewController *)pluginViewCtrl;
+- (void)removePluginOverlay:(PluginViewController *)pluginViewCtrl;
+- (void)updateViewPosition:(PluginViewController *)pluginViewCtrl;
+- (void)startRedrawTimer;
+- (void)stopRedrawTimer;
 @end

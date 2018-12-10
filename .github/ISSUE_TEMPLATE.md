@@ -1,23 +1,34 @@
-<!--- Before asking, please search the past issues. You might get any hits.
+<!--
+Thank you for supporting the plugin activity ($5 usd).
+https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=SQPLZJ672HJ9N&lc=US&item_name=Cordova%2dGoogleMaps%2dPlugin&amount=5%2e00&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_LG%2egif%3aNonHosted
 
-And also please read this page
-https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/articles/before_post_your_issue/README.md
+#--------------------
+# public support
+#--------------------
+Since this plugin project is open source, I give you free public support.
+I almost all cases ask you to share your project files on Github or other git repository services.
+I don't matter if it is public or private repo.
+However screen captures or screen records are posted in public issue thread.
+(Code are not discovered as much as possible)
 
-(Optional) If you are Japanese, you can make an issue written in Japanese. Otherwise, in English please.
+#--------------------
+# private support
+#--------------------
+Even if you don't want to discover anything including screen captures or screen records,
+please ask me to private support.
+I ask you to donate $100 USD to the maps plugin project,
+then I make a private space, then support it.
+
 --->
 
 **I'm submitting a ...**  (check one with "x")
-[ ] question
-[ ] any problem or bug report
-[ ] feature request
-
-**The plugin version:**  (check one with "x")
-[ ] **1.4.x**
-[ ] **2.0.0-beta3** 
+- [ ] question
+- [ ] any problem or bug report
+- [ ] feature request
 
 **If you choose 'problem or bug report', please select OS:**  (check one with "x")
-[ ] **Android**
-[ ] **iOS**
+- [ ] **Android**
+- [ ] **iOS**
 
 **cordova information:**  (run `$> cordova plugin list`) 
 
@@ -25,39 +36,33 @@ https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/articles
 insert the output from the command here
 ```
 
+**If you use `@ionic-native/google-maps`, please tell the package.json (only `@ionic-native/core` and `@ionic-native/google-maps` are fine mostly)**
+
 **Current behavior:**
 <!-- Describe how the bug manifests. -->
 
 **Expected behavior:**
 <!-- Describe what the behavior would be without the bug. -->
 
-**Steps to reproduce:**
-<!-- Reproduce steps are really important.
-
-If you are able to share your project files on Github or BitBucket, I'm really appreciate for your help.
-For your information, you can create a FREE git repository at BitBucket.
-
-If you are NOT able to share your real project files (such as company), please create an example project that reproduce your issue 100%, then share it please.
-
-Please DO NOT share your project file as Zip file, or send it to me directly.
---->
-
 **Screen capture or video record:**
-<!-- In order to describing your problem, please take a screen capture or a screen record.
-You can upload your files with drag & drop up to 10M bytes.
-How to do that? Please read here.
-https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/articles/before_post_your_issue/README.md#4-taking-screen-capture-or-screen-record
+<!--
+Please take a screen capture or a screen record. You can upload your files with drag & drop up to 10M bytes.
+[Android]
+$> adb shell screenrecord /sdcard/capture.mp4
+$> adb pull /sdcard/capture.mp4 ./
+[iOS]
+Use QuickTimer player on Mac
 --->
 
 **Related code, data or error log (please format your code or data):**
 
 ```
-insert any relevant code, data, or error log here
+The person who share your project files on Github (or other git repository) is in faster lane than other people.
+Please share your project files on Github or others(Bitbucket, Gitlabs...etc).
+If you don't want to share your project files, please create a demo project, then share it.
+
+Screen captures, and/or native logs(such as Logcat, xcode logs) are appreciate.
+
+Giving much information, you are waiting time is less.
+Thank you for your cooperation.
 ```
-
-
-----
-
-If your problem is solved, please consider small amount donation to this project.
-Appreciate for your kindness.
-https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/README.md#buy-me-a-beer

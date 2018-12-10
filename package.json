@@ -1,12 +1,13 @@
 {
   "name": "cordova-plugin-googlemaps",
-  "version": "1.4.5",
-  "description": "Google Maps native SDK for Android and iOS",
+  "version": "2.4.6",
+  "description": "Google Maps native SDK for Android and iOS, and Google Maps JavaScript API v3 for browser.",
   "cordova": {
     "id": "cordova-plugin-googlemaps",
     "platforms": [
       "android",
-      "ios"
+      "ios",
+      "browser"
     ]
   },
   "repository": {
@@ -18,7 +19,6 @@
     "maps",
     "geo",
     "google maps",
-    "nightstomp",
     "ecosystem:cordova",
     "cordova-android",
     "cordova-ios"
@@ -30,7 +30,15 @@
     },
     {
       "name": "cordova-ios",
-      "version": ">=4.0.0"
+      "version": ">=4.9.0"
+    },
+    {
+      "name": "apple-xcode",
+      "version": ">=9.0.0"
+    },
+    {
+      "name": "apple-ios",
+      "version": ">=10.0.0"
     }
   ],
   "author": "Masashi Katsumata, Hirbod Mirjavadi",
@@ -38,9 +46,5 @@
   "bugs": {
     "url": "https://github.com/mapsplugin/cordova-plugin-googlemaps/issues"
   },
-  "homepage": "https://github.com/mapsplugin/cordova-plugin-googlemaps#readme",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  }
+  "homepage": "https://github.com/mapsplugin/cordova-plugin-googlemaps"
 }
