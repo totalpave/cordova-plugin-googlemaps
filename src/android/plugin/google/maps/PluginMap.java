@@ -188,6 +188,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
         boolean locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
         //Log.d(TAG, "---> (235) hasPermission =  " + locationPermission);
 
+        /*
         if (!locationPermission) {
           //_saveArgs = args;
           //_saveCallbackContext = callbackContext;
@@ -202,10 +203,11 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
             }
           }
           locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
-
           //Log.d(TAG, "---> (252)setMyLocationEnabled, hasPermission =  " + locationPermission);
 
         }
+        */
+
       }
     }
 
@@ -1857,6 +1859,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
     boolean locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
     //Log.d(TAG, "---> setMyLocationEnabled, hasPermission =  " + locationPermission);
 
+    /*
     if (!locationPermission) {
       //_saveArgs = args;
       //_saveCallbackContext = callbackContext;
@@ -1877,9 +1880,10 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       if (!locationPermission) {
         callbackContext.error(PluginUtil.getPgmStrings(activity,"pgm_location_rejected_by_user"));
         return;
-      }
+     // }
 
     }
+    */
     final JSONObject params = args.getJSONObject(0);
 
     this.activity.runOnUiThread(new Runnable() {
@@ -1901,6 +1905,19 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
             isMyLocationButtonEnabled = params.getBoolean("myLocationButton");
             map.getUiSettings().setMyLocationButtonEnabled(isMyLocationButtonEnabled);
           }
+
+
+          if(isMyLocationEnabled && !locationPermission) {
+            map.setMyLocationEnabled(false);
+            map.getUiSettings().setMyLocationButtonEnabled(false);
+            dummyMyLocationButton.setVisibility(View.VISIBLE);
+            callbackContext.error(PluginUtil.getPgmStrings(activity,"pgm_location_rejected_by_user"));
+            return;
+          }
+
+          map.setMyLocationEnabled(isMyLocationEnabled);
+          map.getUiSettings().setMyLocationButtonEnabled(isMyLocationButtonEnabled);
+
           //Log.d(TAG, "--->isMyLocationButtonEnabled = " + isMyLocationButtonEnabled + ", isMyLocationEnabled = " + isMyLocationEnabled);
           if (!isMyLocationEnabled && isMyLocationButtonEnabled) {
             dummyMyLocationButton.setVisibility(View.VISIBLE);
