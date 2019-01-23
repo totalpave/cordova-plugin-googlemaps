@@ -449,9 +449,9 @@
       <string>$LOCATION_WHEN_IN_USE_DESCRIPTION</string>
     </config-file>
 
-    <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
+    <!-- <config-file target="*-Info.plist" parent="NSLocationAlwaysUsageDescription">
       <string>$LOCATION_ALWAYS_USAGE_DESCRIPTION</string>
-    </config-file>
+    </config-file> -->
 
     <config-file target="*-Info.plist" parent="LSApplicationQueriesSchemes">
       <array>
