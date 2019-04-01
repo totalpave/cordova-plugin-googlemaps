@@ -1,5 +1,3 @@
-cordova.define("cordova-plugin-googlemaps.Map", function(require, exports, module) {
-
 var utils = require('cordova/utils'),
   cordova_exec = require('cordova/exec'),
   common = require('./Common'),
@@ -570,7 +568,8 @@ Map.prototype.centerToBoudns = function(latLngBounds, padding, duration) {
       }
   };
 
-  self.exec.call(self, null, this.errorHandler, this.id, 'centerToBounds', [bounds, padding || 0, duration || 0], {
+  //['Map.centerToBounds', bounds, padding || 0, duration || 0]);
+  self.exec.call(self, null, this.errorHandler, this.id, 'centerToBounds', [bounds, padding || 0, duration || 0]), {
     sync: true
   });
   return this;
@@ -1651,5 +1650,3 @@ Map.prototype._onCameraEvent = function(eventName, cameraPosition) {
 };
 
 module.exports = Map;
-
-});
