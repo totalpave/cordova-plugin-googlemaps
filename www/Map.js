@@ -1,3 +1,4 @@
+cordova.define("cordova-plugin-googlemaps.Map", function(require, exports, module) {
 
 var utils = require('cordova/utils'),
   cordova_exec = require('cordova/exec'),
@@ -553,6 +554,27 @@ Map.prototype.moveCamera = function(cameraPosition, callback) {
     return new Promise(resolver);
   }
 };
+
+Map.prototype.centerToBoudns = function(latLngBounds, padding, duration) {
+  var self = this;
+
+  var ne = latLngBounds.northeast;
+  var bounds = {
+      northeast : {
+          lat : latLngBounds.northeast.lat,
+          lng : latLngBounds.northeast.lng
+      },
+      southwest : {
+          lat : latLngBounds.southwest.lat,
+          lng : latLngBounds.southwest.lng
+      }
+  };
+
+  self.exec.call(self, null, this.errorHandler, this.id, 'centerToBounds', [bounds, padding || 0, duration || 0]), {
+    sync: true
+  });
+  return this;
+}
 
 Map.prototype.setMyLocationButtonEnabled = function(enabled) {
   var self = this;
@@ -1629,3 +1651,5 @@ Map.prototype._onCameraEvent = function(eventName, cameraPosition) {
 };
 
 module.exports = Map;
+
+});
