@@ -483,44 +483,41 @@
 }
 
 - (void)centerToBounds:(CDVInvokedUrlCommand *)command {
+  NSDictionary *bounds = [command.arguments objectAtIndex:0];
+  int padding = [[command.arguments objectAtIndex:1] intValue];
+  int duration = [[command.arguments objectAtIndex:2] intValue];
 
-  [self.mapCtrl.executeQueue addOperationWithBlock:^{
-    NSDictionary *bounds = [command.arguments objectAtIndex:1];
-    int padding = [[command.arguments objectAtIndex:2] intValue];
-    int duration = [[command.arguments objectAtIndex:3] intValue];
+  NSDictionary *northeastData = [bounds objectForKey:@"northeast"];
+  NSDictionary *southwestData = [bounds objectForKey:@"southwest"];
 
-    NSDictionary *northeastData = [bounds objectForKey:@"northeast"];
-    NSDictionary *southwestData = [bounds objectForKey:@"southwest"];
+  CLLocationCoordinate2D northeast = CLLocationCoordinate2DMake([[northeastData valueForKey:@"lat"] floatValue], [[northeastData valueForKey:@"lng"] floatValue]);
+  CLLocationCoordinate2D southwest = CLLocationCoordinate2DMake([[southwestData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
 
-    CLLocationCoordinate2D northeast = CLLocationCoordinate2DMake([[northeastData valueForKey:@"lat"] floatValue], [[northeastData valueForKey:@"lng"] floatValue]);
-    CLLocationCoordinate2D southwest = CLLocationCoordinate2DMake([[southwestData valueForKey:@"lat"] floatValue], [[southwestData valueForKey:@"lng"] floatValue]);
+  if (southwest.latitude < northeast.latitude || 
+      (southwest.latitude == northeast.latitude && 
+        southwest.longitude < northeast.longitude
+      )) {
+    CLLocationCoordinate2D t = northeast;
+    northeast = southwest;
+    southwest = t;
+  }
 
-    if (southwest.latitude < northeast.latitude || 
-        (southwest.latitude == northeast.latitude && 
-          southwest.longitude < northeast.longitude
-        )) {
-      CLLocationCoordinate2D t = northeast;
-      northeast = southwest;
-      southwest = t;
-    }
+  GMSCoordinateBounds *latlngBounds = [[GMSCoordinateBounds new] initWithCoordinate:northeast coordinate:southwest];
 
-    GMSCoordinateBounds *latlngBounds = [[GMSCoordinateBounds new] initWithCoordinate:northeast coordinate:southwest];
+  GMSCameraUpdate *cameraUpdate = [GMSCameraUpdate fitBounds:latlngBounds withPadding:padding];
 
-    GMSCameraUpdate *cameraUpdate = [GMSCameraUpdate fitBounds:latlngBounds withPadding:padding];
+  if (duration == 0) {
+    [self.mapCtrl.map moveCamera:cameraUpdate];
+  }
+  else {
+    [CATransaction begin];
+      [CATransaction setValue:[NSNumber numberWithFloat:(duration/1000.0f)]  forKey:kCATransactionAnimationDuration];
+      [self.mapCtrl.map animateWithCameraUpdate:cameraUpdate];
+    [CATransaction commit];
+  }
 
-    if (duration == 0) {
-      [self.mapCtrl.map moveCamera:cameraUpdate];
-    }
-    else {
-      [CATransaction begin];
-        [CATransaction setValue:[NSNumber numberWithFloat:(duration/1000.0f)]  forKey:kCATransactionAnimationDuration];
-        [self.mapCtrl.map animateWithCameraUpdate:cameraUpdate];
-      [CATransaction commit];
-    }
-
-    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
-    [(CDVCommandDelegateImpl *)self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
-  }]
+  CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+  [(CDVCommandDelegateImpl *)self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 /**
