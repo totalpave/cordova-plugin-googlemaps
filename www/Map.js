@@ -553,7 +553,7 @@ Map.prototype.moveCamera = function(cameraPosition, callback) {
   }
 };
 
-Map.prototype.centerToBoudns = function(latLngBounds, padding, duration) {
+Map.prototype.centerToBounds = function(latLngBounds, padding, duration) {
   var self = this;
 
   var ne = latLngBounds.northeast;
@@ -569,7 +569,7 @@ Map.prototype.centerToBoudns = function(latLngBounds, padding, duration) {
   };
 
   //['Map.centerToBounds', bounds, padding || 0, duration || 0]);
-  self.exec.call(self, null, this.errorHandler, this.id, 'centerToBounds', [bounds, padding || 0, duration || 0]), {
+  self.exec.call(self, null, this.errorHandler, this.id, 'centerToBounds', [bounds, padding || 0, duration || 0], {
     sync: true
   });
   return this;
