@@ -494,15 +494,15 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       }
     });
   }
-  /*
+  
   /**
-   * Centers the camera location so the boudns are in view
-   * /
+   * Centers the camera location so the bounds are in view
+   */
   @SuppressWarnings("unused")
-  private void centerToBounds(JSONArray args, CallbackContext callbackContext) throws JSONException {
-    JSONObject bounds = args.getJSONObject(1);
-    int padding = args.getInt(2);
-    int duration = args.getInt(3);
+  public void centerToBounds(JSONArray args, CallbackContext callbackContext) throws JSONException {
+    JSONObject bounds = args.getJSONObject(0);
+    int padding = args.getInt(1);
+    int duration = args.getInt(2);
 
     JSONObject northeastData = bounds.getJSONObject("northeast");
     JSONObject southwestData = bounds.getJSONObject("southwest");
@@ -514,24 +514,26 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       (southwest.latitude == northeast.latitude && 
         southwest.longitude < northeast.longitude
       )) {
-      //swap coordinates
+      //unkink coordinates
       LatLng t = northeast;
       northeast = southwest;
       southwest = t;
     }
 
     LatLngBounds latlngBounds = new LatLngBounds(northeast, southwest);
+    final CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latlngBounds, padding);
 
-    LOG.w(TAG, "LatLngBounds northeast: " + latlngBounds.northeast.toString());
-    LOG.w(TAG, "LatLngBounds southwest: " + latlngBounds.southwest.toString());
-
-    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(latlngBounds, padding);
-    if (duration == 0) {
-      this.myMoveCamera(cameraUpdate, callbackContext);
-    }
-    else {
-      this.myAnimateCamera(cameraUpdate, duration, callbackContext);  
-    }
+    cordova.getActivity().runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        if (duration == 0) {
+          myMoveCamera(cameraUpdate, callbackContext);
+        }
+        else {
+          myAnimateCamera(mapId, cameraUpdate, duration, callbackContext);  
+        }
+      }
+    });
   }
 
   /**
@@ -3065,6 +3067,4 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       semaphore.notify();
     }
   }
-
-
 }

@@ -19,6 +19,7 @@
 - (void)clear:(CDVInvokedUrlCommand*)command;
 - (void)setClickable:(CDVInvokedUrlCommand*)command;
 - (void)setVisible:(CDVInvokedUrlCommand*)command;
+- (void)centerToBounds:(CDVInvokedUrlCommand*)command;
 - (void)setCameraTilt:(CDVInvokedUrlCommand*)command;
 - (void)setCameraTarget:(CDVInvokedUrlCommand*)command;
 - (void)setCameraBearing:(CDVInvokedUrlCommand *)command;
