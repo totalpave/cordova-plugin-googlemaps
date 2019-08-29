@@ -46,5 +46,8 @@
   "bugs": {
     "url": "https://github.com/mapsplugin/cordova-plugin-googlemaps/issues"
   },
-  "homepage": "https://github.com/mapsplugin/cordova-plugin-googlemaps"
+  "homepage": "https://github.com/mapsplugin/cordova-plugin-googlemaps",
+  "dependencies": {
+    "q": "^1.5.1"
+  }
 }
