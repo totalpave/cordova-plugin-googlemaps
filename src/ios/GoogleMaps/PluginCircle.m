@@ -130,7 +130,7 @@
             // Result for JS
             //---------------------------
             NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-            [result setObject:circleId forKey:@"__pgmId"];
+            [result setObject:circleId forKey:@"id"];
 
             CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

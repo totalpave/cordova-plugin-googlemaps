@@ -54,11 +54,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.VisibleRegion;
 
 import org.apache.cordova.CallbackContext;
@@ -72,8 +70,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -167,7 +163,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
 
     GoogleMapOptions options = new GoogleMapOptions();
     JSONObject meta = args.getJSONObject(0);
-    mapId = meta.getString("__pgmId");
+    mapId = meta.getString("id");
     viewDepth = meta.getInt("depth");
     final JSONObject params = args.getJSONObject(1);
 
@@ -673,6 +669,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       ((MyPluginInterface)plugin).setPluginMap(PluginMap.this);
       MyPlugin myPlugin = (MyPlugin) plugin;
       myPlugin.self = (MyPlugin)plugin;
+      myPlugin.CURRENT_PAGE_URL = CURRENT_PAGE_URL;
       myPlugin.create(args, callbackContext);
     } catch (Exception e) {
       e.printStackTrace();
@@ -915,20 +912,18 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   e.printStackTrace();
                 }
               }
-              if (plugins.size() > 0) {
-                String[] pluginNames = plugins.keySet().toArray(new String[plugins.size()]);
-                PluginEntry pluginEntry;
-                for (int i = 0; i < pluginNames.length; i++) {
-                  pluginEntry = plugins.remove(pluginNames[i]);
-                  if (pluginEntry == null) {
-                    continue;
-                  }
-                  pluginEntry.plugin.onDestroy();
-                  ((MyPlugin)pluginEntry.plugin).map = null;
-                  ((MyPlugin)pluginEntry.plugin).mapCtrl = null;
-                  //((MyPlugin)pluginEntry.plugin).pluginMap = null; // Do not clear at here.
-                  pluginEntry = null;
+              String[] pluginNames = plugins.keySet().toArray(new String[plugins.size()]);
+              PluginEntry pluginEntry;
+              for (int i = 0; i < pluginNames.length; i++) {
+                pluginEntry = plugins.remove(pluginNames[i]);
+                if (pluginEntry == null) {
+                  continue;
                 }
+                pluginEntry.plugin.onDestroy();
+                ((MyPlugin)pluginEntry.plugin).map = null;
+                ((MyPlugin)pluginEntry.plugin).mapCtrl = null;
+                //((MyPlugin)pluginEntry.plugin).pluginMap = null; // Do not clear at here.
+                pluginEntry = null;
               }
               //Log.d("pluginMap", "--> mapView = " + mapView);
               projection = null;
@@ -1861,7 +1856,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
    */
   public void setMyLocationEnabled(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
 
-    final JSONObject params = args.getJSONObject(0);
+    // Request geolocation permission.
 
     boolean locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
     //Log.d(TAG, "---> setMyLocationEnabled, hasPermission =  " + locationPermission);
@@ -1939,7 +1934,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       }
     });
   }
-
   /**
    * Clear all markups
    * @param args Parameters given from JavaScript side
@@ -2547,9 +2541,9 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
    *
    * @param points
    * @param point
-   * @return LatLng on the line
+   * @return
    */
-  private LatLng isPointOnTheLine(List<LatLng> points, LatLng point) {
+  private boolean isPointOnTheLine(List<LatLng> points, LatLng point) {
     double Sx, Sy;
     Point p0, p1, touchPoint;
     touchPoint = projection.toScreenLocation(point);
@@ -2560,11 +2554,11 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       Sx = ((double)touchPoint.x - (double)p0.x) / ((double)p1.x - (double)p0.x);
       Sy = ((double)touchPoint.y - (double)p0.y) / ((double)p1.y - (double)p0.y);
       if (Math.abs(Sx - Sy) < 0.05 && Sx < 1 && Sx > 0) {
-        return points.get(i);
+        return true;
       }
       p0 = p1;
     }
-    return null;
+    return false;
   }
 
   /**
@@ -2574,38 +2568,15 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
    * @param points
    * @param point
    * @param threshold
-   * @return LatLng on the line
+   * @return boolean
    */
-  private LatLng isPointOnTheGeodesicLine(List<LatLng> points, final LatLng point, double threshold) {
-
+  private boolean isPointOnTheGeodesicLine(List<LatLng> points, LatLng point, double threshold) {
     double trueDistance, testDistance1, testDistance2;
-    Point p0, p1;
-    int fingerSize = (int)(20 * density); // assume finger size is 20px
+    Point p0, p1, touchPoint;
+    //touchPoint = new Point();
+    //touchPoint.x = (int) (point.latitude * 100000);
+    //touchPoint.y = (int) (point.longitude * 100000);
 
-    // clicked point(latlng) -> pixels
-    Point touchPoint = projection.toScreenLocation(point);
-    LatLngBounds possibleBounds = new LatLngBounds(point, point);
-    Point nePoint = new Point(touchPoint.x - fingerSize, touchPoint.y - fingerSize);
-    Point swPoint = new Point(touchPoint.x + fingerSize, touchPoint.y + fingerSize);
-
-    possibleBounds = possibleBounds.including(projection.fromScreenLocation(nePoint));
-    possibleBounds = possibleBounds.including(projection.fromScreenLocation(swPoint));
-
-    //--------------------------
-    // debug: draw rectangle
-    //--------------------------
-//    PolylineOptions polylineOptions = new PolylineOptions();
-//    polylineOptions.add(possibleBounds.northeast);
-//    polylineOptions.add(new LatLng(possibleBounds.northeast.latitude, possibleBounds.southwest.longitude));
-//    polylineOptions.add(possibleBounds.southwest);
-//    polylineOptions.add(new LatLng(possibleBounds.southwest.latitude, possibleBounds.northeast.longitude));
-//    polylineOptions.add(possibleBounds.northeast);
-//    map.addPolyline(polylineOptions);
-
-    //----------------------------------------------------------------
-    // Detect the clicked-point is closer to the line or not
-    //----------------------------------------------------------------
-    LatLng start = null, finish = null;
     for (int i = 0; i < points.size() - 1; i++) {
       p0 = new Point();
       p0.x = (int) (points.get(i).latitude * 100000);
@@ -2618,130 +2589,11 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       testDistance2 = this.calculateDistance(point, points.get(i + 1));
       // the distance is exactly same if the point is on the straight line
       if (Math.abs(trueDistance - (testDistance1 + testDistance2)) < threshold) {
-        if (i == 0) {
-          start = points.get(0);
-          finish = points.get(1);
-        } else if (i == points.size() - 1) {
-          start = points.get(i - 1);
-          finish = points.get(i);
-        } else {
-          start = points.get(i);
-          finish = points.get(i + 1);
-        }
-        break;
+        return true;
       }
     }
 
-    if (start == null) {
-      return null;
-    }
-
-    if (start.longitude > finish.longitude) {
-      LatLng tmp = start;
-      start = finish;
-      finish = tmp;
-    }
-
-    //--------------------------
-    // debug: draw rectangle
-    //--------------------------
-//    LatLngBounds _targetBounds = new LatLngBounds(start, finish);
-//    PolylineOptions polylineOptions2 = new PolylineOptions();
-//    polylineOptions2.add(_targetBounds.northeast);
-//    polylineOptions2.add(new LatLng(_targetBounds.northeast.latitude, _targetBounds.southwest.longitude));
-//    polylineOptions2.add(_targetBounds.southwest);
-//    polylineOptions2.add(new LatLng(_targetBounds.southwest.latitude, _targetBounds.northeast.longitude));
-//    polylineOptions2.add(_targetBounds.northeast);
-//    map.addPolyline(polylineOptions2);
-
-
-    //----------------------------------------------------------------
-    // Calculate waypoints from start to finish on geodesic line
-    // @ref http://jamesmccaffrey.wordpress.com/2011/04/17/drawing-a-geodesic-line-for-bing-maps-ajax/
-    //----------------------------------------------------------------
-
-    // convert to radians
-    double lat1 = start.latitude * (Math.PI / 180.0);
-    double lng1 = start.longitude * (Math.PI / 180.0);
-    double lat2 = finish.latitude * (Math.PI / 180.0);
-    double lng2 = finish.longitude * (Math.PI / 180.0);
-
-    double d = 2 * Math.asin(Math.sqrt(Math.pow((Math.sin((lat1 - lat2) / 2)), 2) +
-        Math.cos(lat1) * Math.cos(lat2) * Math.pow((Math.sin((lng1 - lng2) / 2)), 2)));
-    List<LatLng> wayPoints = new ArrayList<LatLng>();
-    double f = 0.00000000f; // fraction of the curve
-    double finc = 0.01000000f; // fraction increment
-
-    while (f <= 1.00000000f) {
-      double A = Math.sin((1.0 - f) * d) / Math.sin(d);
-      double B = Math.sin(f * d) / Math.sin(d);
-
-      double x = A * Math.cos(lat1) * Math.cos(lng1) + B * Math.cos(lat2) * Math.cos(lng2);
-      double y = A * Math.cos(lat1) * Math.sin(lng1) + B * Math.cos(lat2) * Math.sin(lng2);
-      double z = A * Math.sin(lat1) + B * Math.sin(lat2);
-      double lat = Math.atan2(z, Math.sqrt((x*x) + (y*y)));
-      double lng = Math.atan2(y, x);
-
-      LatLng wp = new LatLng(lat / (Math.PI / 180.0), lng / ( Math.PI / 180.0));
-      if (possibleBounds.contains(wp)) {
-        wayPoints.add(wp);
-        //map.addMarker(new MarkerOptions().position(wp));
-      }
-
-      f += finc;
-    } // while
-
-    // break into waypoints with negative longitudes and those with positive longitudes
-    List<LatLng> negLons = new ArrayList<LatLng>(); // lat-lons where the lon part is negative
-    List<LatLng> posLons = new ArrayList<LatLng>();
-    List<LatLng> connect = new ArrayList<LatLng>();
-
-    for (int i = 0; i < wayPoints.size(); ++i) {
-      if (wayPoints.get(i).longitude <= 0.0f)
-        negLons.add(wayPoints.get(i));
-      else
-        posLons.add(wayPoints.get(i));
-    }
-
-    // we may have to connect over 0.0 longitude
-    for (int i = 0; i < wayPoints.size() - 1; ++i) {
-      if (wayPoints.get(i).longitude <= 0.0f && wayPoints.get(i+1).longitude >= 0.0f ||
-          wayPoints.get(i).longitude >= 0.0f && wayPoints.get(i+1).longitude <= 0.0f) {
-        if (Math.abs(wayPoints.get(i).longitude) + Math.abs(wayPoints.get(i+1).longitude) < 100.0f) {
-          connect.add(wayPoints.get(i));
-          connect.add(wayPoints.get(i+1));
-        }
-      }
-    }
-
-    ArrayList<LatLng> inspectPoints = new ArrayList<LatLng>();
-    if (negLons.size() >= 2) {
-      inspectPoints.addAll(negLons);
-    }
-    if (posLons.size() >= 2) {
-      inspectPoints.addAll(posLons);
-    }
-    if (connect.size() >= 2) {
-      inspectPoints.addAll(connect);
-    }
-
-    if (inspectPoints.size() == 0) {
-      return null;
-    }
-
-
-    double minDistance = 999999999;
-    double distance;
-    LatLng mostClosePoint = null;
-
-    for (int i = 0; i < inspectPoints.size(); i++) {
-      distance = this.calculateDistance(point, inspectPoints.get(i));
-      if (distance < minDistance) {
-        minDistance = distance;
-        mostClosePoint = inspectPoints.get(i);
-      }
-    }
-    return mostClosePoint;
+    return false;
   }
 
   /**
@@ -2978,7 +2830,8 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
   }
   @Override
   public void onPoiClick(PointOfInterest pointOfInterest) {
-    String js = String.format(Locale.ENGLISH, "javascript:if('%s' in plugin.google.maps){plugin.google.maps['%s']({evtName: '%s', callback:'_onMapEvent', args:['%s', \"%s\", new plugin.google.maps.LatLng(%f, %f)]});}",
+
+    String js = String.format(Locale.ENGLISH, "javascript:if('%s' in plugin.google.maps){plugin.google.maps['%s']({evtName: '%s', callback:'_onMapEvent', args:['%s', '%s', new plugin.google.maps.LatLng(%f, %f)]});}",
     mapId, mapId, "poi_click", pointOfInterest.placeId, pointOfInterest.name, pointOfInterest.latLng.latitude, pointOfInterest.latLng.longitude);
     jsCallback(js);
   }
@@ -2997,8 +2850,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
    * @param point
    */
   public void onMapClick(final LatLng point) {
-
-    cordova.getThreadPool().execute(new Runnable() {
+    cordova.getThreadPool().submit(new Runnable() {
       @Override
       public void run() {
 
@@ -3024,33 +2876,32 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
             //}
             //pluginEntry = plugins.get(pluginName);
             //myPlugin = (MyPlugin) pluginEntry.plugin;
-            if (objects.size() > 0) {
-              keys = objects.keys.toArray(new String[objects.size()]);
-              for (j = 0; j < keys.length; j++) {
-                key = keys[j];
-                if (key.contains("marker")) {
-                  continue;
-                }
-                if (key.contains("property")) {
-                  properties = (JSONObject) objects.get(key);
-                  try {
-                    //Log.d("PluginMap", "-----> key = " + key + ", " + properties.toString(2));
-                    //Log.d("PluginMap", "-----> key = " + key + ", isVisible = " + properties.getBoolean("isVisible") + ", isClickable = " + properties.getBoolean("isClickable"));
-                    // skip invisible overlay
-                    if (!properties.getBoolean("isVisible") ||
-                        !properties.getBoolean("isClickable")) {
-                      continue;
-                    }
-                  } catch (JSONException e) {
-                    e.printStackTrace();
-                  }
-                  bounds = (LatLngBounds) objects.get(key.replace("property", "bounds"));
-                  if (bounds.contains(point)) {
-                    //Log.d("PluginMap", "-----> add key = " + key.replace("property_", ""));
-                    boundsHitList.put(key, objects.get(key.replace("property_", "")));
-                  }
 
+            keys = objects.keys.toArray(new String[objects.size()]);
+            for (j = 0; j < keys.length; j++) {
+              key = keys[j];
+              if (key.contains("marker")) {
+                continue;
+              }
+              if (key.contains("property")) {
+                properties = (JSONObject) objects.get(key);
+                try {
+                  //Log.d("PluginMap", "-----> key = " + key + ", " + properties.toString(2));
+                  //Log.d("PluginMap", "-----> key = " + key + ", isVisible = " + properties.getBoolean("isVisible") + ", isClickable = " + properties.getBoolean("isClickable"));
+                  // skip invisible overlay
+                  if (!properties.getBoolean("isVisible") ||
+                      !properties.getBoolean("isClickable")) {
+                    continue;
+                  }
+                } catch (JSONException e) {
+                  e.printStackTrace();
                 }
+                bounds = (LatLngBounds) objects.get(key.replace("property", "bounds"));
+                if (bounds.contains(point)) {
+                  //Log.d("PluginMap", "-----> add key = " + key.replace("property_", ""));
+                  boundsHitList.put(key, objects.get(key.replace("property_", "")));
+                }
+
               }
             }
 
@@ -3059,10 +2910,10 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
           //e.printStackTrace();
         }
 
-
         cordova.getActivity().runOnUiThread(new Runnable() {
           @Override
           public void run() {
+
             //Log.d(TAG, "---> onMapClick : " + activeMarker);
             if (activeMarker != null) {
               //Log.d(TAG, "---> activeMarker.getTag() : " + activeMarker.getTag());
@@ -3071,26 +2922,27 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                 if (markerTag.contains("-marker_")) {
                   onClusterEvent("info_close", activeMarker);
                 }
-        //              } else {
-        //                boolean useHtmlInfoWnd = activeMarker.getTitle() == null &&
-        //                    activeMarker.getSnippet() == null;
-        //                if (useHtmlInfoWnd || activeMarker.isInfoWindowShown()) {
-        //                  onInfoWindowClose(activeMarker);
-        //                }
+//              } else {
+//                boolean useHtmlInfoWnd = activeMarker.getTitle() == null &&
+//                    activeMarker.getSnippet() == null;
+//                if (useHtmlInfoWnd || activeMarker.isInfoWindowShown()) {
+//                  onInfoWindowClose(activeMarker);
+//                }
               }
               activeMarker = null;
             }
+            String key;
             Map.Entry<String, Object> entry;
 
             Set<Map.Entry<String, Object>> entrySet = boundsHitList.entrySet();
             Iterator<Map.Entry<String, Object>> iterator = entrySet.iterator();
+
 
             List<LatLng> points ;
             Point origin = new Point();
             Point hitArea = new Point();
             hitArea.x = 1;
             hitArea.y = 1;
-            LatLng touchPoint = null;
             //double threshold = calculateDistance(
             //    projection.fromScreenLocation(origin),
             //    projection.fromScreenLocation(hitArea));
@@ -3099,12 +2951,12 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
             float maxZIndex = -1;
             Object hitOverlay = null;
             Object overlay;
-            String key;
 
             while(iterator.hasNext()) {
               entry = iterator.next();
               key = entry.getKey();
               overlay = entry.getValue();
+
               if (key.startsWith("polyline")) {
 
                 Polyline polyline = (Polyline)overlay;
@@ -3124,15 +2976,13 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   double threshold = calculateDistance(
                     projection.fromScreenLocation(origin),
                     projection.fromScreenLocation(hitArea));
-                  touchPoint = isPointOnTheGeodesicLine(points, point, threshold);
-                  if (touchPoint != null) {
+                  if (isPointOnTheGeodesicLine(points, point, threshold)) {
                     hitOverlay = polyline;
                     maxZIndex = zIndex;
                     continue;
                   }
                 } else {
-                  touchPoint = isPointOnTheLine(points, point);
-                  if (touchPoint != null) {
+                  if (isPointOnTheLine(points, point)) {
                     hitOverlay = polyline;
                     maxZIndex = zIndex;
                     continue;
@@ -3150,7 +3000,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   continue;
                 }
                 if (isPolygonContains(polygon.getPoints(), point)) {
-                  touchPoint = point;
                   hitOverlay = polygon;
                   maxZIndex = zIndex;
                   continue;
@@ -3168,7 +3017,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   continue;
                 }
                 if (isCircleContains(circle, point)) {
-                  touchPoint = point;
                   hitOverlay = circle;
                   maxZIndex = zIndex;
                   continue;
@@ -3184,7 +3032,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   continue;
                 }
                 if (isGroundOverlayContains(groundOverlay, point)) {
-                  touchPoint = point;
                   hitOverlay = groundOverlay;
                   maxZIndex = zIndex;
                   //continue;
@@ -3192,19 +3039,15 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
               }
             }
 
-
-            final Object finalHitOverlay = hitOverlay;
-            final LatLng finalTouchPoint = touchPoint;
-
-            //Log.d("PluginMap", "---> hitOverlay = " + finalHitOverlay);
-            if (finalHitOverlay instanceof Polygon) {
-              onPolygonClick((Polygon)finalHitOverlay, finalTouchPoint);
-            } else if (finalHitOverlay instanceof Polyline) {
-              onPolylineClick((Polyline)finalHitOverlay, finalTouchPoint);
-            } else if (finalHitOverlay instanceof Circle) {
-              onCircleClick((Circle)finalHitOverlay, finalTouchPoint);
-            } else if (finalHitOverlay != null) {
-              onGroundOverlayClick((GroundOverlay)finalHitOverlay, finalTouchPoint);
+            //Log.d("PluginMap", "---> hitOverlay = " + hitOverlay);
+            if (hitOverlay instanceof Polygon) {
+              onPolygonClick((Polygon)hitOverlay, point);
+            } else if (hitOverlay instanceof Polyline) {
+              onPolylineClick((Polyline)hitOverlay, point);
+            } else if (hitOverlay instanceof Circle) {
+              onCircleClick((Circle)hitOverlay, point);
+            } else if (hitOverlay instanceof GroundOverlay) {
+              onGroundOverlayClick((GroundOverlay)hitOverlay, point);
             } else {
               // Only emit click event if no overlays are hit
               onMapEvent("map_click", point);
@@ -3213,6 +3056,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
         });
       }
     });
+
   }
 
   public void onRequestPermissionResult(int requestCode, String[] permissions,

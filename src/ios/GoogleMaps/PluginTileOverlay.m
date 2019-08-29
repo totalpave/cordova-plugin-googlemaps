@@ -142,7 +142,7 @@
           [self.mapCtrl.objects setObject:layer forKey:_id];
 
           NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-          [result setObject:_id forKey:@"__pgmId"];
+          [result setObject:_id forKey:@"id"];
 
           CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
           [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

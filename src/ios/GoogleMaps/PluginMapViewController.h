@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <math.h>
 #import "PluginUtil.h"
+#import "NSData+Base64.h"
 #import "IPluginProtocol.h"
 #import "PluginObjects.h"
 #import "PluginViewController.h"

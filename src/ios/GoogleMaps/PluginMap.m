@@ -744,10 +744,10 @@
 
     [self.mapCtrl.executeQueue addOperationWithBlock:^{
       NSData *imageData = UIImagePNGRepresentation(image);
-      NSString* base64Encoded = [imageData base64EncodedStringWithOptions:0];
-      NSString* base64EncodedWithData = [@"data:image/png;base64," stringByAppendingString:base64Encoded];
-        
-      CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:base64EncodedWithData];
+      NSString *base64Encoded = nil;
+      base64Encoded = [NSString stringWithFormat:@"data:image/png;base64,%@", [imageData base64EncodedStringWithSeparateLines:NO]];
+
+      CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:base64Encoded];
       [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
   }];

@@ -8,6 +8,7 @@
 
 #import "CordovaGoogleMaps.h"
 #import "IPluginProtocol.h"
+#import "NSData+Base64.h"
 #import "IPluginView.h"
 
 @interface PluginMap : CDVPlugin<IPluginProtocol, IPluginView>

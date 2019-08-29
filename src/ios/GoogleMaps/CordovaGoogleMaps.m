@@ -13,9 +13,11 @@
 - (void)pluginInitialize
 {
 
+#if CORDOVA_VERSION_MIN_REQUIRED >= __CORDOVA_4_0_0
   self.webView.backgroundColor = [UIColor clearColor];
   self.webView.opaque = NO;
   [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(pageDidLoad) name:CDVPageDidLoadNotification object:nil];
+#endif
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     self.executeQueue =  [NSOperationQueue new];
     self.executeQueue.maxConcurrentOperationCount = 10;
@@ -25,8 +27,7 @@
     //-------------------------------
     // Check the Google Maps API key
     //-------------------------------
-    NSString *APIKey = [((CDVViewController *)self.viewController).settings objectForKey:@"google_maps_ios_api_key"];
-
+    NSString *APIKey = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Google Maps API Key"];
     if (APIKey == nil) {
       NSString *errorTitle = [PluginUtil PGM_LOCALIZATION:@"APIKEY_IS_UNDEFINED_TITLE"];
       NSString *errorMsg = [PluginUtil PGM_LOCALIZATION:@"APIKEY_IS_UNDEFINED_MESSAGE"];
@@ -213,7 +214,7 @@
 
     CDVViewController *cdvViewController = (CDVViewController*)self.viewController;
     NSDictionary *meta = [command.arguments objectAtIndex:0];
-    NSString *mapId = [meta objectForKey:@"__pgmId"];
+    NSString *mapId = [meta objectForKey:@"id"];
     NSDictionary *initOptions = [command.arguments objectAtIndex:1];
 
     // Wrapper view
@@ -384,7 +385,7 @@
 
     CDVViewController *cdvViewController = (CDVViewController*)self.viewController;
     NSDictionary *meta = [command.arguments objectAtIndex:0];
-    NSString *panoramaId = [meta objectForKey:@"__pgmId"];
+    NSString *panoramaId = [meta objectForKey:@"id"];
     NSString *divId = [command.arguments objectAtIndex:2];
 
     // Wrapper view

@@ -15,13 +15,6 @@
 @end
 
 
-@implementation CGDOMRect : NSObject
-  CGFloat left;
-  CGFloat right;
-  CGFloat top;
-  CGFloat bottom;
-@end
-
 @implementation MyPluginLayer
 
 - (id)initWithWebView:(UIView *)webView {
@@ -55,10 +48,7 @@
     [self.pluginScrollView setContentSize:self.webView.scrollView.frame.size ];
 
     [self addSubview:self.pluginScrollView];
-
     [self addSubview:self.webView];
-
-
 //    dispatch_queue_t q_background = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_BACKGROUND, 0);
 //
 //    dispatch_async(q_background, ^{
@@ -180,7 +170,7 @@
       [self.pluginScrollView.mapCtrls setObject:pluginViewCtrl forKey:pluginViewCtrl.overlayId];
 
       //When showing this plugin multiple times, a UIView from other plugin might be overlayed on
-      //top of this plugin so we must switch the view with the view that is right before the webview
+      //top of this plugin so we must switch the view with the view that is right before the webview 
       //and update the background color for the webview to prevent issues with non transparent webview
       [self exchangeSubviewAtIndex:[self.subviews indexOfObject:self.webView]-1 withSubviewAtIndex:[self.subviews indexOfObject:self.pluginScrollView]];
       self.webView.backgroundColor = [UIColor clearColor];
@@ -345,9 +335,8 @@
   // e.g. PhoneGap-Plugin-ListPicker, etc
   UIView *subview;
   NSArray *subviews = [self.webView.superview subviews];
-  //CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
-  //CGPoint subviewPoint = CGPointMake(browserClickPoint.x, browserClickPoint.y - statusBarFrame.size.height);
-  CGPoint subviewPoint = CGPointMake(browserClickPoint.x, browserClickPoint.y + self.webView.frame.origin.y);
+  CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
+  CGPoint subviewPoint = CGPointMake(browserClickPoint.x, browserClickPoint.y - statusBarFrame.size.height);
   for (int i = ((int)[subviews count] - 1); i >= 0; i--) {
     subview = [subviews objectAtIndex: i];
     //NSLog(@"--->subview[%d] = %@", i, subview);
@@ -399,7 +388,6 @@
   @synchronized(self.pluginScrollView.HTMLNodes) {
     //NSLog(@"--->browserClickPoint = %f, %f", browserClickPoint.x, browserClickPoint.y);
     clickedDomId = [self findClickedDom:@"root" withPoint:browserClickPoint isMapChild:NO overflow:nil];
-    //NSLog(@"--->clickedDomId = %@", clickedDomId);
 
     while(mapId = [mapIDs nextObject]) {
       mapCtrl = [self.pluginScrollView.mapCtrls objectForKey:mapId];
@@ -452,35 +440,21 @@
 - (NSString *)findClickedDom:(NSString *)domId withPoint:(CGPoint)clickPoint isMapChild:(BOOL)isMapChild overflow:(OverflowCSS *)overflow {
 
   if ([self.CACHE_FIND_DOM objectForKey:domId]) {
-    NSString *cacheResult = [self.CACHE_FIND_DOM objectForKey:domId];
-    if ([@"(null)" isEqualToString:cacheResult]) {
-      cacheResult = nil;
-    }
-    return cacheResult;
+    return [self.CACHE_FIND_DOM objectForKey:domId];
   }
-
-  OverflowCSS *overflow1 = nil;
-  if (overflow) {
-    overflow1 = [[OverflowCSS alloc] init];
-    overflow1.cropX = overflow.cropX;
-    overflow1.cropY = overflow.cropY;
-    overflow1.rect = CGRectMake(overflow.rect.origin.x, overflow.rect.origin.y, overflow.rect.size.width, overflow.rect.size.height);
-  }
-
   NSDictionary *domInfo = [self.pluginScrollView.HTMLNodes objectForKey:domId];
   NSDictionary *domInfoChild;
+  NSArray *children = [domInfo objectForKey:@"children"];
   NSString *maxDomId = nil;
-  CGRect rect, tmpRect;
-  CGDOMRect *rect2, *rect3;
+  CGRect rect;
+  float right, bottom;
   NSDictionary *zIndexProp;
-  unsigned long containMapCnt = 0;
+
 
   domInfo = [self.pluginScrollView.HTMLNodes objectForKey:domId];
-  if ([domInfo objectForKey:@"containMapIDs"]) {
-    NSDictionary *containMapIDs = [domInfo objectForKey:@"containMapIDs"];
-    containMapCnt = [[containMapIDs allKeys] count];
-  }
-  isMapChild = isMapChild || [[domInfo objectForKey:@"isMap"] boolValue] || false;
+  NSDictionary *containMapIDs = [domInfo objectForKey:@"containMapIDs"];
+  unsigned long containMapCnt = [[containMapIDs allKeys] count];
+  isMapChild = isMapChild || [[domInfo objectForKey:@"isMap"] boolValue];
   //NSLog(@"---- domId = %@, containMapCnt = %ld, isMapChild = %@", domId, containMapCnt, isMapChild ? @"YES":@"NO");
 
   NSString *pointerEvents = [domInfo objectForKey:@"pointerEvents"];
@@ -488,23 +462,22 @@
   NSString *overflowY = [domInfo objectForKey:@"overflowY"];
   if ([@"hidden" isEqualToString:overflowX] || [@"scroll" isEqualToString:overflowX] ||
     [@"hidden" isEqualToString:overflowY] || [@"scroll" isEqualToString:overflowY]) {
-    overflow1 = [[OverflowCSS alloc] init];
-    overflow1.cropX = [@"hidden" isEqualToString:overflowX] || [@"scroll" isEqualToString:overflowX];
-    overflow1.cropY = [@"hidden" isEqualToString:overflowY] || [@"scroll" isEqualToString:overflowY];
-    overflow1.rect = CGRectFromString([domInfo objectForKey:@"size"]);
+    overflow = [OverflowCSS alloc];
+    overflow.cropX = [@"hidden" isEqualToString:overflowX] || [@"scroll" isEqualToString:overflowX];
+    overflow.cropY = [@"hidden" isEqualToString:overflowY] || [@"scroll" isEqualToString:overflowY];
+    overflow.rect = CGRectFromString([domInfo objectForKey:@"size"]);
   } else if ([@"visible" isEqualToString:overflowX] || [@"visible" isEqualToString:overflowX]) {
-    if (overflow1 != nil) {
-      overflow1.cropX = ![@"visible" isEqualToString:overflowX];
-      overflow1.cropY = ![@"visible" isEqualToString:overflowY];
+    if (overflow != nil) {
+      overflow.cropX = ![@"visible" isEqualToString:overflowX];
+      overflow.cropY = ![@"visible" isEqualToString:overflowY];
     }
   }
 
   zIndexProp = [domInfo objectForKey:@"zIndex"];
-  NSArray *children = [domInfo objectForKey:@"children"];
-  int maxZIndex = -1215752192;  //  -1 * pow(2, 32) + 1;
   if ((containMapCnt > 0 || isMapChild || [@"none" isEqualToString:pointerEvents] ||
        [[zIndexProp objectForKey:@"isInherit"] boolValue]) && children != nil && children.count > 0) {
 
+    int maxZIndex = -1215752192;
     int zIndexValue;
     NSString *childId, *grandChildId;
     NSArray *grandChildren;
@@ -512,115 +485,77 @@
     for (int i = (int)children.count - 1; i >= 0; i--) {
       childId = [children objectAtIndex:i];
       domInfo = [self.pluginScrollView.HTMLNodes objectForKey:childId];
-      if (!domInfo) {
-        continue;
-      }
-
       zIndexProp = [domInfo objectForKey:@"zIndex"];
       zIndexValue = [[zIndexProp objectForKey:@"z"] intValue];
+
       if (maxZIndex < zIndexValue || [[zIndexProp objectForKey:@"isInherit"] boolValue]) {
 
         grandChildren = [domInfo objectForKey:@"children"];
         if (grandChildren == nil || grandChildren.count == 0) {
-          tmpRect = CGRectFromString([domInfo objectForKey:@"size"]);
-          rect2 = [[CGDOMRect alloc] init];
-          rect2.left = tmpRect.origin.x;
-          rect2.top = tmpRect.origin.y;
-          rect2.right = rect2.left + tmpRect.size.width;
-          rect2.bottom = rect2.top + tmpRect.size.height;
-
-          if (overflow1 && ![@"root" isEqualToString:domId]) {
-
-            overflow1.rect = CGRectFromString([domInfo objectForKey:@"size"]);
-            rect3 = [[CGDOMRect alloc] init];
-            rect3.left = overflow1.rect.origin.x;
-            rect3.top = overflow1.rect.origin.y;
-            rect3.right = rect3.left + overflow1.rect.size.width;
-            rect3.bottom = rect3.top + overflow1.rect.size.height;
-
-
-            if (overflow1.cropX) {
-              rect2.left = MAX(rect2.left, rect3.left);
-              rect2.right = MIN(rect2.right, rect3.right);
+          rect = CGRectFromString([domInfo objectForKey:@"size"]);
+          right = rect.origin.x + rect.size.width;
+          bottom = rect.origin.y + rect.size.height;
+          if (overflow != nil && ![@"root" isEqualToString:domId ]) {
+            if (overflow.cropX) {
+              rect.origin.x = MAX(rect.origin.x, overflow.rect.origin.x);
+              right = MIN(right, overflow.rect.origin.x + overflow.rect.size.width);
             }
-            if (overflow1.cropY) {
-              rect2.top = MAX(rect2.top, rect3.top);
-              rect2.bottom = MIN(rect2.bottom, rect3.bottom);
+            if (overflow.cropY) {
+              rect.origin.y = MAX(rect.origin.y, overflow.rect.origin.y);
+              bottom = MIN(bottom, overflow.rect.origin.y + overflow.rect.size.height);
             }
-
           }
 
-          if (clickPoint.x < rect2.left ||
-              clickPoint.y < rect2.top ||
-              clickPoint.x > rect2.right ||
-              clickPoint.y > rect2.bottom) {
+          if (clickPoint.x < rect.origin.x ||
+              clickPoint.y < rect.origin.y ||
+              clickPoint.x > right ||
+              clickPoint.y > bottom) {
             continue;
           }
-
           if ([@"none" isEqualToString:[domInfo objectForKey:@"pointerEvents"]]) {
             continue;
           }
-
           if (maxZIndex < zIndexValue) {
             maxZIndex = zIndexValue;
             maxDomId = childId;
           }
-
         } else {
           if (zIndexValue < maxZIndex) {
+            // NSLog(@"-----skip because %d is %d < %d ", childId, zIndexValue, maxZindex);
             continue;
           }
-          grandChildId = [self findClickedDom:childId withPoint:clickPoint isMapChild: isMapChild overflow:overflow1];
-          //NSLog(@"-----[570] childId = %@ grandChildId = %@", childId, grandChildId);
+          grandChildId = [self findClickedDom:childId withPoint:clickPoint isMapChild: isMapChild overflow:overflow];
           if (grandChildId == nil) {
+            domInfoChild = [self.pluginScrollView.HTMLNodes objectForKey:grandChildId];
             grandChildId = childId;
           } else {
             domInfoChild = [self.pluginScrollView.HTMLNodes objectForKey:grandChildId];
-            zIndexProp = [domInfoChild objectForKey:@"zIndex"];
+            zIndexProp = [domInfo objectForKey:@"zIndex"];
             zIndexValue = [[zIndexProp objectForKey:@"z"] intValue];
           }
-          domInfoChild = [self.pluginScrollView.HTMLNodes objectForKey:grandChildId];
           rect = CGRectFromString([domInfoChild objectForKey:@"size"]);
 
-
-          rect2 = [[CGDOMRect alloc] init];
-          rect2.left = rect.origin.x;
-          rect2.top = rect.origin.y;
-          rect2.right = rect2.left + rect.size.width;
-          rect2.bottom = rect2.top + rect.size.height;
-
-          /*
-          if (overflow1 && ![@"root" isEqualToString:domId]) {
-
-            NSLog(@"-----[519] grandChildId = %@, size = %@", grandChildId, [domInfo objectForKey:@"size"]);
-            overflow1.rect = CGRectFromString([domInfo objectForKey:@"size"]);
-            rect3 = [[CGDOMRect alloc] init];
-            rect3.left = overflow1.rect.origin.x;
-            rect3.top = overflow1.rect.origin.y;
-            rect3.right = rect3.left + overflow1.rect.size.width;
-            rect3.bottom = rect3.top + overflow1.rect.size.height;
-
-
-            if (overflow1.cropX) {
-              rect2.left = MAX(rect2.left, rect3.left);
-              rect2.right = MIN(rect2.right, rect3.right);
+          right = rect.origin.x + rect.size.width;
+          bottom = rect.origin.y + rect.size.height;
+          if (overflow != nil && ![@"root" isEqualToString:domId ]) {
+            if (overflow.cropX) {
+              rect.origin.x = MAX(rect.origin.x, overflow.rect.origin.x);
+              right = MIN(right, overflow.rect.origin.x + overflow.rect.size.width);
             }
-            if (overflow1.cropY) {
-              rect2.top = MAX(rect2.top, rect3.top);
-              rect2.bottom = MIN(rect2.bottom, rect3.bottom);
+            if (overflow.cropY) {
+              rect.origin.y = MAX(rect.origin.y, overflow.rect.origin.y);
+              bottom = MIN(bottom, overflow.rect.origin.y + overflow.rect.size.height);
             }
-
           }
-          */
-          if (clickPoint.x < rect2.left ||
-              clickPoint.y < rect2.top ||
-              clickPoint.x > rect2.right ||
-              clickPoint.y > rect2.bottom) {
+
+          if (clickPoint.x < rect.origin.x ||
+              clickPoint.y < rect.origin.y ||
+              clickPoint.x > right ||
+              clickPoint.y > bottom) {
             continue;
           }
-
-
-          if ([@"none" isEqualToString:[domInfoChild objectForKey:@"pointerEvents"]]) {
+          domInfo = [self.pluginScrollView.HTMLNodes objectForKey:grandChildId];
+          if ([@"none" isEqualToString:[domInfo objectForKey:@"pointerEvents"]]) {
             continue;
           }
           if (maxZIndex < zIndexValue) {
@@ -635,58 +570,35 @@
 
   if (maxDomId == nil && ![@"root" isEqualToString:domId]) {
     if ([@"none" isEqualToString:pointerEvents]) {
-      [self.CACHE_FIND_DOM setValue:@"(null)" forKey:domId];
+      [self.CACHE_FIND_DOM setValue:nil forKey:domId];
       return nil;
     }
-
     domInfo = [self.pluginScrollView.HTMLNodes objectForKey:domId];
     rect = CGRectFromString([domInfo objectForKey:@"size"]);
 
-    rect2 = [[CGDOMRect alloc] init];
-    rect2.left = rect.origin.x;
-    rect2.top = rect.origin.y;
-    rect2.right = rect2.left + rect.size.width;
-    rect2.bottom = rect2.top + rect.size.height;
-
-
-//    if (overflow1) {
-//
-//      overflow1.rect = CGRectFromString([domInfo objectForKey:@"size"]);
-//      rect3 = [[CGDOMRect alloc] init];
-//      rect3.left = overflow1.rect.origin.x;
-//      rect3.top = overflow1.rect.origin.y;
-//      rect3.right = rect3.left + overflow1.rect.size.width;
-//      rect3.bottom = rect3.top + overflow1.rect.size.height;
-//
-//
-//      if (overflow1.cropX) {
-//        rect2.left = MAX(rect2.left, rect3.left);
-//        rect2.right = MIN(rect2.right, rect3.right);
-//      }
-//      if (overflow1.cropY) {
-//        rect2.top = MAX(rect2.top, rect3.top);
-//        rect2.bottom = MIN(rect2.bottom, rect3.bottom);
-//      }
-//
-//    }
-
-    if (clickPoint.x < rect2.left ||
-        clickPoint.y < rect2.top ||
-        clickPoint.x > rect2.right ||
-        clickPoint.y > rect2.bottom) {
-      [self.CACHE_FIND_DOM setValue:@"(null)" forKey:domId];
-      return nil;
+    right = rect.origin.x + rect.size.width;
+    bottom = rect.origin.y + rect.size.height;
+    if (overflow != nil) {
+      if (overflow.cropX) {
+        rect.origin.x = MAX(rect.origin.x, overflow.rect.origin.x);
+        right = MIN(right, overflow.rect.origin.x + overflow.rect.size.width);
+      }
+      if (overflow.cropY) {
+        rect.origin.y = MAX(rect.origin.y, overflow.rect.origin.y);
+        bottom = MIN(bottom, overflow.rect.origin.y + overflow.rect.size.height);
+      }
     }
 
+    if (clickPoint.x < rect.origin.x ||
+        clickPoint.y < rect.origin.y ||
+        clickPoint.x > right ||
+        clickPoint.y > bottom) {
+      [self.CACHE_FIND_DOM setValue:nil forKey:domId];
+      return nil;
+    }
     maxDomId = domId;
   }
-
-  if (!maxDomId) {
-    [self.CACHE_FIND_DOM setValue:@"(null)" forKey:domId];
-  } else {
-    [self.CACHE_FIND_DOM setValue:maxDomId forKey:domId];
-  }
-
+  [self.CACHE_FIND_DOM setValue:maxDomId forKey:domId];
   return maxDomId;
 }
 

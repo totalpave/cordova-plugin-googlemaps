@@ -123,7 +123,7 @@ public class PluginPolygon extends MyPlugin implements MyPluginInterface  {
                 JSONObject result = new JSONObject();
                 try {
                     result.put("hashCode", hashCode);
-                    result.put("__pgmId", "polygon_"+ id);
+                    result.put("id", "polygon_"+ id);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -140,22 +140,20 @@ public class PluginPolygon extends MyPlugin implements MyPluginInterface  {
             @Override
             public void run() {
                 Set<String> keySet = pluginMap.objects.keys;
-                if (keySet.size() > 0) {
-                  String[] objectIdArray = keySet.toArray(new String[keySet.size()]);
+                String[] objectIdArray = keySet.toArray(new String[keySet.size()]);
 
-                  for (String objectId : objectIdArray) {
-                      if (pluginMap.objects.containsKey(objectId)) {
-                          if (objectId.contains("property")) {
-                              Polygon polygon = (Polygon) pluginMap.objects.remove(objectId.replace("property_", ""));
-                              if (polygon != null) {
-                                  polygon.remove();
-                              }
-                          }
-                          Object object = pluginMap.objects.remove(objectId);
-                          object = null;
+                for (String objectId : objectIdArray) {
+                    if (pluginMap.objects.containsKey(objectId)) {
+                        if (objectId.contains("property")) {
+                            Polygon polygon = (Polygon) pluginMap.objects.remove(objectId.replace("property_", ""));
+                            if (polygon != null) {
+                                polygon.remove();
+                            }
+                        }
+                        Object object = pluginMap.objects.remove(objectId);
+                        object = null;
 
-                      }
-                  }
+                    }
                 }
             }
         });
@@ -342,7 +340,7 @@ public class PluginPolygon extends MyPlugin implements MyPluginInterface  {
                 // Update the polygon
                 polygon.setPoints(path);
                 if (path.size() > 0) {
-                    polygon.setVisible(polygon.isVisible());
+                    polygon.setVisible(true);
                 } else {
                     polygon.setVisible(false);
                 }

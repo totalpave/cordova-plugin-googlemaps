@@ -284,7 +284,7 @@ public class PluginKmlOverlay extends MyPlugin implements MyPluginInterface {
           String tmpArry[];
           Bundle latLng;
           for (i = 0; i < lines.length; i++) {
-            lines[i] = lines[i].replaceAll("[^0-9,.\\-Ee]", "");
+            lines[i] = lines[i].replaceAll("[^0-9,.\\-]", "");
             if (!"".equals(lines[i])) {
               tmpArry = lines[i].split(",");
               latLng = new Bundle();

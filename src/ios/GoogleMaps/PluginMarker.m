@@ -70,7 +70,7 @@
 
     __block NSMutableDictionary *createResult = [[NSMutableDictionary alloc] init];
     NSString *markerId = [NSString stringWithFormat:@"marker_%@", hashCode];
-    [createResult setObject:markerId forKey:@"__pgmId"];
+    [createResult setObject:markerId forKey:@"id"];
 
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
       CDVCommandDelegateImpl *cmdDelegate = (CDVCommandDelegateImpl *)self.commandDelegate;
@@ -210,7 +210,7 @@
       iconProperty = [NSMutableDictionary dictionary];
     }
     [iconProperty setObject:animation forKey:@"animation"];
-    //NSLog(@"--->animation = %@", animation);
+    NSLog(@"--->animation = %@", animation);
   }
 
   if ([json valueForKey:@"infoWindowAnchor"]) {
@@ -722,10 +722,7 @@
  * (memo) http://stackoverflow.com/questions/12164049/animationdidstop-for-group-animation
  */
 -(void)setDropAnimation_:(GMSMarker *)marker callbackBlock:(void (^)()) callbackBlock {
-  /**
-   * Marker drop animation
-   */
-  int duration = 0.1f;
+  int duration = 1;
 
   CAKeyframeAnimation *longitudeAnim = [CAKeyframeAnimation animationWithKeyPath:@"longitude"];
   CAKeyframeAnimation *latitudeAnim = [CAKeyframeAnimation animationWithKeyPath:@"latitude"];
@@ -739,15 +736,18 @@
   CLLocationCoordinate2D startLatLng;
 
   point.y = 0;
-  startLatLng = [projection coordinateForPoint:point];
-  [latitudePath addObject:[NSNumber numberWithDouble:startLatLng.latitude]];
-  [longitudeath addObject:[NSNumber numberWithDouble:startLatLng.longitude]];
+  for (double i = 0.75f; i > 0; i-= 0.25f) {
+    startLatLng = [projection coordinateForPoint:point];
+    [latitudePath addObject:[NSNumber numberWithDouble:startLatLng.latitude]];
+    [longitudeath addObject:[NSNumber numberWithDouble:startLatLng.longitude]];
 
-  point.y = distance;
-  startLatLng = [projection coordinateForPoint:point];
-  [latitudePath addObject:[NSNumber numberWithDouble:startLatLng.latitude]];
-  [longitudeath addObject:[NSNumber numberWithDouble:startLatLng.longitude]];
+    point.y = distance;
+    startLatLng = [projection coordinateForPoint:point];
+    [latitudePath addObject:[NSNumber numberWithDouble:startLatLng.latitude]];
+    [longitudeath addObject:[NSNumber numberWithDouble:startLatLng.longitude]];
 
+    point.y = distance - distance * (i - 0.25f);
+  }
   longitudeAnim.values = longitudeath;
   latitudeAnim.values = latitudePath;
 
@@ -761,7 +761,7 @@
 }
 -(void)setBounceAnimation_:(GMSMarker *)marker callbackBlock:(void (^)()) callbackBlock {
   /**
-   * Marker bounce animation
+   * Marker drop animation
    */
   int duration = 1;
 
@@ -970,8 +970,8 @@
       [iconPath rangeOfString:@";base64,"].location != NSNotFound) {
 
     NSArray *tmp = [iconPath componentsSeparatedByString:@","];
-    NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:[tmp objectAtIndex:1] options:0];
 
+    NSData *decodedData = [NSData dataFromBase64String:tmp[1]];
     image = [[UIImage alloc] initWithData:decodedData];
     if (width && height) {
       image = [image resize:width height:height];
@@ -1050,8 +1050,6 @@
 
           //url = [NSURL URLWithString:[NSString stringWithFormat:@"%@/%@", currentURL, iconPath]];
           currentURL = [NSString stringWithFormat:@"%@/%@", currentURL, iconPath];
-          currentURL = [currentURL regReplace:@"\\/\\.\\/" replaceTxt:@"/" options:0];
-          currentURL = [currentURL regReplace:@"\\/+" replaceTxt:@"/" options:0];
           currentURL = [currentURL stringByReplacingOccurrencesOfString:@":/" withString:@"://"];
           currentURL = [currentURL stringByReplacingOccurrencesOfString:@":///" withString:@"://"];
           //NSLog(@"currentURL = %@", currentURL);
@@ -1063,20 +1061,18 @@
           [self downloadImageWithURL:url  completionBlock:^(BOOL succeeded, UIImage *image) {
 
             if (!succeeded) {
-              dispatch_async(dispatch_get_main_queue(), ^{
-                NSLog(@"[fail] url = %@", url);
-                // The `visible` property
-                if (iconProperty[@"visible"] == [NSNumber numberWithBool:true]) {
-                  marker.map = self.mapCtrl.map;
-                } else if (iconProperty[@"visible"] == [NSNumber numberWithBool:false]) {
-                  marker.map = nil;
-                }
-                if ([[UIImageCache sharedInstance].iconCacheKeys objectForKey:iconCacheKey]) {
-                  [[UIImageCache sharedInstance].iconCacheKeys removeObjectForKey:iconCacheKey];
-                }
+              NSLog(@"[fail] url = %@", url);
+              // The `visible` property
+              if (iconProperty[@"visible"] == [NSNumber numberWithBool:true]) {
+                marker.map = self.mapCtrl.map;
+              } else if (iconProperty[@"visible"] == [NSNumber numberWithBool:false]) {
+                marker.map = nil;
+              }
+              if ([[UIImageCache sharedInstance].iconCacheKeys objectForKey:iconCacheKey]) {
+                [[UIImageCache sharedInstance].iconCacheKeys removeObjectForKey:iconCacheKey];
+              }
 
-                callbackBlock(NO, [NSString stringWithFormat:@"Can not load image from '%@'.", url]);
-              });
+              callbackBlock(NO, [NSString stringWithFormat:@"Can not load image from '%@'.", url]);
               return;
             }
 
@@ -1313,28 +1309,23 @@
   // Load the icon from over the internet
   //
 
-  iconPath = [iconPath regReplace:@"\\/\\.\\/" replaceTxt:@"/" options:0];
-  iconPath = [iconPath regReplace:@"\\/+" replaceTxt:@"/" options:0];
-  iconPath = [iconPath stringByReplacingOccurrencesOfString:@":/" withString:@"://"];
   NSURL *url = [NSURL URLWithString:iconPath];
 
   [self downloadImageWithURL:url  completionBlock:^(BOOL succeeded, UIImage *image) {
 
     if (!succeeded) {
-      dispatch_async(dispatch_get_main_queue(), ^{
-        NSLog(@"[fail] url = %@", url);
-        // The `visible` property
-        if (iconProperty[@"visible"] == [NSNumber numberWithBool:true]) {
-          marker.map = self.mapCtrl.map;
-        } else if (iconProperty[@"visible"] == [NSNumber numberWithBool:false]) {
-          marker.map = nil;
-        }
-        if ([[UIImageCache sharedInstance].iconCacheKeys objectForKey:iconCacheKey]) {
-          [[UIImageCache sharedInstance].iconCacheKeys removeObjectForKey:iconCacheKey];
-        }
+      NSLog(@"[fail] url = %@", url);
+      // The `visible` property
+      if (iconProperty[@"visible"] == [NSNumber numberWithBool:true]) {
+        marker.map = self.mapCtrl.map;
+      } else if (iconProperty[@"visible"] == [NSNumber numberWithBool:false]) {
+        marker.map = nil;
+      }
+      if ([[UIImageCache sharedInstance].iconCacheKeys objectForKey:iconCacheKey]) {
+        [[UIImageCache sharedInstance].iconCacheKeys removeObjectForKey:iconCacheKey];
+      }
 
-        callbackBlock(NO, [NSString stringWithFormat:@"Can not load image from '%@'.", url]);
-      });
+      callbackBlock(NO, [NSString stringWithFormat:@"Can not load image from '%@'.", url]);
       return;
     }
 
@@ -1486,19 +1477,8 @@
 {
   [self.mapCtrl.executeQueue addOperationWithBlock:^{
 
-    NSString *urlStr = url.absoluteString;
-    // Since ionic local server declines HTTP access for some reason,
-    // replace URL with file path
-    NSBundle *mainBundle = [NSBundle mainBundle];
-    NSString *wwwPath = [mainBundle pathForResource:@"www/cordova" ofType:@"js"];
-    wwwPath = [wwwPath stringByReplacingOccurrencesOfString:@"/cordova.js" withString:@""];
-    if ([urlStr containsString:@"assets/"]) {
-      urlStr = [urlStr regReplace:@"^.*assets" replaceTxt:[NSString stringWithFormat:@"%@/assets/", wwwPath] options:NSRegularExpressionCaseInsensitive];
-    }
-    urlStr = [urlStr stringByReplacingOccurrencesOfString:@"http://localhost:8080" withString: wwwPath];
-
-    if ([urlStr hasPrefix:@"file:"] || [urlStr hasPrefix:@"/"]) {
-      NSString *iconPath = [urlStr stringByReplacingOccurrencesOfString:@"file:" withString:@""];
+    if ([url.absoluteString hasPrefix:@"file:"]) {
+      NSString *iconPath = [url.absoluteString stringByReplacingOccurrencesOfString:@"file:" withString:@""];
       NSFileManager *fileManager = [NSFileManager defaultManager];
       if (![fileManager fileExistsAtPath:iconPath]) {
         NSLog(@"(error)There is no file at '%@'.", iconPath);

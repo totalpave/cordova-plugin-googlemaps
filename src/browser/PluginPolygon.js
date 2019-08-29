@@ -1,11 +1,15 @@
+
+
+
 var utils = require('cordova/utils'),
   event = require('cordova-plugin-googlemaps.event'),
-  BaseClass = require('cordova-plugin-googlemaps.BaseClass');
+  BaseClass = require('cordova-plugin-googlemaps.BaseClass'),
+  LatLng = require('cordova-plugin-googlemaps.LatLng');
 
 function PluginPolygon(pluginMap) {
   var self = this;
   BaseClass.apply(self);
-  Object.defineProperty(self, 'pluginMap', {
+  Object.defineProperty(self, "pluginMap", {
     value: pluginMap,
     writable: false
   });
@@ -75,7 +79,7 @@ PluginPolygon.prototype._create = function(onSuccess, onError, args) {
   self.pluginMap.objects[polygonId] = polygon;
 
   onSuccess({
-    '__pgmId': polygonId
+    'id': polygonId
   });
 };
 
@@ -215,7 +219,7 @@ PluginPolygon.prototype.removePointAt = function(onSuccess, onError, args) {
   var polygon = self.pluginMap.objects[overlayId];
   if (polygon) {
     var index = args[1];
-    polygon.getPath().removeAt(index);
+    polygon.getPath().removeAt(index, latLng);
   }
   onSuccess();
 };
@@ -250,6 +254,7 @@ PluginPolygon.prototype.insertPointOfHoleAt = function(onSuccess, onError, args)
     polygon = self.pluginMap.objects[overlayId];
 
   if (polygon) {
+    var index = args[1];
     var latLng = new google.maps.LatLng(position.lat, position.lng);
     var paths = polygon.getPaths();
     var hole = null;
@@ -274,6 +279,7 @@ PluginPolygon.prototype.setPointOfHoleAt = function(onSuccess, onError, args) {
     polygon = self.pluginMap.objects[overlayId];
 
   if (polygon) {
+    var index = args[1];
     var latLng = new google.maps.LatLng(position.lat, position.lng);
     polygon.getPaths().getAt(holeIndex).setAt(pointIndex, latLng);
   }
@@ -358,7 +364,7 @@ PluginPolygon.prototype.remove = function(onSuccess, onError, args) {
 
 PluginPolygon.prototype._onPolygonEvent = function(polygon, polyMouseEvt) {
   var self = this,
-    mapId = self.pluginMap.__pgmId;
+    mapId = self.pluginMap.id;
   if (mapId in plugin.google.maps) {
     plugin.google.maps[mapId]({
       'evtName': event.POLYGON_CLICK,

@@ -14,9 +14,9 @@
   NSString* jsName = [name stringByReplacingOccurrencesOfString:@"'" withString:@"\\'"];
   jsName = [jsName stringByReplacingOccurrencesOfString:@"\n" withString:@"\\n"];
   jsName = [jsName stringByReplacingOccurrencesOfString:@"\r" withString:@"\\r"];
-
+  
   NSString* jsString = [NSString
-                        stringWithFormat:@"javascript:if('%@' in plugin.google.maps){plugin.google.maps['%@']({evtName: '%@', callback: '_onMapEvent', args: ['%@', \"%@\", new plugin.google.maps.LatLng(%f,%f)]});}",
+                        stringWithFormat:@"javascript:if('%@' in plugin.google.maps){plugin.google.maps['%@']({evtName: '%@', callback: '_onMapEvent', args: ['%@', '%@', new plugin.google.maps.LatLng(%f,%f)]});}",
                         self.overlayId, self.overlayId, @"poi_click", placeID, jsName, location.latitude, location.longitude];
   [self execJS:jsString];
 }
@@ -192,7 +192,6 @@
 
   //
   maxZIndex = -1;
-  CLLocationCoordinate2D touchPoint;
   for (i = 0; i < [boundsHitList count]; i++) {
     key = [boundsHitList objectAtIndex:i];
     //plugin = [boundsPluginList objectAtIndex:i];
@@ -209,15 +208,14 @@
       geodesic = (NSNumber *)[properties objectForKey:@"geodesic"];
       path = (GMSPath *)[properties objectForKey:@"mutablePath"];
       if ([geodesic boolValue] == YES) {
-        touchPoint = [PluginUtil isPointOnTheGeodesicLine:path coordinate:coordinate threshold:threshold projection:self.map.projection];
-        if (CLLocationCoordinate2DIsValid(touchPoint)) {
+        if ([PluginUtil isPointOnTheGeodesicLine:path coordinate:coordinate threshold:threshold]) {
+
           maxZIndex = zIndex;
           hitKey = [key stringByReplacingOccurrencesOfString:@"_property" withString:@""];
           continue;
         }
       } else {
-        touchPoint = [PluginUtil isPointOnTheLine:path coordinate:coordinate projection:self.map.projection];
-        if (CLLocationCoordinate2DIsValid(touchPoint)) {
+        if ([PluginUtil isPointOnTheLine:path coordinate:coordinate projection:self.map.projection]) {
           maxZIndex = zIndex;
           hitKey = [key stringByReplacingOccurrencesOfString:@"_property" withString:@""];
           continue;
@@ -228,7 +226,6 @@
     if ([key hasPrefix:@"polygon_"]) {
       path = (GMSPath *)[properties objectForKey:@"mutablePath"];
       if ([PluginUtil isPolygonContains:path coordinate:coordinate projection:self.map.projection]) {
-        touchPoint = coordinate;
         maxZIndex = zIndex;
         hitKey = [key stringByReplacingOccurrencesOfString:@"_property" withString:@""];
         continue;
@@ -240,7 +237,6 @@
       key = [key stringByReplacingOccurrencesOfString:@"_property" withString:@""];
       GMSCircle *circle = (GMSCircle *)[self.objects objectForKey:key];
       if ([PluginUtil isCircleContains:circle coordinate:coordinate]) {
-        touchPoint = coordinate;
         maxZIndex = zIndex;
         hitKey = key;
         continue;
@@ -251,7 +247,6 @@
       key = [key stringByReplacingOccurrencesOfString:@"_property" withString:@""];
       GMSGroundOverlay *groundOverlay = (GMSGroundOverlay *)[self.objects objectForKey:key];
       if ([groundOverlay.bounds containsCoordinate:coordinate]) {
-        touchPoint = coordinate;
         maxZIndex = zIndex;
         hitKey = key;
         continue;
@@ -263,7 +258,7 @@
   if (hitKey != nil) {
     NSArray *tmp = [hitKey componentsSeparatedByString:@"_"];
     NSString *eventName = [NSString stringWithFormat:@"%@_click", [tmp objectAtIndex:0]];
-    [self triggerOverlayEvent:eventName overlayId:hitKey coordinate:touchPoint];
+    [self triggerOverlayEvent:eventName overlayId:hitKey coordinate:coordinate];
   } else {
     [self triggerMapEvent:@"map_click" coordinate:coordinate];
   }
@@ -758,7 +753,7 @@
 
     isTextMode = false;
     NSArray *tmp = [title componentsSeparatedByString:@","];
-    NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:[tmp objectAtIndex:1] options:0];
+    NSData *decodedData = [NSData dataFromBase64String:tmp[1]];
     base64Image = [[UIImage alloc] initWithData:decodedData];
     rectSize = CGSizeMake(base64Image.size.width + leftImg.size.width, base64Image.size.height + leftImg.size.height / 2);
 

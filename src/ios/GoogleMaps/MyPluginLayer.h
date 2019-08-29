@@ -10,17 +10,10 @@
 #import "PluginMapViewController.h"
 #import "MyPluginScrollView.h"
 
-@interface CGDOMRect : NSObject
-  @property CGFloat left;
-  @property CGFloat right;
-  @property CGFloat top;
-  @property CGFloat bottom;
-@end
-
 @interface OverflowCSS : NSObject
-  @property BOOL cropX;
-  @property BOOL cropY;
-  @property CGRect rect;
+@property BOOL cropX;
+@property BOOL cropY;
+@property CGRect rect;
 @end
 
 @interface MyPluginLayer : UIView<UIScrollViewDelegate>

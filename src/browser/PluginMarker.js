@@ -7,11 +7,11 @@ var utils = require('cordova/utils'),
 function PluginMarker(pluginMap) {
   var self = this;
   BaseClass.apply(self);
-  Object.defineProperty(self, 'pluginMap', {
+  Object.defineProperty(self, "pluginMap", {
     value: pluginMap,
     writable: false
   });
-  Object.defineProperty(self, 'infoWnd', {
+  Object.defineProperty(self, "infoWnd", {
     value: null,
     writable: true
   });
@@ -21,16 +21,15 @@ utils.extend(PluginMarker, BaseClass);
 
 PluginMarker.prototype._create = function(onSuccess, onError, args) {
   var self = this,
+    map = self.pluginMap.get('map'),
     markerId = 'marker_' + args[2],
     pluginOptions = args[1];
   self.__create.call(self, markerId, pluginOptions, function(marker, properties) {
     onSuccess(properties);
-  }, onError);
+  });
 };
 
-/*eslint-disable no-unused-vars*/
-PluginMarker.prototype.__create = function(markerId, pluginOptions, onSuccess, onError) {
-/*eslint-enable no-unused-vars*/
+PluginMarker.prototype.__create = function(markerId, pluginOptions, onSuccess) {
   var self = this,
     map = self.pluginMap.get('map');
   var markerOpts = {
@@ -48,11 +47,6 @@ PluginMarker.prototype.__create = function(markerId, pluginOptions, onSuccess, o
   if (pluginOptions.icon) {
     var icon = pluginOptions.icon;
     markerOpts.icon = {};
-    if (Array.isArray(pluginOptions.icon) && pluginOptions.icon.length === 4) {
-      pluginOptions.icon = {
-        'url': pluginOptions.icon
-      };
-    }
     if (typeof pluginOptions.icon === 'string') {
       // Specifies path or url to icon image
       markerOpts.icon.url = pluginOptions.icon;
@@ -62,7 +56,7 @@ PluginMarker.prototype.__create = function(markerId, pluginOptions, onSuccess, o
         markerOpts.icon = {
           'path': 'm12 0c-4.4183 2.3685e-15 -8 3.5817-8 8 0 1.421 0.3816 2.75 1.0312 3.906 0.1079 0.192 0.221 0.381 0.3438 0.563l6.625 11.531 6.625-11.531c0.102-0.151 0.19-0.311 0.281-0.469l0.063-0.094c0.649-1.156 1.031-2.485 1.031-3.906 0-4.4183-3.582-8-8-8zm0 4c2.209 0 4 1.7909 4 4 0 2.209-1.791 4-4 4-2.2091 0-4-1.791-4-4 0-2.2091 1.7909-4 4-4z',
           'fillColor': 'rgb(' + pluginOptions.icon.url[0] + ',' + pluginOptions.icon.url[1] + ',' + pluginOptions.icon.url[2] + ')',
-          'fillOpacity': pluginOptions.icon.url[3] / 255,
+          'fillOpacity': pluginOptions.icon.url[3] / 256,
           'scale': 1.3,
           'strokeWeight': 1,
           'strokeColor': 'rgb(255, 255, 255)',
@@ -128,7 +122,7 @@ PluginMarker.prototype.__create = function(markerId, pluginOptions, onSuccess, o
 
   if (iconSize) {
     onSuccess(marker, {
-      '__pgmId': markerId,
+      'id': markerId,
       'width': iconSize.width,
       'height': iconSize.height
     });
@@ -136,7 +130,7 @@ PluginMarker.prototype.__create = function(markerId, pluginOptions, onSuccess, o
     var markerIcon = marker.getIcon();
     if (markerIcon && markerIcon.size) {
       onSuccess({
-        '__pgmId': markerId,
+        'id': markerId,
         'width': markerIcon.size.width,
         'height': markerIcon.size.height
       });
@@ -144,20 +138,19 @@ PluginMarker.prototype.__create = function(markerId, pluginOptions, onSuccess, o
       var img = new Image();
       img.onload = function() {
         onSuccess(marker, {
-          '__pgmId': markerId,
+          'id': markerId,
           'width': img.width,
           'height': img.height
         });
       };
-      img.onerror = function(error) {
-        console.warn(error.getMessage());
+      img.onerror = function() {
         onSuccess(marker, {
-          '__pgmId': markerId,
+          'id': markerId,
           'width': 20,
           'height': 42
         });
       };
-      if (typeof markerOpts.icon === 'string') {
+      if (typeof markerOpts.icon === "string") {
         img.src = markerOpts.icon;
       } else {
         img.src = markerOpts.icon.url;
@@ -245,17 +238,19 @@ PluginMarker.prototype.setInfoWindowAnchor = function(onSuccess, onError, args) 
   var overlayId = args[0];
   var marker = self.pluginMap.objects[overlayId];
   if (marker) {
-    var icon = marker.getIcon();
-    var anchorX = args[1];
-    anchorX = anchorX - icon.size.width / 2;
-    var anchorY = args[2];
-    anchorY = anchorY - icon.size.height / 2;
-    marker.setOptions({
-      'anchorPoint': new google.maps.Point(anchorX, anchorY)
-    });
-    if (self.infoWnd) {
-      self._showInfoWindow.call(self, marker);
-    }
+    (new Promise(function(resolve, reject) {
+      var icon = marker.getIcon();
+      var anchorX = args[1];
+      anchorX = anchorX - icon.size.width / 2;
+      var anchorY = args[2];
+      anchorY = anchorY - icon.size.height / 2;
+      marker.setOptions({
+        'anchorPoint': new google.maps.Point(anchorX, anchorY)
+      });
+      if (self.infoWnd) {
+        self._showInfoWindow.call(self, marker);
+      }
+    }));
   }
   onSuccess();
 };
@@ -300,7 +295,7 @@ PluginMarker.prototype.setIconAnchor = function(onSuccess, onError, args) {
   var marker = self.pluginMap.objects[overlayId];
   if (marker) {
     var icon = marker.getIcon();
-    if (typeof icon === 'string') {
+    if (typeof icon === "string") {
       icon = {
         'url': icon
       };
@@ -333,8 +328,9 @@ PluginMarker.prototype.showInfoWindow = function(onSuccess, onError, args) {
   }
   onSuccess();
 };
-PluginMarker.prototype.hideInfoWindow = function(onSuccess) {
+PluginMarker.prototype.hideInfoWindow = function(onSuccess, onError, args) {
   var self = this;
+  var overlayId = args[0];
   if (self.infoWnd) {
     google.maps.event.trigger(self.infoWnd, 'closeclick');
     self.infoWnd.close();
@@ -352,7 +348,8 @@ PluginMarker.prototype.setIcon = function(onSuccess, onError, args) {
     .catch(onError);
 };
 PluginMarker.prototype.setIcon_ = function(marker, iconOpts) {
-  return new Promise(function(resolve) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
     if (marker) {
       if (Array.isArray(iconOpts)) {
         // Specifies color name or rule
@@ -364,9 +361,9 @@ PluginMarker.prototype.setIcon_ = function(marker, iconOpts) {
           'strokeWeight': 0,
           'anchor': new google.maps.Point(12, 27)
         };
-      } else if (typeof iconOpts === 'object') {
+      } else if (typeof iconOpts === "object") {
 
-        if (typeof iconOpts.size === 'object') {
+        if (typeof iconOpts.size === "object") {
           iconOpts.size = new google.maps.Size(iconOpts.size.width, iconOpts.size.height, 'px', 'px');
           iconOpts.scaledSize = iconOpts.size;
         }
@@ -407,7 +404,7 @@ PluginMarker.prototype.remove = function(onSuccess, onError, args) {
 
 PluginMarker.prototype.onMarkerEvent = function(evtName, marker) {
   var self = this,
-    mapId = self.pluginMap.__pgmId;
+    mapId = self.pluginMap.id;
 
   if (mapId in plugin.google.maps) {
     var latLng = marker.getPosition();
@@ -435,11 +432,11 @@ PluginMarker.prototype._showInfoWindow = function(marker) {
   self.pluginMap._syncInfoWndPosition.call(self);
   var maxWidth = marker.getMap().getDiv().offsetWidth * 0.7;
   var html = [];
-  if (marker.get('title')) {
-    html.push(marker.get('title'));
+  if (marker.get("title")) {
+    html.push(marker.get("title"));
   }
-  if (marker.get('snippet')) {
-    html.push('<small>' + marker.get('snippet') + '</small>');
+  if (marker.get("snippet")) {
+    html.push('<small>' + marker.get("snippet") + '</small>');
   }
   if (html.length > 0) {
     container.innerHTML = html.join('<br>');
@@ -469,7 +466,7 @@ PluginMarker.prototype._showInfoWindow = function(marker) {
 PluginMarker.prototype.onMarkerClickEvent = function(evtName, marker) {
   var self = this;
 
-  var overlayId = marker.get('overlayId');
+  var overlayId = marker.get("overlayId");
 
   if (self.pluginMap.activeMarker && self.pluginMap.activeMarker !== marker) {
     self.onMarkerEvent(event.INFO_CLOSE, self.pluginMap.activeMarker);
@@ -478,7 +475,7 @@ PluginMarker.prototype.onMarkerClickEvent = function(evtName, marker) {
   if (marker.get('disableAutoPan') === false) {
     self.pluginMap.get('map').panTo(marker.getPosition());
   }
-  if (overlayId.indexOf('markercluster_') > -1) {
+  if (overlayId.indexOf("markercluster_") > -1) {
     self.onClusterEvent(evtName, marker);
   } else {
     self.onMarkerEvent(evtName, marker);

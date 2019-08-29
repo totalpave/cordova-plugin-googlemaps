@@ -10,6 +10,7 @@
 #import "IPluginProtocol.h"
 #import "PluginUtil.h"
 #import "PluginMarker.h"
+#import "NSData+Base64.h"
 
 @interface PluginMarkerCluster : PluginMarker<IPluginProtocol>
 @property (atomic, strong) NSMutableDictionary *debugFlags;

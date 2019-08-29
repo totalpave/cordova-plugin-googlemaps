@@ -114,7 +114,7 @@ public class PluginGroundOverlay extends MyPlugin implements MyPluginInterface  
         JSONObject resultJSON = new JSONObject();
         try {
           resultJSON.put("hashCode", idBase);
-          resultJSON.put("__pgmId", "groundoverlay_" + idBase);
+          resultJSON.put("id", "groundoverlay_" + idBase);
         } catch (Exception e) {
           e.printStackTrace();
         }
@@ -142,52 +142,47 @@ public class PluginGroundOverlay extends MyPlugin implements MyPluginInterface  
         @Override
         public void run() {
           Set<String> keySet = pluginMap.objects.keys;
-          if (keySet.size() > 0) {
-            String[] objectIdArray = keySet.toArray(new String[keySet.size()]);
+          String[] objectIdArray = keySet.toArray(new String[keySet.size()]);
 
-            synchronized (pluginMap.objects) {
-              Bitmap image;
-              for (String objectId : objectIdArray) {
-                if (pluginMap.objects.containsKey(objectId)) {
-                  if (objectId.startsWith("groundoverlay_") &&
-                      !objectId.startsWith("groundoverlay_property_") &&
-                      !objectId.startsWith("groundoverlay_initOpts_") &&
-                      !objectId.startsWith("groundoverlay_bounds_")) {
-                    GroundOverlay groundOverlay = (GroundOverlay) pluginMap.objects.remove(objectId);
-                    image = overlayImage.remove(objectId);
-                    if (image != null && !image.isRecycled()) {
-                      image.recycle();
-                    }
-                    groundOverlay.setTag(null);
-                    groundOverlay.remove();
-                    groundOverlay = null;
-                  } else {
-                    Object object = pluginMap.objects.remove(objectId);
-                    object = null;
+          synchronized (pluginMap.objects) {
+            Bitmap image;
+            for (String objectId : objectIdArray) {
+              if (pluginMap.objects.containsKey(objectId)) {
+                if (objectId.startsWith("groundoverlay_") &&
+                    !objectId.startsWith("groundoverlay_property_") &&
+                    !objectId.startsWith("groundoverlay_initOpts_") &&
+                    !objectId.startsWith("groundoverlay_bounds_")) {
+                  GroundOverlay groundOverlay = (GroundOverlay) pluginMap.objects.remove(objectId);
+                  image = overlayImage.remove(objectId);
+                  if (image != null && !image.isRecycled()) {
+                    image.recycle();
                   }
+                  groundOverlay.setTag(null);
+                  groundOverlay.remove();
+                  groundOverlay = null;
+                } else {
+                  Object object = pluginMap.objects.remove(objectId);
+                  object = null;
                 }
               }
             }
+          }
 
-            synchronized (semaphore) {
-              _clearDone = true;
-              semaphore.notify();
-            }
+          synchronized (semaphore) {
+            _clearDone = true;
+            semaphore.notify();
           }
 
         }
       });
 
-      Set<String> keySet = pluginMap.objects.keys;
-      if (keySet.size() > 0) {
-        try {
-          if (!_clearDone) {
-            semaphore.wait(1000);
-          }
-        } catch (InterruptedException e) {
-          // ignore
-          //e.printStackTrace();
+      try {
+        if (!_clearDone) {
+          semaphore.wait(1000);
         }
+      } catch (InterruptedException e) {
+        // ignore
+        //e.printStackTrace();
       }
     }
   }
@@ -644,7 +639,7 @@ public class PluginGroundOverlay extends MyPlugin implements MyPluginInterface  
       @Override
       public void run() {
         AsyncTask task;
-        int i, ilen = imageLoadingTasks.size();
+        int i, ilen=imageLoadingTasks.size();
         for (i = 0; i < ilen; i++) {
           task = imageLoadingTasks.remove(i);
           task.cancel(true);
