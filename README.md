@@ -1,6 +1,8 @@
-# Cordova GoogleMaps plugin for Android, iOS and Browser (version 2.4.6)
+# Cordova GoogleMaps plugin for Android, iOS and Browser v2.5.3
 
-![](https://img.shields.io/npm/dm/cordova-plugin-googlemaps.svg)
+| Download | Build test (master branch)|
+|----------|---------------------------|
+| [![](https://img.shields.io/npm/dm/cordova-plugin-googlemaps.svg)](https://npm-stat.com/charts.html?package=cordova-plugin-googlemaps) |[![](https://travis-ci.org/mapsplugin/cordova-plugin-googlemaps.svg?branch=master)](https://travis-ci.org/mapsplugin/cordova-plugin-googlemaps/branches) |
 
   This plugin displays Google Maps in your application.
   This plugin uses these libraries for each platforms:
@@ -195,54 +197,55 @@
 ---------------------------------------------------------------------------------------------------------
 
 ## Release Notes
-  - **v2.4.6**
-    - Fix: (iOS) Only `src/ios/check_sdk_version.js` error.
+  - **v2.5.3**
+    - Fix: (iOS) touch problem
+    - Fix: (iOS) `toDataURL()` bug
 
-  - **v2.4.5**
-    - Fix: (Browser) `GeocoderResult.extra.lines` field is incorrect position.
-    - Fix: (Android/iOS/Browser) `promise-7.0.4.min.js.map` file is missing.
-    - Update: (Android/iOS/Browser) Detecting way of `viewport-fit=cover`.
-    - Update: (iOS) No longer use `com.googlemaps.ios`. Use `CocoaPod` installation instead.
+  - **v2.5.2**
+    - Fix: (Android/iOS/Browser) MarkerCluster.remove() causes null pointer error.
+    - Fix: (iOS) touch problem
+    - Fix: (Android) setMyLocationEnabled(false) does not work
 
-  - **v2.4.4**
-    - Fix: (Browser) All methods were tested, and fixed lots of bugs.
-    - Fix: (Android/iOS) Executes `map.animateCamera()` while map has been detached automatically causes dead lock.
-    - Update: (iOS) Fixed issue where plugin could appear behind other plugins
-    - Update: (Android) `getMyLocation()` does not return if application has been launched when location is disabled, then enable the location after soon.
+  - **v2.5.1**
+    - Fix: (Android/iOS/Browser) Marker cluster does not work when you zoom in.
+    - Fix: (iOS) HTML click detection is incorrect.
+    - Fix: (Android/iOS) Clicking on POI with an apostrophe in its name causes a SyntaxError.
+    - Fix: (Browser) Can not set icon color for marker cluster icons.
 
-  - **v2.4.3**
-    - Fix: (Browser) HTMLInfoWindow displays unnecessary scroll bars.
-    - Fix: (Android) Can not load KML file from http://localhost on ionic 3.
-    - Fix: (iOS) Can not click bottom 20px.
-    - Fix: (Browser) map.setCameraTarget() implementation is wrong.
-    - Fix: (iOS) GroundOverlayOptions.anchor property is missing.
-    - Add: (Android/iOS/Browser) `GoogleMapOptions.preferences.gestureBounds` property. You can set limit bounds of panning.
+  - **v2.5.0**
+    - Add: (Android/iOS/Browser) Support `promise` for `TileOverlayOptions.getTile`. You must return new URL in 5 seconds.
       ```js
-      var map = plugin.google.maps.Map.getMap(mapDiv, {
-        'preferences': {
-          'gestureBounds': [
-            {lat: ..., lng: ...},
-            ... ,
-            {lat: ..., lng: ...}
-          ]
+      var tileOverlay = map.addTileOverlay({
+        getTile: function(x, y, zoom) {
+          return new Promise(function(resolve, reject) {
+            somethingAsync(function(url) {
+              resolve(url);
+            });
+          });
         }
       });
       ```
 
-  - **v2.4.2**
-    - Fix: If application uses ionic v1, it can't interactive with map view on only iPhone5 because of resetCSS
-    - Fix: `Cannot set property 'isMap' of undefined` error
-    - Update: (Browser) Can not load Google Maps JavaScript API v3 with `libraries=places`
+    - Add: (Android/iOS/Browser) `BaseClass.onThrottled()/addThrottledEventListener()/hasEventListener()` are added.
+      ```js
+      var marker = map.addMarker({ ... });
+      marker.onThrottled('position_changed', function(latLng) {
+        console.log(latLng);
+      }, 1000);
+      ```
 
-  - **v2.4.1**
-    - Fix: `map.getMap()` does not work when page changing on ionic v4.
-    - Fix: `LocationService.hasPermission()` is not implement for browser platform.
-
-  - **v2.4.0**
-    - Add: `Browser` platform!
-    - Add: `plugin.google.maps.environment.setEnv()` method.
-    - Add: `icon` property for KmlOverlayOptions
-    - Fix: map.addKmlOverlay() does not work if page url contains '#hash'
+    - Add: (Android/iOS/Browser) `TileOverlayOptions.getTile` can return **base64 encoded image(png,gif,jpeg)**.
+    - Fix: (Android) Can not load icon image file for Marker after external link opened.
+    - Fix: (Browser) `MapOptions.styles` does not work.
+    - Fix: (Android) `map.setOptions()` asks location permission always even options do no include `myLocation` and/or `myLocationButton` options.
+    - Update: (Android) Set `transparent` backgroundColor at `onResume()` because some other plugins change background color.
+    - Update: (Android/iOS) Improve accuracy of touch detection on geodesic polyline.
+    - Update: (iOS) Remove "NSData+Base64" library. No longer necessary.
+    - Update: (js) ionic 4 hides Google Maps view.
+    - Fix: (Browser) `MarkerCluster.remove()` does not work on browser platform.
+    - Fix: (Android/iOS/Browser) App crashes (or error) if no panorama available.
+    - Fix: (Android/iOS/Browser) `INFO_CLICK` does not work on marker cluster.
+    - Fix: (iOS) Can not click on HtmlInfoWindow.
 
 ---------------------------------------------------------------------------------------------------------
 
@@ -500,7 +503,6 @@ You can write your code `similar to` the Google Maps JavaScript API v3.
 | google.maps.Data                  | (not available)                       |
 | google.maps.DirectionsService     | (not available)                       |
 | google.maps.DistanceMatrixService | (not available)                       |
-| google.maps.FusionTablesLayer     | (not available)                       |
 | google.maps.TransitLayer          | (not available)                       |
 | google.maps.places.*              | (not available)                       |
 | google.maps.visualization.*       | (not available)                       |
