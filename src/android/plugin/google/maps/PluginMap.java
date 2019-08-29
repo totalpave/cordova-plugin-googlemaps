@@ -1891,6 +1891,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
 
     }
     */
+    final JSONObject params = args.getJSONObject(0);
 
     this.activity.runOnUiThread(new Runnable() {
       @SuppressLint("MissingPermission")
