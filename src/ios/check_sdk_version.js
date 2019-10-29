@@ -1,3 +1,8 @@
+/*
+Modifications:
+- Changed imports to use require for non-cordova modules.
+*/
+
 module.exports = function(ctx) {
 
   var PluginInfoProvider = ctx.requireCordovaModule('cordova-common').PluginInfoProvider;
