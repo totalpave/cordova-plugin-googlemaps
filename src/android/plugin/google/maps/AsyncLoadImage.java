@@ -124,10 +124,12 @@ public class AsyncLoadImage extends AsyncTask<Void, Void, AsyncLoadImage.AsyncLo
       mOptions.url = PluginUtil.getAbsolutePathFromCDVFilePath(resourceApi, mOptions.url);
     }
 
-    this.currentPageUrl = CordovaGoogleMaps.CURRENT_URL;
-    if (this.currentPageUrl == null) {
-      this.currentPageUrl = webView.getUrl();
-    }
+    String currentPage = webView.getUrl();
+    currentPage = currentPage.replaceAll("#.*$", "");
+    currentPage = currentPage.replaceAll("\\?.*$", "");
+    currentPage = currentPage.replaceAll("[^\\/]*$", "");
+    this.currentPageUrl = currentPage;
+
     //Log.d(TAG, "-->currentPageUrl = " + this.currentPageUrl);
 
     //View browserView = webView.getView();
