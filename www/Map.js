@@ -582,7 +582,7 @@ Map.prototype.centerToBounds = function(latLngBounds, padding, duration) {
   };
 
   //['Map.centerToBounds', bounds, padding || 0, duration || 0]);
-  self.exec.call(self, null, this.errorHandler, this.id, 'centerToBounds', [bounds, padding || 0, duration || 0], {
+  self.exec.call(self, null, this.errorHandler, this.__pgmId, 'centerToBounds', [bounds, padding || 0, duration || 0], {
     sync: true
   });
   return this;
