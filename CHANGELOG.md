@@ -1,5 +1,8 @@
 # Changelog
 
+# 1.1.0
+- Upgraded base plugin to versino `2.5.3`
+
 # 1.0.0
 - [#2](https://github.com/totalpave/cordova-plugin-googlemaps/pull/2) Fixed bad `requireCordovaModule` usage
 - This version reflects module version `2.4.6`
