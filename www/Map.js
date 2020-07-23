@@ -576,16 +576,16 @@ Map.prototype.moveCamera = function(cameraPosition, callback) {
 Map.prototype.centerToBounds = function(latLngBounds, padding, duration) {
   var self = this;
 
-  var ne = latLngBounds.northeast;
+  // var ne = latLngBounds.northeast;
   var bounds = {
-      northeast : {
-          lat : latLngBounds.northeast.lat,
-          lng : latLngBounds.northeast.lng
-      },
-      southwest : {
-          lat : latLngBounds.southwest.lat,
-          lng : latLngBounds.southwest.lng
-      }
+    northeast : {
+      lat : latLngBounds.northeast.lat,
+      lng : latLngBounds.northeast.lng
+    },
+    southwest : {
+      lat : latLngBounds.southwest.lat,
+      lng : latLngBounds.southwest.lng
+    }
   };
 
   //['Map.centerToBounds', bounds, padding || 0, duration || 0]);
@@ -593,7 +593,7 @@ Map.prototype.centerToBounds = function(latLngBounds, padding, duration) {
     sync: true
   });
   return this;
-}
+};
 
 Map.prototype.setMyLocationButtonEnabled = function(enabled) {
   var self = this;
