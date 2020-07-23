@@ -54,16 +54,6 @@ typedef void (^MYCompletionHandler)(NSError *error);
 @end
 
 //
-// Override the webViewDidFinishLoad
-// http://stackoverflow.com/questions/5272451/overriding-methods-using-categories-in-objective-c#5272612
-//
-@interface MainViewController (CDVViewController)
-#if CORDOVA_VERSION_MIN_REQUIRED < __CORDOVA_4_0_0
-- (void)webViewDidFinishLoad:(UIWebView*)theWebView;
-#endif
-@end
-
-//
 // animationDidStop for group animation
 // http://stackoverflow.com/a/28051909/697856
 //
@@ -75,8 +65,8 @@ typedef void (^TIFAnimationGroupCompletionBlock)();
 
 @interface PluginUtil : NSObject
 + (BOOL)isPolygonContains:(GMSPath *)path coordinate:(CLLocationCoordinate2D)coordinate projection:(GMSProjection *)projection;
-+ (BOOL)isPointOnTheLine:(GMSPath *)path coordinate:(CLLocationCoordinate2D)coordinate projection:(GMSProjection *)projection;
-+ (BOOL)isPointOnTheGeodesicLine:(GMSPath *)path coordinate:(CLLocationCoordinate2D)coordinate threshold:(double)threshold;
++ (CLLocationCoordinate2D)isPointOnTheLine:(GMSPath *)path coordinate:(CLLocationCoordinate2D)coordinate projection:(GMSProjection *)projection;
++ (CLLocationCoordinate2D)isPointOnTheGeodesicLine:(GMSPath *)path coordinate:(CLLocationCoordinate2D)coordinate threshold:(double)threshold projection:(GMSProjection *)projection;
 + (BOOL)isCircleContains:(GMSCircle *)circle coordinate:(CLLocationCoordinate2D)point;
 + (BOOL)isInDebugMode;
 + (GMSMutablePath *)getMutablePathFromCircle:(CLLocationCoordinate2D)center radius:(double)radius;

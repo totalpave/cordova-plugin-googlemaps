@@ -86,14 +86,14 @@
         groundOverlay.title = groundOverlayId;
         groundOverlay.anchor = CGPointMake(0.5f, 0.5f);
 
-        if ([json valueForKey:@"zIndex"]) {
+        if ([json valueForKey:@"zIndex"] && [json valueForKey:@"zIndex"] != [NSNull null]) {
             groundOverlay.zIndex = [[json valueForKey:@"zIndex"] floatValue];
         }
 
-        if ([json valueForKey:@"bearing"]) {
+        if ([json valueForKey:@"bearing"] && [json valueForKey:@"bearing"] != [NSNull null]) {
             groundOverlay.bearing = [[json valueForKey:@"bearing"] floatValue];
         }
-        if ([json valueForKey:@"anchor"]) {
+        if ([json valueForKey:@"anchor"] && [json valueForKey:@"anchor"] != [NSNull null]) {
             NSArray *anchor = [json valueForKey:@"anchor"];
             groundOverlay.anchor = CGPointMake([[anchor objectAtIndex:0] floatValue], [[anchor objectAtIndex:1] floatValue]);
         }
@@ -111,7 +111,7 @@
           groundOverlay.map = self.mapCtrl.map;
         }
         BOOL isClickable = NO;
-        if ([[json valueForKey:@"clickable"] boolValue]) {
+        if ([json valueForKey:@"clickable"] != [NSNull null] && [[json valueForKey:@"clickable"] boolValue]) {
             isClickable = YES;
         }
 
@@ -136,7 +136,7 @@
                   //NSString *imgId = [NSString stringWithFormat:@"groundoverlay_image_%lu", (unsigned long)groundOverlay.hash];
                   //[me.imgCache setObject:groundOverlay.icon forKey:imgId];
 
-                  if ([json valueForKey:@"opacity"]) {
+                  if ([json valueForKey:@"opacity"] && [json valueForKey:@"opacity"] != [NSNull null]) {
                       CGFloat opacity = [[json valueForKey:@"opacity"] floatValue];
                       groundOverlay.icon = [groundOverlay.icon imageByApplyingAlpha:opacity];
                   }
@@ -163,7 +163,7 @@
                   // Result for JS
                   //---------------------------
                   NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-                  [result setObject:groundOverlayId forKey:@"id"];
+                  [result setObject:groundOverlayId forKey:@"__pgmId"];
 
                   CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
                   [self_.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -180,6 +180,7 @@
 
 - (void)_setImage:(GMSGroundOverlay *)groundOverlay urlStr:(NSString *)urlStr completionHandler:(void (^)(BOOL succeeded))completionHandler {
 
+
     NSRange range = [urlStr rangeOfString:@"http"];
 
     if (range.location != 0) {
@@ -195,8 +196,8 @@
              * Base64 icon
              */
             NSArray *tmp = [urlStr componentsSeparatedByString:@","];
+            NSData *decodedData = [[NSData alloc] initWithBase64EncodedString:[tmp objectAtIndex:1] options:0];
 
-            NSData *decodedData = [NSData dataFromBase64String:tmp[1]];
             image = [[UIImage alloc] initWithData:decodedData];
 
         } else {
@@ -223,57 +224,42 @@
                   // Get the current URL, then calculate the relative path.
                   CDVViewController *cdvViewController = (CDVViewController*)self.viewController;
                   id webview = cdvViewController.webView;
-                  NSString *clsName = [webview className];
-                  NSURL *url;
-                  if ([clsName isEqualToString:@"UIWebView"]) {
-                    url = ((UIWebView *)cdvViewController.webView).request.URL;
-                    NSString *currentURL = url.absoluteString;
-                    currentURL = [currentURL stringByDeletingLastPathComponent];
-                    currentURL = [currentURL stringByReplacingOccurrencesOfString:@"file:" withString:@""];
-                    currentURL = [currentURL stringByReplacingOccurrencesOfString:@"//" withString:@"/"];
-                    currentURL = [currentURL stringByReplacingOccurrencesOfString:@"%20" withString:@" "];
-                    urlStr = [NSString stringWithFormat:@"file://%@/%@", currentURL, urlStr];
-                  } else {
-                    //------------------------------------------
-                    // WKWebView URL is use http:// always
-                    //------------------------------------------
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                      NSURL *url = [webview URL];
-                      NSString *currentURL = url.absoluteString;
-                      if (![[url lastPathComponent] isEqualToString:@"/"]) {
-                        currentURL = [currentURL stringByDeletingLastPathComponent];
-                      }
+                  dispatch_sync(dispatch_get_main_queue(), ^{
+                       NSURL *url = [webview URL];
+                       NSString *currentURL = url.absoluteString;
+                       if (![[url lastPathComponent] isEqualToString:@"/"]) {
+                         currentURL = [currentURL stringByDeletingLastPathComponent];
+                       }
 
-                      // remove page unchor (i.e index.html#page=test, index.html?key=value)
-                      NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"[#\\?].*$" options:NSRegularExpressionCaseInsensitive error:nil];
-                      currentURL = [regex stringByReplacingMatchesInString:currentURL options:0 range:NSMakeRange(0, [currentURL length]) withTemplate:@""];
+                       // remove page unchor (i.e index.html#page=test, index.html?key=value)
+                       NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"[#\\?].*$" options:NSRegularExpressionCaseInsensitive error:nil];
+                       currentURL = [regex stringByReplacingMatchesInString:currentURL options:0 range:NSMakeRange(0, [currentURL length]) withTemplate:@""];
 
-                      // remove file name (i.e /index.html)
-                      regex = [NSRegularExpression regularExpressionWithPattern:@"\\/[^\\/]+\\.[^\\/]+$" options:NSRegularExpressionCaseInsensitive error:nil];
-                      currentURL = [regex stringByReplacingMatchesInString:currentURL options:0 range:NSMakeRange(0, [currentURL length]) withTemplate:@""];
+                       // remove file name (i.e /index.html)
+                       regex = [NSRegularExpression regularExpressionWithPattern:@"\\/[^\\/]+\\.[^\\/]+$" options:NSRegularExpressionCaseInsensitive error:nil];
+                       currentURL = [regex stringByReplacingMatchesInString:currentURL options:0 range:NSMakeRange(0, [currentURL length]) withTemplate:@""];
 
 
-                      NSString *urlStr2 = [NSString stringWithFormat:@"%@/%@", currentURL, urlStr];
-                      urlStr2 = [urlStr2 stringByReplacingOccurrencesOfString:@":/" withString:@"://"];
-                      urlStr2 = [urlStr2 stringByReplacingOccurrencesOfString:@":///" withString:@"://"];
-                      url = [NSURL URLWithString:urlStr2];
+                       NSString *urlStr2 = [NSString stringWithFormat:@"%@/%@", currentURL, urlStr];
+                       urlStr2 = [urlStr2 stringByReplacingOccurrencesOfString:@":/" withString:@"://"];
+                       urlStr2 = [urlStr2 stringByReplacingOccurrencesOfString:@":///" withString:@"://"];
+                       url = [NSURL URLWithString:urlStr2];
 
-                      [self downloadImageWithURL:url  completionBlock:^(BOOL succeeded, UIImage *image) {
+                       [self downloadImageWithURL:url  completionBlock:^(BOOL succeeded, UIImage *image) {
 
-                        if (!succeeded) {
-                          completionHandler(NO);
-                          return;
-                        }
+                         if (!succeeded) {
+                           completionHandler(NO);
+                           return;
+                         }
 
-                        dispatch_async(dispatch_get_main_queue(), ^{
-                          groundOverlay.icon = image;
-                          completionHandler(YES);
-                        });
+                         dispatch_async(dispatch_get_main_queue(), ^{
+                           groundOverlay.icon = image;
+                           completionHandler(YES);
+                         });
 
-                      }];
-                    });
-                    return;
-                  }
+                       }];
+                   });
+                   return;
                 } else {
                   urlStr = [NSString stringWithFormat:@"file://%@", urlStr];
                 }
@@ -315,8 +301,6 @@
 
         }];
     }
-
-
 }
 
 /**
@@ -537,7 +521,23 @@
 
     NSString *iconPath = url.absoluteString;
 
-    if ([iconPath hasPrefix:@"file://"]) {
+    // Since ionic local server declines HTTP access for some reason,
+    // replace URL with file path
+    NSBundle *mainBundle = [NSBundle mainBundle];
+    NSString *wwwPath = [mainBundle pathForResource:@"www/cordova" ofType:@"js"];
+    wwwPath = [wwwPath stringByReplacingOccurrencesOfString:@"/cordova.js" withString:@""];
+    if ([iconPath containsString:@"assets/"]) {
+      iconPath = [iconPath regReplace:@"^.*assets/" replaceTxt:[NSString stringWithFormat:@"%@/assets/", wwwPath] options:NSRegularExpressionCaseInsensitive];
+    }
+    // iconPath = [iconPath stringByReplacingOccurrencesOfString:wwwPath withString: @""];
+    
+    // ionic 4
+    iconPath = [iconPath stringByReplacingOccurrencesOfString:@"http://localhost:8080" withString: wwwPath];
+
+    // ionic 5
+    iconPath = [iconPath stringByReplacingOccurrencesOfString:@"ionic://localhost" withString: wwwPath];
+    
+    if ([iconPath hasPrefix:@"file://"] || [iconPath hasPrefix:@"/"]) {
       iconPath = [iconPath stringByReplacingOccurrencesOfString:@"file://" withString:@""];
       if (![iconPath hasPrefix:@"/"]) {
         iconPath = [NSString stringWithFormat:@"/%@", iconPath];

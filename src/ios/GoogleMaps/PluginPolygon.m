@@ -69,7 +69,7 @@
 
   // Create paths of the hole property if specified.
   NSMutableArray *holePaths = [NSMutableArray array];
-  if ([json valueForKey:@"holes"]) {
+  if ([json valueForKey:@"holes"] && [json valueForKey:@"holes"] != [NSNull null]) {
       NSArray *holes = [json objectForKey:@"holes"];
       NSArray *latLngArray;
       NSDictionary *latLng;
@@ -163,7 +163,7 @@
           // Result for JS
           //---------------------------
           NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-          [result setObject:id forKey:@"id"];
+          [result setObject:id forKey:@"__pgmId"];
 
           CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
           [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];

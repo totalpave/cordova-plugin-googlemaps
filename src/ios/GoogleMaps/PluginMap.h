@@ -8,7 +8,6 @@
 
 #import "CordovaGoogleMaps.h"
 #import "IPluginProtocol.h"
-#import "NSData+Base64.h"
 #import "IPluginView.h"
 
 @interface PluginMap : CDVPlugin<IPluginProtocol, IPluginView>
@@ -43,7 +42,6 @@
 - (void)panBy:(CDVInvokedUrlCommand*)command;
 - (void)getFocusedBuilding:(CDVInvokedUrlCommand*)command;
 - (void)setActiveMarkerId:(CDVInvokedUrlCommand*)command;
+- (void)stopAnimation:(CDVInvokedUrlCommand*)command;
 
 @end
-
-
