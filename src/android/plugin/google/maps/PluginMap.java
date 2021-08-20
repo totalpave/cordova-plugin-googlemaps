@@ -16,13 +16,14 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.v4.content.PermissionChecker;
+import androidx.annotation.NonNull;
+import androidx.core.content.PermissionChecker;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -89,7 +90,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
     GoogleMap.OnCameraIdleListener, GoogleMap.OnCameraMoveCanceledListener,
     GoogleMap.OnCameraMoveListener, GoogleMap.OnCameraMoveStartedListener,
     GoogleMap.OnInfoWindowLongClickListener, GoogleMap.OnInfoWindowCloseListener,
-    GoogleMap.OnMyLocationClickListener, GoogleMap.OnPoiClickListener,
+    GoogleMap.OnMyLocationClickListener, GoogleMap.OnPoiClickListener, ViewTreeObserver.OnGlobalLayoutListener,
     IPluginView{
 
   private LatLngBounds initCameraBounds;
@@ -110,6 +111,10 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
   private ImageView dummyMyLocationButton;
   public static final Object semaphore = new Object();
   private int viewDepth = 0;
+  private CallbackContext getMapContext;
+  private JSONArray getMapContextArgs = null;
+  private boolean hasGetMapRan = false;
+  private boolean hasOnGlobalLayoutRan = false;
 
   private enum TEXT_STYLE_ALIGNMENTS {
     left, center, right
@@ -162,9 +167,90 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
     mainHandler = new Handler(Looper.getMainLooper());
   }
 
+  private void _checkMapReady() throws JSONException {
+    if (getMapContext != null && hasGetMapRan && hasOnGlobalLayoutRan) {
+      projection = map.getProjection();
+      JSONObject params = getMapContextArgs.getJSONObject(1);
+
+      // ------------------------------
+      // Embed the map if a container is specified.
+      // ------------------------------
+      if (getMapContextArgs.length() == 3) {
+        mapDivId = getMapContextArgs.getString(2);
+
+        mapCtrl.mPluginLayout.addPluginOverlay(PluginMap.this);
+        PluginMap.this.resizeMap(getMapContextArgs, new PluginUtil.MyCallbackContext("dummy-" + map.hashCode(), webView) {
+          @Override
+          public void onResult(PluginResult pluginResult) {
+            if (initCameraBounds != null) {
+              map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+                @Override
+                public void onCameraIdle() {
+                  mapView.setVisibility(View.INVISIBLE);
+                  PluginMap.this.onCameraIdle();
+                  map.setOnCameraIdleListener(PluginMap.this);
+                  Handler handler = new Handler();
+                  handler.postDelayed(new AdjustInitCamera(params, getMapContext), 750);
+                  getMapContext = null;
+                  getMapContextArgs = null;
+                }
+              });
+            } else {
+              mapView.setVisibility(View.VISIBLE);
+              PluginMap.this.onCameraEvent("camera_move_end");
+              getMapContext.success();
+              getMapContext = null;
+              getMapContextArgs = null;
+            }
+          }
+        });
+      } else {
+        if (initCameraBounds != null) {
+          map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+              PluginMap.this.onCameraIdle();
+              map.setOnCameraIdleListener(PluginMap.this);
+              mapView.setVisibility(View.INVISIBLE);
+              Handler handler = new Handler();
+              handler.postDelayed(new AdjustInitCamera(params, getMapContext), 750);
+              getMapContext = null;
+              getMapContextArgs = null;
+            }
+          });
+        } else {
+          mapView.setVisibility(View.VISIBLE);
+          PluginMap.this.onCameraEvent("camera_move_end");
+          getMapContext.success();
+          getMapContext = null;
+          getMapContextArgs = null;
+          //if (map.getMapType() == GoogleMap.MAP_TYPE_NONE) {
+          PluginMap.this.onMapLoaded();
+          //}
+        }
+      }
+    }
+  }
+
+  @Override
+  public void onGlobalLayout() {
+    hasOnGlobalLayoutRan = true;
+    if (map != null) {
+      try {
+        this._checkMapReady();
+      } catch (Exception e) {
+        getMapContext.error(e.getMessage());
+        getMapContext = null;
+        getMapContextArgs = null;
+      }
+    }
+  }
+
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   public void getMap(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-
+    getMapContext = callbackContext;
+    getMapContextArgs = args;
+    
     GoogleMapOptions options = new GoogleMapOptions();
     JSONObject meta = args.getJSONObject(0);
     mapId = meta.getString("__pgmId");
@@ -278,17 +364,16 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
     }
 
     mapView = new MapView(activity, options);
-
+    mapView.getViewTreeObserver().addOnGlobalLayoutListener(this);
     activity.runOnUiThread(new Runnable() {
       @Override
       public void run() {
         mapView.onCreate(null);
         mapView.setTag(getViewDepth());
 
-        mapView.getMapAsync(new OnMapReadyCallback() {
+        mapView.getMapAsync(new OnMapReadyCallback(){
           @Override
-          public void onMapReady(GoogleMap googleMap) {
-
+          public void onMapReady(GoogleMap googleMap){
             dummyMyLocationButton = new ImageView(activity);
             FrameLayout.LayoutParams lParams = new FrameLayout.LayoutParams((int)(48 * density), (int)(48 * density));
             lParams.gravity = Gravity.RIGHT;
@@ -315,8 +400,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
             mapView.addView(dummyMyLocationButton);
 
             map = googleMap;
-            projection = map.getProjection();
-
             try {
               //styles
               if (params.has("styles")) {
@@ -360,6 +443,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   }
                 }
               }
+
               //preferences
               if (params.has("preferences")) {
                 JSONObject preferences = params.getJSONObject("preferences");
@@ -398,7 +482,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   }
                 }
 
-
                 if (preferences.has("gestureBounds")) {
                   Object target = preferences.get("gestureBounds");
                   @SuppressWarnings("rawtypes")
@@ -434,65 +517,16 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
 
 
               mapView.onResume();
-
-
-              // ------------------------------
-              // Embed the map if a container is specified.
-              // ------------------------------
-              if (args.length() == 3) {
-                mapDivId = args.getString(2);
-
-                mapCtrl.mPluginLayout.addPluginOverlay(PluginMap.this);
-                PluginMap.this.resizeMap(args, new PluginUtil.MyCallbackContext("dummy-" + map.hashCode(), webView) {
-                  @Override
-                  public void onResult(PluginResult pluginResult) {
-
-                    if (initCameraBounds != null) {
-                      map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-                        @Override
-                        public void onCameraIdle() {
-                          mapView.setVisibility(View.INVISIBLE);
-                          PluginMap.this.onCameraIdle();
-                          map.setOnCameraIdleListener(PluginMap.this);
-                          Handler handler = new Handler();
-                          handler.postDelayed(new AdjustInitCamera(params, callbackContext), 750);
-                        }
-                      });
-                    } else {
-                      mapView.setVisibility(View.VISIBLE);
-                      PluginMap.this.onCameraEvent("camera_move_end");
-                      callbackContext.success();
-                    }
-                  }
-                });
-              } else {
-                if (initCameraBounds != null) {
-                  map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-                    @Override
-                    public void onCameraIdle() {
-                      PluginMap.this.onCameraIdle();
-                      map.setOnCameraIdleListener(PluginMap.this);
-                      mapView.setVisibility(View.INVISIBLE);
-                      Handler handler = new Handler();
-                      handler.postDelayed(new AdjustInitCamera(params, callbackContext), 750);
-                    }
-                  });
-                } else {
-                  mapView.setVisibility(View.VISIBLE);
-                  PluginMap.this.onCameraEvent("camera_move_end");
-                  callbackContext.success();
-                  //if (map.getMapType() == GoogleMap.MAP_TYPE_NONE) {
-                    PluginMap.this.onMapLoaded();
-                  //}
-                }
-              }
+              mapView.getViewTreeObserver().dispatchOnGlobalLayout();
+              hasGetMapRan = true;
+              PluginMap.this._checkMapReady();
             } catch (Exception e) {
-              callbackContext.error(e.getMessage());
+              getMapContext.error(e.getMessage());
+              getMapContext = null;
+              getMapContextArgs = null;
             }
           }
         });
-
-
       }
     });
   }
