@@ -443,6 +443,7 @@ public class CordovaGoogleMaps extends CordovaPlugin implements ViewTreeObserver
 
   @TargetApi(Build.VERSION_CODES.HONEYCOMB)
   public void getMap(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+    Log.d(TAG, "getMap was called");
     //------------------------------------------
     // Create an instance of PluginMap class.
     //------------------------------------------

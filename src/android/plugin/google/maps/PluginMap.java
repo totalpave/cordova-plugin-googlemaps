@@ -16,8 +16,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.annotation.NonNull;
-import android.support.v4.content.PermissionChecker;
+import androidx.annotation.NonNull;
+import androidx.core.content.PermissionChecker;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Gravity;
@@ -315,7 +315,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
             mapView.addView(dummyMyLocationButton);
 
             map = googleMap;
-            projection = map.getProjection();
 
             try {
               //styles
@@ -435,7 +434,6 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
 
               mapView.onResume();
 
-
               // ------------------------------
               // Embed the map if a container is specified.
               // ------------------------------
@@ -446,12 +444,13 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                 PluginMap.this.resizeMap(args, new PluginUtil.MyCallbackContext("dummy-" + map.hashCode(), webView) {
                   @Override
                   public void onResult(PluginResult pluginResult) {
-
+                    mapView.getViewTreeObserver().dispatchOnGlobalLayout();
                     if (initCameraBounds != null) {
                       map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                         @Override
                         public void onCameraIdle() {
                           mapView.setVisibility(View.INVISIBLE);
+                          projection = map.getProjection();
                           PluginMap.this.onCameraIdle();
                           map.setOnCameraIdleListener(PluginMap.this);
                           Handler handler = new Handler();
@@ -460,6 +459,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                       });
                     } else {
                       mapView.setVisibility(View.VISIBLE);
+                      projection = map.getProjection();
                       PluginMap.this.onCameraEvent("camera_move_end");
                       callbackContext.success();
                     }
@@ -470,6 +470,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
                     @Override
                     public void onCameraIdle() {
+                      projection = map.getProjection();
                       PluginMap.this.onCameraIdle();
                       map.setOnCameraIdleListener(PluginMap.this);
                       mapView.setVisibility(View.INVISIBLE);
@@ -479,6 +480,7 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
                   });
                 } else {
                   mapView.setVisibility(View.VISIBLE);
+                  projection = map.getProjection();
                   PluginMap.this.onCameraEvent("camera_move_end");
                   callbackContext.success();
                   //if (map.getMapType() == GoogleMap.MAP_TYPE_NONE) {
