@@ -22,7 +22,7 @@ BaseClass.prototype = {
   },
 
   get: function (key) {
-    return this[VARS_FIELD].hasOwnProperty(key) ? this[VARS_FIELD][key] : undefined;
+    return Object.prototype.hasOwnProperty.call(this[VARS_FIELD], key) ? this[VARS_FIELD][key] : undefined;
   },
 
   set: function (key, value, noNotify) {

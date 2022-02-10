@@ -6,4 +6,6 @@ module.exports = {
   globals: {
     cordova: {},
   },
+  testEnvironment: 'jsdom'
 };
+  

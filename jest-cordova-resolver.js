@@ -1,4 +1,4 @@
-var Resolver = require('jest-resolve');
+
 var path = require('path');
 var fs = require('fs');
 
@@ -18,5 +18,5 @@ module.exports = function(moduleId, options) {
 
     throw new Error(moduleId + 'could not be located');
   }
-  return Resolver.findNodeModule(moduleId, options);
+  return options.defaultResolver(moduleId, options);
 };
