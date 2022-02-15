@@ -587,6 +587,31 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
     }
   }
 
+  public synchronized void bulkSetPolylineVisible(final JSONArray argsList, final CallbackContext callbackContext) throws JSONException {
+    for (int i = 0; i < argsList.length(); i++) {
+      JSONArray args = argsList.getJSONArray(i);
+      String id = args.getString(0);
+      String hashCode = args.getString(1);
+      if (!pluginMap.objects.containsKey(id)) {
+        //Log.e(TAG, "---> can not find the polyline : " + id);
+        continue;
+      }
+      final Polyline polyline = (Polyline)pluginMap.objects.get(id);
+      final boolean isVisible = args.getBoolean(2);
+
+      cordova.getActivity().runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+          polyline.setVisible(isVisible);
+        }
+      });
+      String propertyId = "polyline_property_" + hashCode;
+      JSONObject properties = (JSONObject)pluginMap.objects.get(propertyId);
+      properties.put("isVisible", isVisible);
+      pluginMap.objects.put(propertyId, properties);
+    }
+  }
+
   //-----------------------------------
   // Create the instance of class
   //-----------------------------------

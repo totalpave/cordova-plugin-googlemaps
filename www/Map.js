@@ -247,6 +247,36 @@ Map.prototype.getMap = function(meta, div, options) {
   });
 };
 
+/**
+ * 
+ * @param {Array<{polyline, isVisible}} data 
+ */
+Map.prototype.bulkSetPolylineVisible = function(data) {
+  var self = this;
+  let input = [];
+  for (let i = 0, length = data.length; i < length; ++i) {
+    let item = data[i]
+    input.push([item.polyline.getId(), item.polyline.getHashCode(), item.isVisible]);
+  }
+  self.exec.call(self, 
+    function() {
+      if (polyline) {
+        polyline._privateInitialize();
+        delete polyline._privateInitialize;
+
+        if (typeof callback === 'function') {
+          callback.call(self, polyline);
+        }
+      }
+    },
+    self.errorHandler,
+    self.__pgmId,
+    'bulkSetPolylineVisible',
+    input
+  );
+
+}
+
 Map.prototype.setOptions = function(options) {
   options = options || {};
 
