@@ -44,6 +44,9 @@
   <js-module name="GroundOverlay" src="www/GroundOverlay.js">
     <runs/>
   </js-module>
+  <js-module name="GeoJsonLayer" src="www/GeoJsonLayer.js">
+    <runs/>
+  </js-module>
   <js-module name="Common" src="www/Common.js">
     <runs/>
   </js-module>
@@ -176,6 +179,9 @@
       <feature name="PluginGroundOverlay">
         <param name="android-package" value="plugin.google.maps.PluginGroundOverlay"/>
       </feature>
+      <feature name="PluginGeoJsonLayer">
+        <param name="android-package" value="plugin.google.maps.PluginGeoJsonLayer"/>
+      </feature>
       <feature name="PluginKmlOverlay">
         <param name="android-package" value="plugin.google.maps.PluginKmlOverlay"/>
       </feature>
@@ -208,6 +214,7 @@
     <source-file src="src/android/plugin/google/maps/PluginGeocoder.java" target-dir="src/plugin/google/maps"/>
     <source-file src="src/android/plugin/google/maps/PluginLocationService.java" target-dir="src/plugin/google/maps"/>
     <source-file src="src/android/plugin/google/maps/PluginGroundOverlay.java" target-dir="src/plugin/google/maps"/>
+    <source-file src="src/android/plugin/google/maps/PluginGeoJsonLayer.java" target-dir="src/plugin/google/maps"/>
     <source-file src="src/android/plugin/google/maps/PluginKmlOverlay.java" target-dir="src/plugin/google/maps"/>
     <source-file src="src/android/plugin/google/maps/PluginMap.java" target-dir="src/plugin/google/maps"/>
     <source-file src="src/android/plugin/google/maps/PluginMarker.java" target-dir="src/plugin/google/maps"/>
@@ -228,6 +235,8 @@
 
 
     <framework src="src/android/frameworks/pgm-custom.gradle" custom="true" type="gradleReference"/>
+    <framework src="src/android/frameworks/apikey.gradle" custom="true" type="gradleReference"/>
+    <framework src="src/android/frameworks/android-map-utils.gradle" custom="true" type="gradleReference"/>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
       <meta-data android:name="com.google.android.geo.API_KEY" android:value="${GOOGLE_MAPS_ANDROID_API_KEY}"/>
@@ -235,6 +244,8 @@
       <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
       <!-- for Android 9 or above -->
       <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+
+      <uses-library android:name="com.google.android.maps" />
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest">
@@ -322,6 +333,9 @@
       <feature name="PluginGroundOverlay">
         <param name="ios-package" value="PluginGroundOverlay"/>
       </feature>
+      <feature name="PluginGeoJsonLayer">
+        <param name="ios-package" value="PluginGeoJsonLayer"/>
+      </feature>
       <feature name="PluginKmlOverlay">
         <param name="ios-package" value="PluginKmlOverlay"/>
       </feature>
@@ -361,6 +375,8 @@
     <source-file src="src/ios/GoogleMaps/PluginMapViewController.m"/>
     <header-file src="src/ios/GoogleMaps/PluginGroundOverlay.h"/>
     <source-file src="src/ios/GoogleMaps/PluginGroundOverlay.m"/>
+    <header-file src="src/ios/GoogleMaps/PluginGeoJsonLayer.h"/>
+    <source-file src="src/ios/GoogleMaps/PluginGeoJsonLayer.m"/>
     <header-file src="src/ios/GoogleMaps/PluginKmlOverlay.h"/>
     <source-file src="src/ios/GoogleMaps/PluginKmlOverlay.m"/>
     <header-file src="src/ios/GoogleMaps/PluginMap.h"/>
@@ -499,6 +515,9 @@
       <runs/>
     </js-module>
     <js-module name="PluginGroundOverlay" src="src/browser/PluginGroundOverlay.js">
+      <runs/>
+    </js-module>
+    <js-module name="PluginGeoJsonLayer" src="src/browser/PluginGeoJsonLayer.js">
       <runs/>
     </js-module>
     <js-module name="PluginKmlOverlay" src="src/browser/PluginKmlOverlay.js">
