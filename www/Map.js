@@ -18,7 +18,8 @@ var utils = require('cordova/utils'),
   GroundOverlay = require('./GroundOverlay'),
   KmlOverlay = require('./KmlOverlay'),
   KmlLoader = require('./KmlLoader'),
-  MarkerCluster = require('./MarkerCluster');
+  MarkerCluster = require('./MarkerCluster'),
+  GeoJsonLayer = require('./GeoJsonLayer');
 
 /**
  * Google Maps model.
@@ -1240,6 +1241,34 @@ Map.prototype.addPolygon = function(polygonOptions, callback) {
 
   return polygon;
 };
+
+//-------------
+// GeoJsonLayer
+//-------------
+Map.prototype.addGeoJsonLayer = function(geoJsonOptions, callback) {
+  var self = this;
+
+  var geoJsonLayer = new GeoJsonLayer(self, geoJsonOptions, exec);
+  var geoJsonLayerId = geoJsonLayer.getId();
+  self.OVERLAYS[geoJsonLayerId] = geoJsonLayer;
+
+  geoJsonLayer.one(geoJsonLayerId + '_remove', function() {
+    geoJsonLayer.off();
+    delete self.OVERLAYS[geoJsonLayerId];
+    geoJsonLayer = undefined;
+  });
+
+  self.exec.call(self, function() {
+    geoJsonLayer._privateInitialize();
+    delete geoJsonLayer._privateInitialize;
+
+    if (typeof callback === 'function') {
+      callback.call(self, geoJsonLayer);
+    }
+  }, self.errorHandler, self.__pgmId, 'loadPlugin', ['GeoJsonLayer', geoJsonOptions, geoJsonLayer.hashCode]);
+
+  return geoJsonLayer;  
+}
 
 //-------------
 // Polyline
