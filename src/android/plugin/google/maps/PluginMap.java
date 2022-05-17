@@ -186,7 +186,10 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       }
 
 
-      if (controls.has("myLocationButton") || controls.has("myLocation")) {
+      if (
+        (controls.has("myLocationButton") && controls.getBoolean("myLocationButton")) ||
+        (controls.has("myLocation") && controls.getBoolean("myLocation"))
+      ) {
 
         // Request geolocation permission.
         boolean locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
@@ -1829,32 +1832,33 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
 
     final JSONObject params = args.getJSONObject(0);
 
-    boolean locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
-    //Log.d(TAG, "---> setMyLocationEnabled, hasPermission =  " + locationPermission);
-
-    if (!locationPermission) {
-      //_saveArgs = args;
-      //_saveCallbackContext = callbackContext;
-      synchronized (semaphore) {
-        cordova.requestPermissions(this, callbackContext.hashCode(), new String[]{
-            Manifest.permission.ACCESS_FINE_LOCATION
-        });
-        try {
-          semaphore.wait();
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
-      locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
-
-      //Log.d(TAG, "---> (1720)setMyLocationEnabled, hasPermission =  " + locationPermission);
+    if (params.getBoolean("myLocation") || params.getBoolean("myLocationButton")) {
+      boolean locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
+      //Log.d(TAG, "---> setMyLocationEnabled, hasPermission =  " + locationPermission);
 
       if (!locationPermission) {
-        callbackContext.error(PluginUtil.getPgmStrings(activity,"pgm_location_rejected_by_user"));
-        return;
-      }
+        //_saveArgs = args;
+        //_saveCallbackContext = callbackContext;
+        synchronized (semaphore) {
+          cordova.requestPermissions(this, callbackContext.hashCode(), new String[]{
+              Manifest.permission.ACCESS_FINE_LOCATION
+          });
+          try {
+            semaphore.wait();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+        }
+        locationPermission = PermissionChecker.checkSelfPermission(cordova.getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) == PermissionChecker.PERMISSION_GRANTED;
 
-    }
+        //Log.d(TAG, "---> (1720)setMyLocationEnabled, hasPermission =  " + locationPermission);
+
+        if (!locationPermission) {
+          callbackContext.error(PluginUtil.getPgmStrings(activity,"pgm_location_rejected_by_user"));
+          return;
+        }
+      }
+    };
 
     this.activity.runOnUiThread(new Runnable() {
       @SuppressLint("MissingPermission")
