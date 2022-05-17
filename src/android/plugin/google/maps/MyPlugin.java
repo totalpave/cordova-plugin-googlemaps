@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.util.Log;
 
+import com.google.maps.android.data.geojson.GeoJsonLayer;
+
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.GroundOverlay;
@@ -152,6 +154,13 @@ public class MyPlugin extends CordovaPlugin implements MyPluginInterface {
       return null;
     }
     return (GroundOverlay)pluginMap.objects.get(id);
+  }
+  protected synchronized GeoJsonLayer getGeoJsonLayer(String id) {
+    if (!pluginMap.objects.containsKey(id)) {
+      //Log.e(TAG, "---> can not find the geo json layer : " + id);
+      return null;
+    }
+    return (GeoJsonLayer)pluginMap.objects.get(id);
   }
   protected synchronized Marker getMarker(String id) {
     if (!pluginMap.objects.containsKey(id)) {

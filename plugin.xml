@@ -235,7 +235,6 @@
 
 
     <framework src="src/android/frameworks/pgm-custom.gradle" custom="true" type="gradleReference"/>
-    <framework src="src/android/frameworks/apikey.gradle" custom="true" type="gradleReference"/>
     <framework src="src/android/frameworks/android-map-utils.gradle" custom="true" type="gradleReference"/>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">

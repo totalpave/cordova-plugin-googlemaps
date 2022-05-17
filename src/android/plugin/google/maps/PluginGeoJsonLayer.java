@@ -1,15 +1,8 @@
 package plugin.google.maps;
 
-// import plugin.google.maps.geojson.GeometryFactory;
-
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
-
-import com.google.android.gms.maps.model.LatLngBounds;
-
 import com.google.maps.android.data.geojson.GeoJsonLayer;
-// import com.google.maps.android.data.Geometry;
-// import com.google.maps.android.data.geojson.GeoJsonFeature;
+import com.google.maps.android.data.geojson.GeoJsonFeature;
+import com.google.maps.android.data.geojson.GeoJsonLineStringStyle;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -37,7 +30,13 @@ public class PluginGeoJsonLayer extends MyPlugin implements MyPluginInterface  {
     public void create(JSONArray args, CallbackContext callbackContext) throws JSONException {
         JSONObject geometry = args.getJSONObject(1);
         String hashCode = args.getString(2);
+
         GeoJsonLayer layer = new GeoJsonLayer(this.map, geometry);
+        GeoJsonFeature feature = layer.getFeatures().iterator().next();
+        GeoJsonLineStringStyle style = new GeoJsonLineStringStyle();
+        style.setColor(0xFFFF0000);
+        feature.setLineStringStyle(style);
+
         this.pluginMap.objects.put("geojsonlayer_" + hashCode, layer);
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
