@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-plugin-googlemaps" version="2.7.1" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-googlemaps" version="3.0.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
   <name>cordova-plugin-googlemaps</name>
   <js-module name="Promise" src="www/Promise.js" />
   <js-module name="BaseClass" src="www/BaseClass.js">
@@ -24,6 +24,9 @@
     <runs/>
   </js-module>
   <js-module name="Polyline" src="www/Polyline.js">
+    <runs/>
+  </js-module>
+  <js-module name="TotalPaveTileLayer" src="www/TotalPaveTileLayer.js">
     <runs/>
   </js-module>
   <js-module name="Polygon" src="www/Polygon.js">
@@ -127,6 +130,8 @@
     <engine name="apple-ios" version=">=10.0.0" />
   </engines>
 
+  <dependency id="@totalpave/cordova-plugin-libtilegen" version="0.0.5" />
+
   <!-- android -->
   <platform name="android">
     <info>
@@ -218,11 +223,12 @@
     <source-file src="src/android/plugin/google/maps/PluginMarkerCluster.java" target-dir="src/plugin/google/maps"/>
     <source-file src="src/android/plugin/google/maps/PluginStreetViewPanorama.java" target-dir="src/plugin/google/maps"/>
     <source-file src="src/android/plugin/google/maps/IPluginView.java" target-dir="src/plugin/google/maps"/>
+    <source-file src="src/android/plugin/google/maps/TotalPaveTileProvider.java" target-dir="src/plugin/google/maps"/>
+    <source-file src="src/android/plugin/google/maps/PluginTotalPaveTileLayer.java" target-dir="src/plugin/google/maps"/>
 
     <framework src="src/android/frameworks/tbxml-android.gradle" custom="true" type="gradleReference"/>
     <resource-file src="src/android/frameworks/tbxml-android.aar" target="libs/tbxml-android.aar"/>
     <resource-file src="src/android/frameworks/tbxml-android.aar" target="app/src/libs/tbxml-android.aar"/>
-
 
     <framework src="src/android/frameworks/pgm-custom.gradle" custom="true" type="gradleReference"/>
 
@@ -394,6 +400,10 @@
     <source-file src="src/ios/GoogleMaps/PluginViewController.m"/>
     <header-file src="src/ios/GoogleMaps/IPluginView.h"/>
     <header-file src="src/ios/GoogleMaps/IPluginProtocol.h"/>
+    <header-file src="src/ios/GoogleMaps/PluginTotalPaveTileLayer.h"/>
+    <source-file src="src/ios/GoogleMaps/PluginTotalPaveTileLayer.m"/>
+    <header-file src="src/ios/GoogleMaps/TotalPaveTileProvider.h"/>
+    <source-file src="src/ios/GoogleMaps/TotalPaveTileProvider.mm"/>
 
     <!-- Base messages -->
     <resource-file src="src/ios/strings/pgm_Localizable_en.json" target="pgm_Localizable_en.json"/>
@@ -464,6 +474,10 @@
           <pod name="GoogleMaps" version="5.2.0" />
         </pods>
     </podspec>
+
+    <hook type="after_plugin_install" src="hooks/ios/configureXCode.py"/>
+    <hook type="before_plugin_uninstall" src="hooks/ios/deconfigureXCode.py"/>
+    <hook type="after_platform_add" src="hooks/ios/configureXCode.py"/>
 
 <!--
     <hook type="before_platform_add" src="src/ios/check_sdk_version.js"/>

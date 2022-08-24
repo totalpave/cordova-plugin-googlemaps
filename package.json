@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-googlemaps",
-  "version": "2.7.1",
+  "version": "3.0.0",
   "description": "Google Maps native SDK for Android and iOS, and Google Maps JavaScript API v3 for browser.",
   "cordova": {
     "id": "cordova-plugin-googlemaps",
@@ -9,6 +9,10 @@
       "ios",
       "browser"
     ]
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.totalpave.com:48731"
   },
   "repository": {
     "type": "git",
@@ -60,6 +64,6 @@
     "jest": "^23.6.0"
   },
   "dependencies": {
-    "cordova-common": "^3.1.0"
+    "cordova-common": "4.1.0"
   }
 }

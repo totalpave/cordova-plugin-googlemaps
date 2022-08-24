@@ -167,6 +167,12 @@ public class MyPlugin extends CordovaPlugin implements MyPluginInterface {
     }
     return (Polyline)pluginMap.objects.get(id);
   }
+  protected synchronized PluginTotalPaveTileLayer getTotalPaveTileLayer(String id) {
+    if (!pluginMap.objects.containsKey(id)) {
+      return null;
+    }
+    return (PluginTotalPaveTileLayer)pluginMap.objects.get(id);
+  }
   protected synchronized Polygon getPolygon(String id) {
     if (!pluginMap.objects.containsKey(id)) {
       //Log.e(TAG, "---> can not find the polygon : " + id);

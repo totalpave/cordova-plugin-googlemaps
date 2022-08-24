@@ -1,5 +1,4 @@
-var cordova_exec = require('cordova/exec'),
-  common = require('cordova-plugin-googlemaps.Common');
+var common = require('cordova-plugin-googlemaps.Common');
 
 function pluginInit() {
   //-------------------------------------------------------------
@@ -121,49 +120,15 @@ function pluginInit() {
   //--------------------------------------------
   // Hook the backbutton of Android action
   //--------------------------------------------
-  var anotherBackbuttonHandler = null;
 
-  function onBackButton(e) {
-
+  function onBackButton() {
     // Check DOM tree for new page
     cordova.fireDocumentEvent('plugin_touch', {
       force: true
     });
-
-    if (anotherBackbuttonHandler) {
-      // anotherBackbuttonHandler must handle the page moving transaction.
-      // The plugin does not take care anymore if another callback is registered.
-      anotherBackbuttonHandler(e);
-    } else {
-      cordova_exec(null, null, 'CordovaGoogleMaps', 'backHistory', []);
-    }
   }
 
   document.addEventListener('backbutton', onBackButton);
-
-  var _org_addEventListener = document.addEventListener;
-  var _org_removeEventListener = document.removeEventListener;
-  document.addEventListener = function (eventName, callback) {
-    var args = Array.prototype.slice.call(arguments, 0);
-    if (eventName.toLowerCase() !== 'backbutton') {
-      _org_addEventListener.apply(this, args);
-      return;
-    }
-    if (!anotherBackbuttonHandler) {
-      anotherBackbuttonHandler = callback;
-    }
-  };
-  document.removeEventListener = function (eventName, callback) {
-    var args = Array.prototype.slice.call(arguments, 0);
-    if (eventName.toLowerCase() !== 'backbutton') {
-      _org_removeEventListener.apply(this, args);
-      return;
-    }
-    if (anotherBackbuttonHandler === callback) {
-      anotherBackbuttonHandler = null;
-    }
-  };
-
 }
 
 module.exports = pluginInit;
