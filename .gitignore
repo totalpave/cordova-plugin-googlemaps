@@ -40,7 +40,6 @@ ant-build/
 ant-gen/
 plugins/
 platforms/
-hooks/
 
 out/
 node_modules/
