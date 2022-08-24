@@ -18,7 +18,8 @@ var utils = require('cordova/utils'),
   GroundOverlay = require('./GroundOverlay'),
   KmlOverlay = require('./KmlOverlay'),
   KmlLoader = require('./KmlLoader'),
-  MarkerCluster = require('./MarkerCluster');
+  MarkerCluster = require('./MarkerCluster'),
+  TotalPaveTileLayer = require('./TotalPaveTileLayer');
 
 /**
  * Google Maps model.
@@ -1247,6 +1248,68 @@ Map.prototype.addPolygon = function(polygonOptions, callback) {
 
   return polygon;
 };
+
+Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callback) {
+  var self = this;
+  
+  if (!totalPaveTileLayerOptions.dbName) {
+    throw new Error("totalPaveTileLayerOptions.dbName is required.");
+  }
+  if (!totalPaveTileLayerOptions.selectQuery) {
+    throw new Error("totalPaveTileLayerOptions.selectQuery is required. Columns: int id, string geojson geometry, nullable double value for color-coding.");
+  }
+
+  if (!totalPaveTileLayerOptions.scale || !(totalPaveTileLayerOptions.scale instanceof Array) || totalPaveTileLayerOptions.scale.length === 0) {
+    throw new Error("totalPaveTileLayerOptions.scale is required. Array of {low: number, high: number, stroke: hex color string, fill: hex color string}. low and high are used with the select query value.");
+  }
+
+  for (let i = 0, items = totalPaveTileLayerOptions.scale, length = items.length; i < length - 1; ++i) {
+    let item = items[i];
+    if (typeof item !== 'object') {
+      throw new Error("totalPaveTileLayerOptions.scale[x] must be an Object: {low: floating number, high: floating number, fill: RGBA numerical hex color code, stroke: RGBA numberical hex color code}");
+    }
+    if (typeof item.low !== "number") {
+      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].low is required. Floating point number.");
+    }
+    if (typeof item.stroke !== "number") {
+      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].stroke is required. RGBA Numerical hex color code.");
+    }
+    if (typeof item.fill !== "number") {
+      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].fill is required. RGBA Numerical hex color code.");
+    }
+
+    if (i === length - 1 && (typeof items[i] !== 'object' || items[i].high !== null)) {
+      throw new Error("totalPaveTileLayerOptions.scale[<last item's index>].high must be null.");
+    }
+    else if (typeof items[i] !== 'object' || typeof items[i].high !== "number") {
+      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].high must be a floating point number.");
+    }
+  }
+
+  var opts = JSON.parse(JSON.stringify(totalPaveTileLayerOptions));
+  var layer = new TotalPaveTileLayer(self, totalPaveTileLayerOptions, exec);
+  var layerId = layer.getId();
+  self.OVERLAYS[layerId] = layer;
+
+  layer.one(layerId + '_remove', function() {
+    layer.off();
+    delete self.OVERLAYS[layerId];
+    layer = undefined;
+  });
+
+  self.exec.call(self, function() {
+    if (layer) {
+      layer._privateInitialize();
+      delete layer._privateInitialize;
+
+      if (typeof callback === 'function') {
+        callback.call(self, layer);
+      }
+    }
+  }, self.errorHandler, self.__pgmId, 'loadPlugin', ['TotalPaveTileLayer', opts, layer.hashCode]);
+
+  return layer;
+}
 
 //-------------
 // Polyline
