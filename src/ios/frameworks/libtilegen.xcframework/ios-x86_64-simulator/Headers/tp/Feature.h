@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "./IGeometry.h"
-#include "./Extent.hpp"
+#include <tp/geom/Extent.h>
 
 namespace TP {
     class Feature {
@@ -13,15 +13,16 @@ namespace TP {
 
             uint32_t getID(void) const;
             const IGeometry* getGeometry(void) const;
+            IGeometry* getGeometry(void);
 
-            const Extent<double>& getExtent(void) const;
+            const geom::Extent<double>& getExtent(void) const;
 
             const double* getValue(void) const;
 
         private:
             uint32_t $id;
             IGeometry* $geometry;
-            Extent<double> $extent;
+            geom::Extent<double> $extent;
             double* $value;
     };
 }

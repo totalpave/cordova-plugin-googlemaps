@@ -3,7 +3,8 @@
 
 #include <cstdint>
 #include <vector>
-#include <tp/Extent.hpp>
+#include <tp/geom/Extent.h>
+#include <tp/qt/QuadTree.h>
 #include <tp/GeomType.h>
 
 namespace TP {
@@ -13,6 +14,6 @@ namespace TP {
 
             // virtual uint32_t getNumPoints(void) = 0;
             virtual GeomType getType(void) const = 0;
-            virtual Extent<double> calculateExtent(void) = 0;
+            virtual geom::Extent<double> calculateExtent(void) = 0;
     };
 }

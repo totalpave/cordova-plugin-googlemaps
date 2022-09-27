@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "./Image.h"
-#include "./Extent.hpp"
+#include <tp/geom/Extent.h>
 #include "./GPoint.h"
 #include <vector>
 #include "./Feature.h"
@@ -18,8 +18,8 @@ namespace TP {
             Tile(uint16_t tileSize, uint32_t x, uint32_t y, uint32_t z);
             virtual ~Tile();
 
-            static void calculateExtent(const int16_t& x, const int16_t& y, const int16_t& z, double& minlon, double&minlat, double& maxlon, double& maxlat);
-            static void calculateExtent(const int16_t& x, const int16_t& y, const int16_t& z, Extent<double>& extent);
+            static void calculateExtent(const uint32_t& x, const uint32_t& y, const uint32_t& z, double& minlon, double&minlat, double& maxlon, double& maxlat);
+            static void calculateExtent(const uint32_t& x, const uint32_t& y, const uint32_t& z, geom::Extent<double>& extent);
 
             bool raster(int& errorCode, std::vector<Feature*>& features, Image& image, const Scale& scale);
 
@@ -30,7 +30,7 @@ namespace TP {
             double $resolution;
             MPoint $normal;
             MPoint $offset;
-            Extent<double> $extent;
+            geom::Extent<double> $extent;
 
             double $getResZ(const uint32_t& z) const;
             MPoint $gToM(const GPoint& g) const;
@@ -40,7 +40,7 @@ namespace TP {
             MPoint $mToP(const MPoint& m) const;
             MPoint $pToL(const MPoint& m) const;
 
-            Extent<double> $normalizeGeoExtent(const Extent<double>& extent) const;
+            geom::Extent<double> $normalizeGeoExtent(const geom::Extent<double>& extent) const;
 
             // bool $isPointInTriangle(const Image::XY& v1, const Image::XY& v2, const Image::XY& v3, const Image::XY& p) const;
 

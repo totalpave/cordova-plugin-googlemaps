@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstdint>
 #include <tp/GPoint.h>
+#include <tp/geom/Extent.h>
 
 namespace TP {
     class LineString: public IGeometry {
@@ -17,9 +18,10 @@ namespace TP {
 
             // void getPoints(std::vector<GPoint*>& out) const;
             std::vector<GPoint>& getPoints(void);
+            const std::vector<GPoint>& getPoints(void) const;
             // virtual uint32_t getNumPoints(void) override;
             virtual GeomType getType(void) const override;
-            virtual Extent<double> calculateExtent(void) override;
+            virtual geom::Extent<double> calculateExtent(void) override;
 
         private:
             std::string $geometryString;
