@@ -1,0 +1,17 @@
+{
+    "java.project.sourcePaths": [
+        "src/android",
+        "third_party/cordova-android/framework/src",
+
+        // For Norman
+        "/development/android/sources/android-24"
+    ],
+    "java.project.referencedLibraries": [
+        "src/android/frameworks/tb-xml-android.aar",
+        "src/android/frameworks/libtilegen.aar",
+        
+        // For Norman
+        "/development/android/platforms/android-32/android.jar"
+    ],
+    "java.configuration.updateBuildConfiguration": "disabled",
+}
