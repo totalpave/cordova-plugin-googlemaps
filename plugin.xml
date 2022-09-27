@@ -112,7 +112,8 @@
   </js-module>
 
   <!-- Provides SQLite binaries for libtilegen -->
-  <dependency id="@totalpave/cordova-plugin-libsqlite" version="0.0.2" />
+  <!-- TODO PIN this to a major version, e.g. 1.x when we build a final release -->
+  <dependency id="@totalpave/cordova-plugin-libsqlite" version="*" />
 
   <description>You can display native Google Maps views in cordova application. Native Google Maps view is faster, powerful, and more friendly for mobile applications. You can control the native Google Maps view through this plugin API.
 

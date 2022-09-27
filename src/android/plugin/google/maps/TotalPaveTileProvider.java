@@ -1,6 +1,8 @@
 package plugin.google.maps;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
 import android.content.Context;
 
 import androidx.annotation.Nullable;
@@ -13,6 +15,8 @@ import java.lang.IllegalArgumentException;
 import java.lang.RuntimeException;
 
 import com.totalpave.libtilegen.TileGenerator;
+import com.totalpave.libtilegen.GeneratorSettings;
+import com.totalpave.libtilegen.ScaleItem;
 
 public class TotalPaveTileProvider implements TileProvider {
     Context context;
@@ -20,8 +24,39 @@ public class TotalPaveTileProvider implements TileProvider {
 
     public TotalPaveTileProvider(Context applicationContext, String dbName, String selectQuery, JSONArray scale) throws IllegalArgumentException {
         super();
+
         File file = applicationContext.getDatabasePath(dbName);
-        int status = TileGenerator.load(file.getAbsolutePath(), selectQuery);
+
+        GeneratorSettings settings = new GeneratorSettings();
+        settings.dbPath = file.getAbsolutePath();
+        settings.sql = selectQuery;
+
+        try {
+            for (int i = 0; i < scale.length(); i++) {
+                JSONObject scaleObj = scale.getJSONObject(i);
+
+                Double low = null;
+                Double high = null;
+
+                if (!scaleObj.isNull("low")) {
+                    low = scaleObj.getDouble("low");
+                }
+
+                if (!scaleObj.isNull("high")) {
+                    high = scaleObj.getDouble("high");
+                }
+
+                int strokeColor = scaleObj.getInt("stroke");
+                int fillColor = scaleObj.getInt("fill");
+
+                settings.addScaleItem(new ScaleItem(low, high, strokeColor, fillColor));
+            }
+        }
+        catch (JSONException ex) {
+            throw new IllegalArgumentException("Could not parse Scale array.", ex);
+        }
+        
+        int status = TileGenerator.load(settings);
         this.scale = scale;
 
         // TO-DO Give scale data to TileGenerator
