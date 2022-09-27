@@ -59,8 +59,6 @@ public class TotalPaveTileProvider implements TileProvider {
         int status = TileGenerator.load(settings);
         this.scale = scale;
 
-        // TO-DO Give scale data to TileGenerator
-
         if (status == 0) {} // No error occurred.
         else if (status == TileGenerator.DATASET_LOAD_ERROR) {
             throw new IllegalArgumentException("Could not load dataset. Logcat may contain addition error messages.");
