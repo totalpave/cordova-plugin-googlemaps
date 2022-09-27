@@ -9,7 +9,8 @@
 #include <vector>
 #include "./IGeometry.h"
 #include "./Feature.h"
-#include "./Extent.hpp"
+#include <tp/qt/QuadTree.h>
+#include <tp/geom/Extent.h>
 #include "./GeneratorSettings.h"
 #include "./Scale.h"
 
@@ -37,7 +38,8 @@ namespace TP {
 
             Scale $scale;
             std::vector<Feature*> $features;
-            Extent<double> $networkExtent;
+            geom::Extent<double> $networkExtent;
+            qt::QuadTree* $quadtree;
 
             TileGenerator(void);
             TileGenerator(const TileGenerator&) = delete;
@@ -48,5 +50,7 @@ namespace TP {
             IGeometry* $parseGeometry(int& errorcode, const unsigned char* strGeom) const;
 
             void $reportSQLiteError(int code) const;
+
+            void $insertFeatureIntoQuadTree(Feature* feature);
     };
 }

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <tp/GPoint.h>
 #include <CDT.h>
+#include <tp/geom/Extent.h>
 
 namespace TP {
     class Polygon: public IGeometry {
@@ -23,7 +24,7 @@ namespace TP {
             const CDT::EdgeUSet& getEdges(void) const;
 
             virtual GeomType getType(void) const override;
-            virtual Extent<double> calculateExtent(void) override;
+            virtual geom::Extent<double> calculateExtent(void) override;
 
         private:
             std::string $geometryString;
