@@ -136,6 +136,9 @@
 
   <!-- android -->
   <platform name="android">
+    <!-- TODO PIN this to a major version, e.g. 1.x when we build a final release -->
+    <!-- Required by libtilegen -->
+    <dependency id="@totalpave/cordova-plugin-libcxx" version="*" />
     <info>
       Official document https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/v2.6.0/README.md Please consider to buy a beer for us 🍺 https://github.com/mapsplugin/cordova-plugin-googlemaps#buy-us-a-beer
     </info>
