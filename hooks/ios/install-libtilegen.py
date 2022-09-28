@@ -2,7 +2,7 @@
 
 #
 # This script is replacing the functionality of <framework /> and simular tags in plugin.xml
-# The reason why we are replacing these tags is because they are not properly installing libtilegen.xc
+# The reason why we are replacing these tags is because they are not properly installing libtilegen.xcframework
 # The proper installation requires libtilegen.xcframework to be both embedded and linked with the binary.
 # <framework /> is only capable 1 or the other.
 #
@@ -22,16 +22,21 @@ except:
 
 import sys
 import shutil
+import xml.etree.ElementTree as ET
+tree = ET.parse(sys.argv[1] + '/config.xml')
+root = tree.getroot()
+name = root.find('{http://www.w3.org/ns/widgets}name').text
 
 # Copy xcframework file into the iOS platform
 src = sys.argv[1] + '/plugins/cordova-plugin-googlemaps/src/ios/frameworks/libtilegen.xcframework'
-dest = sys.argv[1] + '/platforms/ios/IRI Dev/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework'
+dest = sys.argv[1] + '/platforms/ios/' + name + '/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework'
+
 shutil.copytree(src, dest)
 
 # Add xcframework file to the XCode Project, ensure it is linked and embedded.
-project = XcodeProject.load(sys.argv[1] + '/platforms/ios/IRI Dev.xcodeproj/project.pbxproj')
+project = XcodeProject.load(sys.argv[1] + '/platforms/ios/' + name + '.xcodeproj/project.pbxproj')
 file_options = FileOptions(embed_framework=True, code_sign_on_copy=True)
 frameworks = project.get_or_create_group('Frameworks')
-project.add_file('IRI Dev/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework', parent=frameworks, force=False, file_options=file_options)
+project.add_file(name + '/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework', parent=frameworks, force=False, file_options=file_options)
 
 project.save()
