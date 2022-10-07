@@ -1252,8 +1252,8 @@ Map.prototype.addPolygon = function(polygonOptions, callback) {
 Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callback) {
   var self = this;
   
-  if (!totalPaveTileLayerOptions.dbName) {
-    throw new Error("totalPaveTileLayerOptions.dbName is required.");
+  if (!totalPaveTileLayerOptions.dbPath) {
+    throw new Error("totalPaveTileLayerOptions.dbPath is required.");
   }
   if (!totalPaveTileLayerOptions.selectQuery) {
     throw new Error("totalPaveTileLayerOptions.selectQuery is required. Columns: int id, string geojson geometry, nullable double value for color-coding.");
