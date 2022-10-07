@@ -8,12 +8,12 @@
 #
 
 import importlib.util
+import os
 try:
   from pbxproj import XcodeProject
   from pbxproj.pbxextensions.ProjectFiles import FileOptions
 except:
   if input("pbxproj module not found. Can I install the module with \"sudo pip3 install pbxproj\"? [y/any other character] ") == "y":
-    import os
     os.system('sudo pip3 install pbxproj')
     from pbxproj import XcodeProject
     from pbxproj.pbxextensions.ProjectFiles import FileOptions
@@ -31,6 +31,8 @@ name = root.find('{http://www.w3.org/ns/widgets}name').text
 src = sys.argv[1] + '/plugins/cordova-plugin-googlemaps/src/ios/frameworks/libtilegen.xcframework'
 dest = sys.argv[1] + '/platforms/ios/' + name + '/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework'
 
+if os.path.exists(dest):
+  shutil.rmtree(dest)
 shutil.copytree(src, dest)
 
 # Add xcframework file to the XCode Project, ensure it is linked and embedded.
