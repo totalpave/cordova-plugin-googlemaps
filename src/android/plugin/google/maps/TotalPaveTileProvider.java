@@ -22,13 +22,11 @@ public class TotalPaveTileProvider implements TileProvider {
     Context context;
     JSONArray scale;
 
-    public TotalPaveTileProvider(Context applicationContext, String dbName, String selectQuery, JSONArray scale) throws IllegalArgumentException {
+    public TotalPaveTileProvider(Context applicationContext, String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
         super();
 
-        File file = applicationContext.getDatabasePath(dbName);
-
         GeneratorSettings settings = new GeneratorSettings();
-        settings.dbPath = file.getAbsolutePath();
+        settings.dbPath = dbPath;
         settings.sql = selectQuery;
 
         try {

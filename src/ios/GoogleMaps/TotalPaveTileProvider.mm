@@ -9,20 +9,15 @@
 }
 
 
-- (id)initWithDB:(NSString *)dbName selectQuery:(NSString *)selectQuery scale:(NSArray*)scale {
+- (id)initWithDB:(NSString *)dbPath selectQuery:(NSString *)selectQuery scale:(NSArray*)scale {
     self = [super init];
     self->scale = scale;
     self->logger = new TP::Logger("TotalPaveTileProvider");
     TP::Logger::setActiveLogger(self->logger);
 
-    NSString *libs = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex: 0];
-    NSString *nosync = [libs stringByAppendingPathComponent:@"LocalDatabase"];
-    NSURL* dbPath = [NSURL fileURLWithPath:nosync isDirectory:false];
-    dbPath = [dbPath URLByAppendingPathComponent:dbName];
-
     int status = 0;
     TP::GeneratorSettingsBuilder builder;
-    builder.setDBPath([[dbPath path] UTF8String])
+    builder.setDBPath([dbPath UTF8String])
         .setSQLString([selectQuery UTF8String]);
         
     for (NSUInteger i = 0, length = scale.count; i < length; ++i) {
