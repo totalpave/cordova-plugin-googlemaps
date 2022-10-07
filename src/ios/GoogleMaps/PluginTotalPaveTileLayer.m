@@ -13,8 +13,8 @@ NSString * const PROPERTY_PREFIX = @"totalPaveTileProvider_property";
     NSString* hashCode = [command.arguments objectAtIndex:2];
     TotalPaveTileProvider* provider;
 
-    NSString* dbName = [opts valueForKey:@"dbName"];
-    if ([dbName isEqual:[NSNull null]]) {
+    NSString* dbPath = [opts valueForKey:@"dbPath"];
+    if ([dbPath isEqual:[NSNull null]]) {
         [self.commandDelegate
             sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"DB Name is required."]
             callbackId:command.callbackId
@@ -40,7 +40,7 @@ NSString * const PROPERTY_PREFIX = @"totalPaveTileProvider_property";
         return;
     }
     
-    provider = [[TotalPaveTileProvider alloc] initWithDB:dbName selectQuery:selectQuery scale:scale];
+    provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery scale:scale];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         provider.map = self.mapCtrl.map;

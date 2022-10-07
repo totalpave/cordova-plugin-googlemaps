@@ -17,8 +17,8 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         TotalPaveTileProvider provider;
         // See PluginPolyline for examples on how to use opts
 
-        if (!opts.has("dbName")) {
-            callbackContext.error("DB Name is required.");
+        if (!opts.has("dbPath")) {
+            callbackContext.error("DB Path is required.");
             return;
         }
 
@@ -34,7 +34,7 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         try {
             provider = new TotalPaveTileProvider(
                 this.cordova.getActivity().getApplicationContext(),
-                opts.getString("dbName"),
+                opts.getString("dbPath"),
                 opts.getString("selectQuery"),
                 opts.getJSONArray("scale")
             );
