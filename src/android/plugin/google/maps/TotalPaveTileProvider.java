@@ -11,6 +11,7 @@ import com.google.android.gms.maps.model.Tile;
 import com.google.android.gms.maps.model.TileProvider;
 
 import java.io.File;
+import java.net.URI;
 import java.lang.IllegalArgumentException;
 import java.lang.RuntimeException;
 
@@ -26,7 +27,7 @@ public class TotalPaveTileProvider implements TileProvider {
         super();
 
         GeneratorSettings settings = new GeneratorSettings();
-        settings.dbPath = dbPath;
+        settings.dbPath = new File(URI.create(dbPath)).getAbsolutePath();
         settings.sql = selectQuery;
 
         try {
