@@ -17,6 +17,8 @@
 
     NSURL* dbPath = [NSURL fileURLWithPath:dbPathStr isDirectory:false];
 
+    // TODO: Ensure dbPath directory exists (e.g. /path/to/db.db needs to ensure (and create) the directory /path/to/)
+
     int status = 0;
     TP::GeneratorSettingsBuilder builder;
     builder.setDBPath([[dbPath path] UTF8String])
