@@ -26,9 +26,24 @@ public class TotalPaveTileProvider implements TileProvider {
     public TotalPaveTileProvider(Context applicationContext, String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
         super();
 
+        File fdbPath = new File(URI.create(dbPath));
+
         GeneratorSettings settings = new GeneratorSettings();
-        settings.dbPath = new File(URI.create(dbPath)).getAbsolutePath();
+        settings.dbPath = fdbPath.getAbsolutePath();
         settings.sql = selectQuery;
+
+        File directory = fdbPath.getParentFile();
+        if (directory != null) {
+            // getParentFile will return null if there are no parent directory,
+            // which I think will only occur if dbPath is "/", but regardless
+            // we will handle it
+            try {
+                directory.mkdirs();
+            }
+            catch (SecurityException ex) {
+                throw new IllegalArgumentException("Insufficient permissions for " + directory.toString(), ex);
+            }
+        }
 
         try {
             for (int i = 0; i < scale.length(); i++) {
