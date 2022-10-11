@@ -416,29 +416,7 @@
     <header-file src="src/ios/GoogleMaps/TotalPaveTileProvider.h"/>
     <source-file src="src/ios/GoogleMaps/TotalPaveTileProvider.mm"/>
 
-    <!-- 
-      Runs into linker errors during build
-      <framework src="src/ios/frameworks/libtilegen.xcframework" custom="true" embed="true" />
-    
-      Runtime crash due to missing dylib file for physical devices. Simulator works fine.
-      Manually changing xcframework settings to embed allows everything to work.
-      <framework src="src/ios/frameworks/libtilegen.xcframework" custom="true"/>
-
-      So here is how we are installing libtilegen.xcframework.
-      Since the libtilegen.xcframework is in the plugin, it's copied to the plugins directory of the cordova project.
-      The install script copes libtilegen.xcframework from the plugins directory into the platforms directory.
-      The destination is the same destination we would get if we used the framework tag.
-
-      The install script then uses https://github.com/kronenthaler/mod-pbxproj to install the xcframework to the xcode project.
-      The uninstall script uninstalls the xcframework from the xcode project.
-
-      The reason why we need to do this is because of bad assumptions in the cordova framework.
-      As far as I could tell, there is no way for a plugin to have an xcframework be both embedded and linked to the binary. It's one or the other.
-      I don't know why this assumption is made considering the default behaviour of dragging and dropping an xcframework into XCode is to embed it and link it to the binary.
-      Either way, as described above, if the xcframework is not both embedded and linked there will be errors.
-    -->
-    <hook type="after_plugin_install" src="hooks/ios/install-libtilegen.py"/>
-    <hook type="before_plugin_uninstall" src="hooks/ios/uninstall-libtilegen.py"/>
+    <framework src="./src/ios/frameworks/libtilegen.xcframework" custom="true" embed="true" link="true" />
 
     <!-- Base messages -->
     <resource-file src="src/ios/strings/pgm_Localizable_en.json" target="pgm_Localizable_en.json"/>

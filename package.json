@@ -60,6 +60,6 @@
     "jest": "^23.6.0"
   },
   "dependencies": {
-    "cordova-common": "^3.1.0"
+    "cordova-common": "file:cordova-common-4.0.3-dev.tgz"
   }
 }
