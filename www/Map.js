@@ -1255,6 +1255,10 @@ Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callba
   if (!totalPaveTileLayerOptions.dbPath) {
     throw new Error("totalPaveTileLayerOptions.dbPath is required.");
   }
+  else if (totalPaveTileLayerOptions.dbPath.indexOf("file://") !== 0) {
+    throw new Error("totalPaveTileLayerOptions.dbPath must start with file://");
+  }
+
   if (!totalPaveTileLayerOptions.selectQuery) {
     throw new Error("totalPaveTileLayerOptions.selectQuery is required. Columns: int id, string geojson geometry, nullable double value for color-coding.");
   }
