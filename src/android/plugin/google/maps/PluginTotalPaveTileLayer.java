@@ -11,6 +11,11 @@ import com.google.android.gms.maps.model.TileOverlayOptions;
 public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterface  {
     protected final String PROVIDER_SUFFIX = "_Provider";
     
+    public void reload(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        ((TotalPaveTileProvider)this.pluginMap.objects.get(args.getString(0) + PROVIDER_SUFFIX)).reload();
+        callbackContext.success();   
+    }
+
     public void create(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         JSONObject opts = args.getJSONObject(1);
         final String hashCode = args.getString(2);
@@ -50,7 +55,7 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
                 .fadeIn(false)
             );
 
-            String id = "totalPaveTileLayer_" + hashCode;
+            String id = "totalpavetilelayer_" + hashCode;
             this.pluginMap.objects.put(id, overlay);
             this.pluginMap.objects.put(id + PROVIDER_SUFFIX, provider);
 

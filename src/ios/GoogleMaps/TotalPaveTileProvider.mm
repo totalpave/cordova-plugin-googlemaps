@@ -2,14 +2,17 @@
 #import "TotalPaveTileProvider.h"
 #import <tp/TileGenerator.h>
 #import <tp/Logger.h>
+#import <tp/ErrorCode.h>
 
 @implementation TotalPaveTileProvider {
     NSArray* scale;
     TP::Logger* logger;
+    TP::GeneratorSettings settings;
 }
 
+NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
-- (id)initWithDB:(NSString *)dbPathStr selectQuery:(NSString *)selectQuery scale:(NSArray*)scale {
+- (id)initWithDB:(NSString *)dbPathStr selectQuery:(NSString *)selectQuery scale:(NSArray*)scale error:(NSError*_Nonnull*_Nonnull) error {
     self = [super init];
     self->scale = scale;
     self->logger = new TP::Logger("TotalPaveTileProvider");
@@ -34,7 +37,8 @@
         builder.addScaleItem(scaleItem);
     }
     
-    TP::TileGenerator::getInstance()->load(status, builder.build());
+    self->settings = builder.build();
+    [self $load:error];
     return self;
 }
 
@@ -45,6 +49,56 @@
         NSLog(@"Error during tile render, code: %i", status);
     }
     return [[UIImage alloc] initWithData: [[NSData alloc] initWithBytes:buffer.data() length:buffer.size()]];
+}
+
+- (void) reload:(NSError*_Nonnull*_Nonnull) error {
+    [self $load:error];
+}
+
+- (void) $load:(NSError*_Nonnull*_Nonnull) error {
+    int status = 0;
+    TP::TileGenerator::getInstance()->load(status, self->settings);
+    if (status == 0) {} // No error occurred.
+    else if (status == TP::ErrorCode::DATASET_LOAD_ERROR) {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Could not load dataset."
+            }
+        ];
+        return;
+    }
+    else if (status == TP::ErrorCode::INVALID_FEATURE) {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Dataset contained invalid features."
+            }
+        ];
+        return;
+    }
+    else if (status == TP::ErrorCode::UNSUPPORTED_GEOMETRY) {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Dataset contained unsupported features. Only LineString and Polygons are supported."
+            }
+        ];
+        return;
+    }
+    else {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Unexpected error received from libtilegen."
+            }
+        ];
+        return;
+    }
 }
 
 @end
