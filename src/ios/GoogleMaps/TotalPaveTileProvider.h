@@ -2,6 +2,7 @@
 
 @interface TotalPaveTileProvider : GMSSyncTileLayer
 
-- (id)initWithDB:(NSString *)dbName selectQuery:(NSString *)selectQuery scale:(NSArray*)scale;
+- (id _Nonnull)initWithDB:(NSString *_Nonnull)dbName selectQuery:(NSString *_Nonnull)selectQuery scale:(NSArray*_Nonnull)scale error:(NSError*_Nonnull*_Nonnull)error;
+- (void)reload:(NSError*_Nonnull*_Nonnull)error;
 
 @end
