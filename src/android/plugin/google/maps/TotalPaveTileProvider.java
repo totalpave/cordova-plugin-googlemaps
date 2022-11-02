@@ -22,13 +22,14 @@ import com.totalpave.libtilegen.ScaleItem;
 public class TotalPaveTileProvider implements TileProvider {
     Context context;
     JSONArray scale;
+    GeneratorSettings settings;
 
     public TotalPaveTileProvider(Context applicationContext, String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
         super();
 
         File fdbPath = new File(URI.create(dbPath));
 
-        GeneratorSettings settings = new GeneratorSettings();
+        this.settings = new GeneratorSettings();
         settings.dbPath = fdbPath.getAbsolutePath();
         settings.sql = selectQuery;
 
@@ -57,9 +58,12 @@ public class TotalPaveTileProvider implements TileProvider {
             throw new IllegalArgumentException("Could not parse Scale array.", ex);
         }
         
-        int status = TileGenerator.load(settings);
         this.scale = scale;
+        this.$load();
+    }
 
+    private void $load() {
+        int status = TileGenerator.load(this.settings);
         if (status == 0) {} // No error occurred.
         else if (status == TileGenerator.DATASET_LOAD_ERROR) {
             throw new IllegalArgumentException("Could not load dataset. Logcat may contain addition error messages.");
@@ -73,6 +77,10 @@ public class TotalPaveTileProvider implements TileProvider {
         else {
             throw new RuntimeException("Unexpected error received from libtilegen. Error Code: " + status);
         }
+    }
+
+    public void reload() {
+        this.$load();
     }
 
     @Nullable

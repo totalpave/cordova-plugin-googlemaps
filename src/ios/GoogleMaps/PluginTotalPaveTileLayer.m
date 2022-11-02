@@ -2,8 +2,8 @@
 #import "PluginTotalPaveTileLayer.h"
 #import "TotalPaveTileProvider.h"
 
-NSString * const PREFIX = @"totalPaveTileProvider_";
-NSString * const PROPERTY_PREFIX = @"totalPaveTileProvider_property";
+NSString * const PREFIX = @"totalpavetileprovider_";
+NSString * const PROPERTY_PREFIX = @"totalpavetileprovider_property";
 
 @implementation PluginTotalPaveTileLayer
 
@@ -40,8 +40,16 @@ NSString * const PROPERTY_PREFIX = @"totalPaveTileProvider_property";
         return;
     }
     
-    provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery scale:scale];
-    
+    NSError* error;
+    provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery scale:scale error:&error];
+    if (![error isEqual:[NSNull null]] && error != nil) {
+        [self.commandDelegate
+            sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]
+            callbackId:command.callbackId
+        ];
+        return;
+    }
+
     dispatch_async(dispatch_get_main_queue(), ^{
         provider.map = self.mapCtrl.map;
         NSString *id = [NSString stringWithFormat:[PREFIX stringByAppendingString:@"%@"], hashCode];
@@ -62,6 +70,20 @@ NSString * const PROPERTY_PREFIX = @"totalPaveTileProvider_property";
             ];
         }];
     });
+}
+
+-(void)reload:(CDVInvokedUrlCommand *)command {
+    NSError* error;
+    [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error];
+    if ([error isEqual:[NSNull null]]) {
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+    }
+    else {
+        [self.commandDelegate
+            sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]
+            callbackId:command.callbackId
+        ];
+    }
 }
 
 -(void)remove:(CDVInvokedUrlCommand *)command
