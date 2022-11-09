@@ -11,7 +11,6 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
 {
     NSDictionary* opts = [command.arguments objectAtIndex:1];
     NSString* hashCode = [command.arguments objectAtIndex:2];
-    TotalPaveTileProvider* provider;
 
     NSString* dbPath = [opts valueForKey:@"dbPath"];
     if ([dbPath isEqual:[NSNull null]] || dbPath == nil) {
@@ -40,50 +39,54 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
         return;
     }
     
-    NSError* error;
-    provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery scale:scale error:&error];
-    if (![error isEqual:[NSNull null]] && error != nil) {
-        [self.commandDelegate
-            sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]
-            callbackId:command.callbackId
-        ];
-        return;
-    }
-
-    dispatch_async(dispatch_get_main_queue(), ^{
-        provider.map = self.mapCtrl.map;
-        NSString *id = [NSString stringWithFormat:[PREFIX stringByAppendingString:@"%@"], hashCode];
-        [self.mapCtrl.objects setObject:provider forKey: id];
-
-        [self.mapCtrl.executeQueue addOperationWithBlock:^{
-            NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
-            [result setObject:id forKey:@"__pgmId"];
-            // NSString *propertyId = [NSString stringWithFormat:[PROPERTY_PREFIX stringByAppendingString:@"%@"], hashCode];
-            // NSMutableDictionary *properties = [[NSMutableDictionary alloc] init];
-            // // // geodesic
-            // // [properties setObject:[NSNumber numberWithBool:polyline.geodesic] forKey:@"geodesic"];
-            // [self.mapCtrl.objects setObject:properties forKey:propertyId];
-
+    [self.commandDelegate runInBackground:^{
+        NSError* error;
+        TotalPaveTileProvider* provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery scale:scale error:&error];
+        if (![error isEqual:[NSNull null]] && error != nil) {
             [self.commandDelegate
-                sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result]
+                sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]
                 callbackId:command.callbackId
             ];
-        }];
-    });
+            return;
+        }
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            provider.map = self.mapCtrl.map;
+            NSString *id = [NSString stringWithFormat:[PREFIX stringByAppendingString:@"%@"], hashCode];
+            [self.mapCtrl.objects setObject:provider forKey: id];
+
+            [self.mapCtrl.executeQueue addOperationWithBlock:^{
+                NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+                [result setObject:id forKey:@"__pgmId"];
+                // NSString *propertyId = [NSString stringWithFormat:[PROPERTY_PREFIX stringByAppendingString:@"%@"], hashCode];
+                // NSMutableDictionary *properties = [[NSMutableDictionary alloc] init];
+                // // // geodesic
+                // // [properties setObject:[NSNumber numberWithBool:polyline.geodesic] forKey:@"geodesic"];
+                // [self.mapCtrl.objects setObject:properties forKey:propertyId];
+
+                [self.commandDelegate
+                    sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result]
+                    callbackId:command.callbackId
+                ];
+            }];
+        });
+    }];
 }
 
 -(void)reload:(CDVInvokedUrlCommand *)command {
-    NSError* error;
-    [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error];
-    if ([error isEqual:[NSNull null]] || error == nil) {
-        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
-    }
-    else {
-        [self.commandDelegate
-            sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]
-            callbackId:command.callbackId
-        ];
-    }
+    [self.commandDelegate runInBackground:^{
+        NSError* error;
+        [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error];
+        if ([error isEqual:[NSNull null]] || error == nil) {
+            [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
+        }
+        else {
+            [self.commandDelegate
+                sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]
+                callbackId:command.callbackId
+            ];
+        }
+    }];
 }
 
 -(void)remove:(CDVInvokedUrlCommand *)command
