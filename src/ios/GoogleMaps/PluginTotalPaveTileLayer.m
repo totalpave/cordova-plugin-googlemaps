@@ -2,8 +2,8 @@
 #import "PluginTotalPaveTileLayer.h"
 #import "TotalPaveTileProvider.h"
 
-NSString * const PREFIX = @"totalpavetileprovider_";
-NSString * const PROPERTY_PREFIX = @"totalpavetileprovider_property";
+NSString * const PREFIX = @"totalpavetilelayer_";
+NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
 
 @implementation PluginTotalPaveTileLayer
 
@@ -14,7 +14,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetileprovider_property";
     TotalPaveTileProvider* provider;
 
     NSString* dbPath = [opts valueForKey:@"dbPath"];
-    if ([dbPath isEqual:[NSNull null]]) {
+    if ([dbPath isEqual:[NSNull null]] || dbPath == nil) {
         [self.commandDelegate
             sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"DB Name is required."]
             callbackId:command.callbackId
@@ -23,7 +23,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetileprovider_property";
     }
 
     NSString* selectQuery = [opts valueForKey:@"selectQuery"];
-    if ([selectQuery isEqual:[NSNull null]]) {
+    if ([selectQuery isEqual:[NSNull null]] || selectQuery == nil) {
         [self.commandDelegate
             sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Select Query is required."]
             callbackId:command.callbackId
@@ -32,7 +32,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetileprovider_property";
     }
 
     NSArray* scale = [opts valueForKey:@"scale"];
-    if ([scale isEqual:[NSNull null]]) {
+    if ([scale isEqual:[NSNull null]] || scale == nil) {
         [self.commandDelegate
             sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Scale is required."]
             callbackId:command.callbackId
@@ -75,7 +75,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetileprovider_property";
 -(void)reload:(CDVInvokedUrlCommand *)command {
     NSError* error;
     [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error];
-    if ([error isEqual:[NSNull null]]) {
+    if ([error isEqual:[NSNull null]] || error == nil) {
         [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
     }
     else {

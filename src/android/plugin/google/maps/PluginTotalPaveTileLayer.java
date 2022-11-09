@@ -13,7 +13,16 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
     
     public void reload(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         ((TotalPaveTileProvider)this.pluginMap.objects.get(args.getString(0) + PROVIDER_SUFFIX)).reload();
-        callbackContext.success();   
+        cordova.getActivity().runOnUiThread(() -> {
+            try {
+                ((TileOverlay) this.pluginMap.objects.get(args.getString(0))).clearTileCache();
+                callbackContext.success();
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+                callbackContext.error("" + e.getMessage());
+            }
+        });
     }
 
     public void create(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
@@ -38,7 +47,6 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
 
         try {
             provider = new TotalPaveTileProvider(
-                this.cordova.getActivity().getApplicationContext(),
                 opts.getString("dbPath"),
                 opts.getString("selectQuery"),
                 opts.getJSONArray("scale")

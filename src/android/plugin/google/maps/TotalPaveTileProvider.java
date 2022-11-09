@@ -20,11 +20,10 @@ import com.totalpave.libtilegen.GeneratorSettings;
 import com.totalpave.libtilegen.ScaleItem;
 
 public class TotalPaveTileProvider implements TileProvider {
-    Context context;
     JSONArray scale;
     GeneratorSettings settings;
 
-    public TotalPaveTileProvider(Context applicationContext, String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
+    public TotalPaveTileProvider(String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
         super();
 
         File fdbPath = new File(URI.create(dbPath));

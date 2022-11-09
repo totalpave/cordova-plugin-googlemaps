@@ -53,6 +53,9 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
 - (void) reload:(NSError*_Nonnull*_Nonnull) error {
     [self $load:error];
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [self clearTileCache];
+    }];
 }
 
 - (void) $load:(NSError*_Nonnull*_Nonnull) error {
