@@ -12,15 +12,20 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
     protected final String PROVIDER_SUFFIX = "_Provider";
     
     public void reload(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
-        ((TotalPaveTileProvider)this.pluginMap.objects.get(args.getString(0) + PROVIDER_SUFFIX)).reload();
-        cordova.getActivity().runOnUiThread(() -> {
-            try {
-                ((TileOverlay) this.pluginMap.objects.get(args.getString(0))).clearTileCache();
-                callbackContext.success();
-            }
-            catch (JSONException e) {
-                e.printStackTrace();
-                callbackContext.error("" + e.getMessage());
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                ((TotalPaveTileProvider)this.pluginMap.objects.get(args.getString(0) + PROVIDER_SUFFIX)).reload();
+
+                cordova.getActivity().runOnUiThread(() -> {
+                    try {
+                        ((TileOverlay) this.pluginMap.objects.get(args.getString(0))).clearTileCache();
+                        callbackContext.success();
+                    }
+                    catch (JSONException e) {
+                        e.printStackTrace();
+                        callbackContext.error("" + e.getMessage());
+                    }
+                });
             }
         });
     }
@@ -45,36 +50,40 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
             callbackContext.error("scale is required.");
         }
 
-        try {
-            provider = new TotalPaveTileProvider(
-                opts.getString("dbPath"),
-                opts.getString("selectQuery"),
-                opts.getJSONArray("scale")
-            );
-        }
-        catch (Exception ex) {
-            callbackContext.error(ex.getMessage());
-            return;
-        }
+        cordova.getThreadPool().execute(new Runnable() {
+            public void run() {
+                try {
+                    provider = new TotalPaveTileProvider(
+                        opts.getString("dbPath"),
+                        opts.getString("selectQuery"),
+                        opts.getJSONArray("scale")
+                    );
+                }
+                catch (Exception ex) {
+                    callbackContext.error(ex.getMessage());
+                    return;
+                }
 
-        cordova.getActivity().runOnUiThread(() -> {
-            TileOverlay overlay = map.addTileOverlay(new TileOverlayOptions()
-                .tileProvider(provider)
-                .fadeIn(false)
-            );
+                cordova.getActivity().runOnUiThread(() -> {
+                    TileOverlay overlay = map.addTileOverlay(new TileOverlayOptions()
+                        .tileProvider(provider)
+                        .fadeIn(false)
+                    );
 
-            String id = "totalpavetilelayer_" + hashCode;
-            this.pluginMap.objects.put(id, overlay);
-            this.pluginMap.objects.put(id + PROVIDER_SUFFIX, provider);
+                    String id = "totalpavetilelayer_" + hashCode;
+                    this.pluginMap.objects.put(id, overlay);
+                    this.pluginMap.objects.put(id + PROVIDER_SUFFIX, provider);
 
-            try {
-                JSONObject result = new JSONObject();
-                result.put("hashCode", hashCode);
-                result.put("__pgmId", id);
-                callbackContext.success(result);
-            } catch (JSONException e) {
-                e.printStackTrace();
-                callbackContext.error("" + e.getMessage());
+                    try {
+                        JSONObject result = new JSONObject();
+                        result.put("hashCode", hashCode);
+                        result.put("__pgmId", id);
+                        callbackContext.success(result);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        callbackContext.error("" + e.getMessage());
+                    }
+                });
             }
         });
     }
