@@ -34,15 +34,9 @@ namespace TP {
 
             double $getResZ(const uint32_t& z) const;
             MPoint $gToM(const GPoint& g) const;
-            Image::XY $mToXY(const MPoint& m) const;
             Image::XYRelative $mToXYRelative(const MPoint& m) const;
-            MPoint $pToM(const Image::XY& p) const;
-            MPoint $mToP(const MPoint& m) const;
-            MPoint $pToL(const MPoint& m) const;
 
             geom::Extent<double> $normalizeGeoExtent(const geom::Extent<double>& extent) const;
-
-            // bool $isPointInTriangle(const Image::XY& v1, const Image::XY& v2, const Image::XY& v3, const Image::XY& p) const;
 
             std::vector<MPoint> $batchConvert(const std::vector<GPoint>& points) const;
 

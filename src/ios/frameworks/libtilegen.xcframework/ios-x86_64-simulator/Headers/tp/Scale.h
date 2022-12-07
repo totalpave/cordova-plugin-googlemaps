@@ -11,13 +11,13 @@ namespace TP {
             struct Item {
                 double low = -std::numeric_limits<double>::infinity();
                 double high = std::numeric_limits<double>::infinity();
-                uint32_t strokeColor;
-                uint32_t fillColor;
+                uint32_t strokeColor = 0x000000FF;
+                uint32_t fillColor = 0x000000FF;
             };
 
             struct ColorInfo {
-                uint32_t strokeColor;
-                uint32_t fillColor;
+                uint32_t strokeColor = 0x000000FF;
+                uint32_t fillColor = 0x00000080; // 50% opacity
             };
 
             Scale(void);
