@@ -18,20 +18,33 @@
 
 #include <tp/qt/Node.h>
 #include <cstdint>
+#include <limits>
 #include <tp/geom/Extent.h>
 #include <vector>
-#include <tp/qt/Point.h>
+#include <tp/qt/QuadPoint.h>
+#include <tp/qt/XYPoint.h>
+#include <tp/qt/RectPoint.h>
 
 namespace TP { namespace qt {
     class QuadTree {
         public:
-            QuadTree(uint32_t bucketSize, const geom::Extent<double>& extent);
+            QuadTree(uint32_t bucketSize, const geom::Extent<double>& extent, uint8_t maxDepth = std::numeric_limits<uint8_t>::max());
             virtual ~QuadTree();
 
+            /**
+                Uses XYPoint
+            */
             void insert(double x, double y, const void* data);
+            void insert(XYPoint* point, const void* data);
+            /**
+                Uses RectPoint
+            */
+            void insert(double x1, double y1, double x2, double y2, const void* data);
+            void insert(const geom::Extent<double>& extent, const void* data);
+            void insert(RectPoint* point, const void* data);
             void query(const geom::Extent<double>& extent, std::vector<const void*>& outData);
         private:
             Node* $root;
-            std::vector<Point*> $data;
+            std::vector<QuadPoint*> $data;
     };
 }}

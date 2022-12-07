@@ -22,7 +22,7 @@ namespace TP {
             // bool load(int& errorCode, const std::string& path);
             bool load(int& errorCode, const GeneratorSettings& settings);
 
-            int render(std::vector<uint8_t>& buffer, int x, int y, int z, int dpiScale);
+            int render(std::vector<uint8_t>& buffer, int x, int y, int z, int dpiScale = 1);
             void getTileRange(
                 const int z,
                 uint32_t& minX,
