@@ -22,7 +22,7 @@ namespace TP {
             // bool load(int& errorCode, const std::string& path);
             bool load(int& errorCode, const GeneratorSettings& settings);
 
-            int render(std::vector<uint8_t>& buffer, int x, int y, int z, int dpiScale = 1);
+            int render(std::vector<uint8_t>& buffer, int x, int y, int z);
             void getTileRange(
                 const int z,
                 uint32_t& minX,
@@ -40,7 +40,11 @@ namespace TP {
             std::vector<Feature*> $features;
             geom::Extent<double> $networkExtent;
             qt::QuadTree* $quadtree;
-
+            int $tileSize;
+            int $dpiScale;
+            int $strokeWidth;
+            int $antiAlias;
+            
             TileGenerator(void);
             TileGenerator(const TileGenerator&) = delete;
             TileGenerator(TileGenerator&&) = delete;
