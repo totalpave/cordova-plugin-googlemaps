@@ -18,10 +18,29 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
     self->logger = new TP::Logger("TotalPaveTileProvider");
     TP::Logger::setActiveLogger(self->logger);
 
-    int status = 0;
+    /**
+        https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale?language=objc
+        The default logical coordinate space is measured using points. For Retina displays,
+        the scale factor may be 3.0 or 2.0 and one point can represented by nine or four pixels,
+        respectively. For standard-resolution displays, the scale factor is 1.0 and one point equals one pixel.
+
+        Note, standard resolution displays are no longer made. Even the iPhone 6 Simulator have a UIScreen scale of 2.
+        In otherwords, there seems to be a lack of devices and simulators to test standard resolutions (UIScreen scale of 1).
+    */
+    int dpiScale = 1;
+    if ([UIScreen mainScreen].scale == 2) {
+        dpiScale = 4;
+    }
+    else if ([UIScreen mainScreen].scale == 3) {
+        dpiScale = 9;
+    }
+    
     TP::GeneratorSettingsBuilder builder;
     builder.setDBPath([[[NSURL URLWithString:dbPathStr] path] UTF8String])
-        .setSQLString([selectQuery UTF8String]);
+        .setSQLString([selectQuery UTF8String])
+        .setDpiScale(dpiScale)
+        .setAntiAlias(1)
+        .setTileSize(512);
         
     for (NSUInteger i = 0, length = scale.count; i < length; ++i) {
         NSDictionary *item = scale[i];
@@ -44,24 +63,8 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
 - ( UIImage * _Nullable ) tileForX:(NSUInteger)x y:(NSUInteger)y zoom:(NSUInteger)zoom {
     std::vector<uint8_t> buffer;
-    /**
-        https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale?language=objc
-        The default logical coordinate space is measured using points. For Retina displays,
-        the scale factor may be 3.0 or 2.0 and one point can represented by nine or four pixels,
-        respectively. For standard-resolution displays, the scale factor is 1.0 and one point equals one pixel.
 
-        Note, standard resolution displays are no longer made. Even the iPhone 6 Simulator have a UIScreen scale of 2.
-        In otherwords, there seems to be a lack of devices and simulators to test standard resolutions (UIScreen scale of 1).
-    */
-    int scale = 1;
-    if ([UIScreen mainScreen].scale == 2) {
-        scale = 4;
-    }
-    else if ([UIScreen mainScreen].scale == 3) {
-        scale = 9;
-    }
-    
-    int status = TP::TileGenerator::getInstance()->render(buffer, (int)x, (int)y, (int)zoom, scale);
+    int status = TP::TileGenerator::getInstance()->render(buffer, (int)x, (int)y, (int)zoom);
     if (status != 0) {
         NSLog(@"Error during tile render, code: %i", status);
     }

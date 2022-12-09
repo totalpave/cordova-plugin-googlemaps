@@ -32,6 +32,9 @@ public class TotalPaveTileProvider implements TileProvider {
         this.settings = new GeneratorSettings();
         settings.dbPath = fdbPath.getAbsolutePath();
         settings.sql = selectQuery;
+        settings.dpiScale = 1;
+        settings.tileSize = 512;
+        settings.antiAlias = 1;
 
         try {
             for (int i = 0; i < scale.length(); i++) {
@@ -89,7 +92,7 @@ public class TotalPaveTileProvider implements TileProvider {
     public Tile getTile(int x, int y, int z) {
         try {
             byte[] data = TileGenerator.render(x, y, z);
-            return new Tile(256, 256, data);
+            return new Tile(512, 512, data);
         }
         catch (NoTilesToRenderException ex) {
             return TileProvider.NO_TILE;
