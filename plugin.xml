@@ -488,6 +488,10 @@
         </pods>
     </podspec>
 
+    <hook type="after_plugin_install" src="hooks/ios/enableCXX17.py"/>
+    <hook type="before_plugin_uninstall" src="hooks/ios/disableCXX17.py"/>
+    <hook type="after_platform_add" src="hooks/ios/enableCXX17.py"/>
+
 <!--
     <hook type="before_platform_add" src="src/ios/check_sdk_version.js"/>
     <hook type="before_plugin_install" src="src/ios/check_sdk_version.js"/>
