@@ -13,6 +13,7 @@
 #include <tp/geom/Extent.h>
 #include "./GeneratorSettings.h"
 #include "./Scale.h"
+#include <shared_mutex>
 
 namespace TP {
     class TileGenerator {
@@ -21,6 +22,9 @@ namespace TP {
 
             // bool load(int& errorCode, const std::string& path);
             bool load(int& errorCode, const GeneratorSettings& settings);
+            
+            // Clears data and invalidates TileGenerator state so that load must be called again.
+            void reset();
 
             int render(std::vector<uint8_t>& buffer, int x, int y, int z);
             void getTileRange(
@@ -34,6 +38,8 @@ namespace TP {
         private:
             static TileGenerator* $instance;
 
+            std::shared_mutex $mutex;
+
             sqlite3* $db;
 
             Scale $scale;
@@ -45,6 +51,9 @@ namespace TP {
             int $strokeWidth;
             int $antiAlias;
             
+            // When true, load must be called
+            bool $isInvalid;
+
             TileGenerator(void);
             TileGenerator(const TileGenerator&) = delete;
             TileGenerator(TileGenerator&&) = delete;
@@ -52,9 +61,8 @@ namespace TP {
             TileGenerator& operator=(TileGenerator&&) = delete;
 
             IGeometry* $parseGeometry(int& errorcode, const unsigned char* strGeom) const;
-
             void $reportSQLiteError(int code) const;
-
             void $insertFeatureIntoQuadTree(Feature* feature);
+            void $reset();
     };
 }
