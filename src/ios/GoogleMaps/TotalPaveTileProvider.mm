@@ -61,11 +61,24 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
     return self;
 }
 
+ - (void) reset {
+    TP::TileGenerator::getInstance()->reset();
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [self clearTileCache];
+    }];
+ }
+
 - ( UIImage * _Nullable ) tileForX:(NSUInteger)x y:(NSUInteger)y zoom:(NSUInteger)zoom {
     std::vector<uint8_t> buffer;
 
     int status = TP::TileGenerator::getInstance()->render(buffer, (int)x, (int)y, (int)zoom);
-    if (status != 0) {
+    if (status == TP::ErrorCode::TILE_UNAVAILABLE) {
+        return nil;
+    }
+    if (status == TP::ErrorCode::NO_FEATURES_TO_RENDER) {
+        return kGMSTileLayerNoTile;
+    }
+    else if (status != 0) {
         NSLog(@"Error during tile render, code: %i", status);
     }
     return [[UIImage alloc] initWithData: [[NSData alloc] initWithBytes:buffer.data() length:buffer.size()]];

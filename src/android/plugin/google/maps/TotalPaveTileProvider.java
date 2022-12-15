@@ -19,6 +19,7 @@ import com.totalpave.libtilegen.TileGenerator;
 import com.totalpave.libtilegen.GeneratorSettings;
 import com.totalpave.libtilegen.ScaleItem;
 import com.totalpave.libtilegen.NoTilesToRenderException;
+import com.totalpave.libtilegen.TileUnavailableException;
 
 public class TotalPaveTileProvider implements TileProvider {
     JSONArray scale;
@@ -87,6 +88,11 @@ public class TotalPaveTileProvider implements TileProvider {
         // Tile cache is cleared in PluginTotalPaveTileLayer.
     }
 
+    public void reset() {
+        TileGenerator.reset();        
+        // Tile cache is cleared in PluginTotalPaveTileLayer.
+    }
+
     @Nullable
     @Override
     public Tile getTile(int x, int y, int z) {
@@ -94,7 +100,7 @@ public class TotalPaveTileProvider implements TileProvider {
             byte[] data = TileGenerator.render(x, y, z);
             return new Tile(512, 512, data);
         }
-        catch (NoTilesToRenderException ex) {
+        catch (NoTilesToRenderException | TileUnavailableException ex) {
             return TileProvider.NO_TILE;
         }
     }

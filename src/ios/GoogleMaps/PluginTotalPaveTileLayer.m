@@ -91,16 +91,16 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
 
 -(void)remove:(CDVInvokedUrlCommand *)command
 {
-    [self.mapCtrl.executeQueue addOperationWithBlock:^{
+    [self.commandDelegate runInBackground:^{
         NSString *providerKey = [command.arguments objectAtIndex:0];
+        TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:providerKey];
+        [provider reset];
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-            TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:providerKey];
             [self.mapCtrl.objects removeObjectForKey:providerKey];
 
             NSString *propertyId = [providerKey stringByReplacingOccurrencesOfString:PREFIX withString:PROPERTY_PREFIX];
             [self.mapCtrl.objects removeObjectForKey:propertyId];
             provider.map = nil;
-            provider = nil;
 
             [self.commandDelegate
                 sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK]
