@@ -15,23 +15,20 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         cordova.getThreadPool().execute(() -> {
             try {
                 ((TotalPaveTileProvider)this.pluginMap.objects.get(args.getString(0) + PROVIDER_SUFFIX)).reload();
+                this.$clearTileCache(args.getString(0), callbackContext);
             }
             catch (JSONException e) {
                 e.printStackTrace();
                 callbackContext.error("" + e.getMessage());
                 return;
             }
+        });
+    }
 
-            cordova.getActivity().runOnUiThread(() -> {
-                try {
-                    ((TileOverlay) this.pluginMap.objects.get(args.getString(0))).clearTileCache();
-                    callbackContext.success();
-                }
-                catch (JSONException e) {
-                    e.printStackTrace();
-                    callbackContext.error("" + e.getMessage());
-                }
-            });
+    private void $clearTileCache(String id, final CallbackContext callbackContext) {
+        cordova.getActivity().runOnUiThread(() -> {
+            ((TileOverlay) this.pluginMap.objects.get(id)).clearTileCache();
+            callbackContext.success();
         });
     }
 
@@ -99,15 +96,10 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
             callbackContext.success();
             return;
         }
+        ((TotalPaveTileProvider)this.pluginMap.objects.get(id + PROVIDER_SUFFIX)).reset();
         this.pluginMap.objects.remove(id);
         this.pluginMap.objects.remove(id + PROVIDER_SUFFIX);
 
-        cordova.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-
-                callbackContext.success();
-            }
-        });
+        this.$clearTileCache(args.getString(0), callbackContext);
     }
 }
