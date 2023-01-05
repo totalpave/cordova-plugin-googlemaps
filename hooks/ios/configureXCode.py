@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+# Configurations:
+# Set CXX Language Standard to C++ 17
+# Add Header Search path to libtilegen.xcframework's public headers.
+
 import importlib.util
 import os
 try:
@@ -21,5 +25,8 @@ root = tree.getroot()
 name = root.find('{http://www.w3.org/ns/widgets}name').text
 
 project = XcodeProject.load(sys.argv[1] + '/platforms/ios/' + name + '.xcodeproj/project.pbxproj')
+
 project.add_flags("CLANG_CXX_LANGUAGE_STANDARD", "c++17")
+project.add_header_search_paths('"' + name + '/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework/ios-arm64/libtilegen.framework/Headers"')
+
 project.save()
