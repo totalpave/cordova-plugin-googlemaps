@@ -1,8 +1,10 @@
 
 #import "TotalPaveTileProvider.h"
-#import <tp/TileGenerator.h>
-#import <tp/Logger.h>
-#import <tp/ErrorCode.h>
+#import <libtilegen/tp/TileGenerator.h>
+#import <libtilegen/tp/Logger.h>
+#import <libtilegen/tp/ErrorCode.h>
+#import <libtilegen/tp/Scale.h>
+#import <libtilegen/tp/GeneratorSettings.h>
 
 @implementation TotalPaveTileProvider {
     NSArray* scale;
