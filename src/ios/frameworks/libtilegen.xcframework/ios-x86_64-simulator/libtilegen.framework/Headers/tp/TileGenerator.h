@@ -50,7 +50,8 @@ namespace TP {
             int $dpiScale;
             int $strokeWidth;
             int $antiAlias;
-            
+            float $tileLogicPadding;
+
             // When true, load must be called
             bool $isInvalid;
 

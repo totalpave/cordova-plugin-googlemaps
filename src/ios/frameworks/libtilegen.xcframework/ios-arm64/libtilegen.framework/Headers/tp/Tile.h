@@ -20,6 +20,7 @@ namespace TP {
 
             static void calculateExtent(const uint32_t& x, const uint32_t& y, const uint32_t& z, double& minlon, double&minlat, double& maxlon, double& maxlat);
             static void calculateExtent(const uint32_t& x, const uint32_t& y, const uint32_t& z, geom::Extent<double>& extent);
+            static void calculateExtent(const uint32_t& x, const uint32_t& y, const uint32_t& z, geom::Extent<double>& extent, float modifier);
 
             bool raster(int& errorCode, std::vector<Feature*>& features, Image& image, const Scale& scale);
 
