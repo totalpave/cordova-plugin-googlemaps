@@ -49,8 +49,11 @@ namespace TP {
             int $tileSize;
             int $dpiScale;
             int $strokeWidth;
+            int $minStrokeWidth;
             int $antiAlias;
             float $tileLogicPadding;
+            float $zoomModifier;
+            int $zoomModifierThreshold;
 
             // When true, load must be called
             bool $isInvalid;

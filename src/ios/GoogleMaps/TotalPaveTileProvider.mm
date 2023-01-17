@@ -42,7 +42,9 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
         .setSQLString([selectQuery UTF8String])
         .setDpiScale(dpiScale)
         .setAntiAlias(1)
-        .setTileSize(512);
+        .setTileSize(512)
+        .setZoomModifier(0.3)
+        .setZoomModifierThreshold(16);
         
     for (NSUInteger i = 0, length = scale.count; i < length; ++i) {
         NSDictionary *item = scale[i];
