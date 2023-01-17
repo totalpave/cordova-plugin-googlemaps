@@ -33,6 +33,12 @@ namespace TP {
             Defaults to 2
         */
         int strokeWidth;
+        /** 
+            Defaults to 2.
+
+            Stroke width, after all calculations and modifications have been applied, will never be below minStrokeWidth.
+        */
+        int minStrokeWidth;
         /**
             Defaults to 3
         */
@@ -59,6 +65,28 @@ namespace TP {
             3-Observed if the point/line width is fully drawn or not.
         */
         float tileLogicPadding;
+        /**
+            Defaults to 1
+        */
+        int zoomModifierThreshold;
+        /**
+            Defaults to 0 (effectively does nothing)
+
+            Calculated Stroke Width: The stroke width that is used in the final result. The calculated stroke width factors in all important values, such as dpi scale and the GeneratorSettings stroke width.
+
+            Reduces calculated stroke width by zoomModifier as a % value.
+            Reduction is applied once per zoom level, starting from zoomModifierThreshold.
+
+            Calculated Stroke Width will never be reduced to below minStrokeWidth.
+
+            Example:
+            We'll be referring to calculaterd stroke width as csw.
+            If zoomModifierThreshold is 15.
+            Zoom 16 - No reduction.
+            Zoom 15 - csw -= (csw * 0.3) (round up to minStrokeWidth if necessary)
+            Zoom 14 - csw -= (csw * 0.6) (round up to minStrokeWidth if necessary)
+        */
+        float zoomModifier;
     };
 
     class GeneratorSettingsBuilder {
@@ -73,7 +101,10 @@ namespace TP {
             GeneratorSettingsBuilder& setTileSize(const int size);
             GeneratorSettingsBuilder& setTileLogicPadding(const float padding);
             GeneratorSettingsBuilder& setStrokeWidth(const int width);
+            GeneratorSettingsBuilder& setMinStrokeWidth(const int width);
             GeneratorSettingsBuilder& setAntiAlias(const int aa);
+            GeneratorSettingsBuilder& setZoomModifierThreshold(const int threshold);
+            GeneratorSettingsBuilder& setZoomModifier(const float modifier);
             GeneratorSettings build(void) const;
 
         private:
@@ -83,7 +114,10 @@ namespace TP {
             int $dpiScale;
             int $tileSize;
             int $strokeWidth;
+            int $minStrokeWidth;
             int $antiAlias;
             float $tileLogicPadding;
+            int $zoomModifierThreshold;
+            float $zoomModifier;
     };
 }

@@ -31,11 +31,15 @@ public class TotalPaveTileProvider implements TileProvider {
         File fdbPath = new File(URI.create(dbPath));
 
         this.settings = new GeneratorSettings();
-        settings.dbPath = fdbPath.getAbsolutePath();
-        settings.sql = selectQuery;
-        settings.dpiScale = 1;
-        settings.tileSize = 512;
-        settings.antiAlias = 1;
+        this.settings.setDBPath(fdbPath.getAbsolutePath())
+            .setSQLString(selectQuery)
+            .setDpiScale(1)
+            .setMinStrokeWidth(1)
+            .setTileSize(512)
+            .setAntiAlias(2)
+            .setZoomModifier(1f)
+            .setZoomModifierThreshold(16);
+
 
         try {
             for (int i = 0; i < scale.length(); i++) {
