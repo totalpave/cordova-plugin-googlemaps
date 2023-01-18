@@ -144,9 +144,6 @@
       <!-- for Crosswalk -->
       <preference name="xwalkZOrderOnTop" value="true"/>
       <preference name="BackgroundColor" value="0"/>
-
-      <!-- for this plugin -->
-      <preference name="android-minSdkVersion" value="19"/>
     </config-file>
 
     <config-file target="res/xml/config.xml" parent="/*">
