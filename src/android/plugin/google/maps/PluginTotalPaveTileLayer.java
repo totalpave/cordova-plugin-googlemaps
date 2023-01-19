@@ -56,6 +56,7 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
             TotalPaveTileProvider provider;
             try {
                 provider = new TotalPaveTileProvider(
+                    cordova.getContext().getResources().getDisplayMetrics(),
                     opts.getString("dbPath"),
                     opts.getString("selectQuery"),
                     opts.getJSONArray("scale")

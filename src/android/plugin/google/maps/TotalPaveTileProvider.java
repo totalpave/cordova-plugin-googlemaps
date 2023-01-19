@@ -21,21 +21,29 @@ import com.totalpave.libtilegen.ScaleItem;
 import com.totalpave.libtilegen.NoTilesToRenderException;
 import com.totalpave.libtilegen.TileUnavailableException;
 
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
+
 public class TotalPaveTileProvider implements TileProvider {
     JSONArray scale;
     GeneratorSettings settings;
 
-    public TotalPaveTileProvider(String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
+    private static final int TILE_SIZE_DP = 256;
+    private int tileSize;
+
+    public TotalPaveTileProvider(DisplayMetrics displayMetrics, String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
         super();
 
         File fdbPath = new File(URI.create(dbPath));
+
+        this.tileSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, TILE_SIZE_DP, displayMetrics);
 
         this.settings = new GeneratorSettings();
         this.settings.setDBPath(fdbPath.getAbsolutePath())
             .setSQLString(selectQuery)
             .setDpiScale(1)
             .setMinStrokeWidth(1)
-            .setTileSize(512)
+            .setTileSize(this.tileSize)
             .setAntiAlias(2)
             .setZoomModifier(1f)
             .setZoomModifierThreshold(16);
@@ -93,7 +101,7 @@ public class TotalPaveTileProvider implements TileProvider {
     }
 
     public void reset() {
-        TileGenerator.reset();        
+        TileGenerator.reset();
         // Tile cache is cleared in PluginTotalPaveTileLayer.
     }
 
@@ -102,7 +110,7 @@ public class TotalPaveTileProvider implements TileProvider {
     public Tile getTile(int x, int y, int z) {
         try {
             byte[] data = TileGenerator.render(x, y, z);
-            return new Tile(512, 512, data);
+            return new Tile(this.tileSize, this.tileSize, data);
         }
         catch (NoTilesToRenderException | TileUnavailableException ex) {
             return TileProvider.NO_TILE;
