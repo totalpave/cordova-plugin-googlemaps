@@ -27,6 +27,9 @@ name = root.find('{http://www.w3.org/ns/widgets}name').text
 project = XcodeProject.load(sys.argv[1] + '/platforms/ios/' + name + '.xcodeproj/project.pbxproj')
 
 project.remove_flags("CLANG_CXX_LANGUAGE_STANDARD", "c++17")
-project.remove_header_search_paths('"' + name + '/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework/ios-arm64/libtilegen.framework/Headers"')
+project.remove_header_search_paths([
+  '${{inherited}}',
+  '"' + name + '/Plugins/cordova-plugin-googlemaps/libtilegen.xcframework/ios-arm64/libtilegen.framework/Headers"'
+])
 
 project.save()
