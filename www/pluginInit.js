@@ -1,5 +1,4 @@
-var cordova_exec = require('cordova/exec'),
-  common = require('cordova-plugin-googlemaps.Common');
+var common = require('cordova-plugin-googlemaps.Common');
 
 function pluginInit() {
   //-------------------------------------------------------------
@@ -122,7 +121,7 @@ function pluginInit() {
   // Hook the backbutton of Android action
   //--------------------------------------------
 
-  function onBackButton(e) {
+  function onBackButton() {
     // Check DOM tree for new page
     cordova.fireDocumentEvent('plugin_touch', {
       force: true

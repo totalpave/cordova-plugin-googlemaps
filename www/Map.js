@@ -1253,40 +1253,40 @@ Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callba
   var self = this;
   
   if (!totalPaveTileLayerOptions.dbPath) {
-    throw new Error("totalPaveTileLayerOptions.dbPath is required.");
+    throw new Error('totalPaveTileLayerOptions.dbPath is required.');
   }
-  else if (totalPaveTileLayerOptions.dbPath.indexOf("file://") !== 0) {
-    throw new Error("totalPaveTileLayerOptions.dbPath must start with file://");
+  else if (totalPaveTileLayerOptions.dbPath.indexOf('file://') !== 0) {
+    throw new Error('totalPaveTileLayerOptions.dbPath must start with file://');
   }
 
   if (!totalPaveTileLayerOptions.selectQuery) {
-    throw new Error("totalPaveTileLayerOptions.selectQuery is required. Columns: int id, string geojson geometry, nullable double value for color-coding.");
+    throw new Error('totalPaveTileLayerOptions.selectQuery is required. Columns: int id, string geojson geometry, nullable double value for color-coding.');
   }
 
   if (!totalPaveTileLayerOptions.scale || !(totalPaveTileLayerOptions.scale instanceof Array) || totalPaveTileLayerOptions.scale.length === 0) {
-    throw new Error("totalPaveTileLayerOptions.scale is required. Array of {low: number, high: number, stroke: hex color string, fill: hex color string}. low and high are used with the select query value.");
+    throw new Error('totalPaveTileLayerOptions.scale is required. Array of {low: number, high: number, stroke: hex color string, fill: hex color string}. low and high are used with the select query value.');
   }
 
-  for (let i = 0, items = totalPaveTileLayerOptions.scale, length = items.length; i < length - 1; ++i) {
-    let item = items[i];
+  for (var i = 0, items = totalPaveTileLayerOptions.scale, length = items.length; i < length - 1; ++i) {
+    var item = items[i];
     if (typeof item !== 'object') {
-      throw new Error("totalPaveTileLayerOptions.scale[x] must be an Object: {low: floating number, high: floating number, fill: RGBA numerical hex color code, stroke: RGBA numberical hex color code}");
+      throw new Error('totalPaveTileLayerOptions.scale[x] must be an Object: {low: floating number, high: floating number, fill: RGBA numerical hex color code, stroke: RGBA numberical hex color code}');
     }
-    if (typeof item.low !== "number") {
-      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].low is required. Floating point number.");
+    if (typeof item.low !== 'number') {
+      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].low is required. Floating point number.');
     }
-    if (typeof item.stroke !== "number") {
-      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].stroke is required. RGBA Numerical hex color code.");
+    if (typeof item.stroke !== 'number') {
+      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].stroke is required. RGBA Numerical hex color code.');
     }
-    if (typeof item.fill !== "number") {
-      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].fill is required. RGBA Numerical hex color code.");
+    if (typeof item.fill !== 'number') {
+      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].fill is required. RGBA Numerical hex color code.');
     }
 
     if (i === length - 1 && (typeof items[i] !== 'object' || items[i].high !== null)) {
-      throw new Error("totalPaveTileLayerOptions.scale[<last item's index>].high must be null.");
+      throw new Error('totalPaveTileLayerOptions.scale[<last item\'s index>].high must be null.');
     }
-    else if (typeof items[i] !== 'object' || typeof items[i].high !== "number") {
-      throw new Error("totalPaveTileLayerOptions.scale[" + i + "].high must be a floating point number.");
+    else if (typeof items[i] !== 'object' || typeof items[i].high !== 'number') {
+      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].high must be a floating point number.');
     }
   }
 
@@ -1313,7 +1313,7 @@ Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callba
   }, self.errorHandler, self.__pgmId, 'loadPlugin', ['TotalPaveTileLayer', opts, layer.hashCode]);
 
   return layer;
-}
+};
 
 //-------------
 // Polyline

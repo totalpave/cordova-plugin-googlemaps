@@ -8,6 +8,7 @@ module.exports = {
     "ecmaVersion": 5
   },
   "rules": {
+    "parenthesized-pattern": 0,
     "indent": [
       "error",
       2
