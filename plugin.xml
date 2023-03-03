@@ -130,7 +130,7 @@
     <engine name="apple-ios" version=">=10.0.0" />
   </engines>
 
-  <dependency id="@totalpave/cordova-plugin-libtilegen" version="0.0.5" />
+  <dependency id="@totalpave/cordova-plugin-libtilegen" version="0.0.6" />
 
   <!-- android -->
   <platform name="android">
