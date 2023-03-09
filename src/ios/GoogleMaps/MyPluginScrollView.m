@@ -6,6 +6,9 @@
 //
 //
 
+// TotalPave Modifications:
+// Disabled scrolling. Map can still pan, but the native scrollview will not scroll.
+
 #import "MyPluginScrollView.h"
 
 @implementation MyPluginScrollView
@@ -23,6 +26,7 @@
   }
   self.HTMLNodes = [[NSMutableDictionary alloc] init];
   self.mapCtrls = [[NSMutableDictionary alloc] init];
+  self.scrollEnabled = false;
   return self;
 }
 
