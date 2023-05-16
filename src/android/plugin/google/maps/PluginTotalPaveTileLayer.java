@@ -10,12 +10,26 @@ import com.google.android.gms.maps.model.TileOverlayOptions;
 
 public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterface  {
     protected final String PROVIDER_SUFFIX = "_Provider";
-    
+
     public void reload(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         cordova.getThreadPool().execute(() -> {
             try {
-                ((TotalPaveTileProvider)this.pluginMap.objects.get(args.getString(0) + PROVIDER_SUFFIX)).reload();
-                this.$clearTileCache(args.getString(0), callbackContext);
+                String key = args.getString(0);
+                String providerKey = key + PROVIDER_SUFFIX;
+                // The objects should exist 99% of the time but we'd had odd crash reports that indicate it didn't exist. So let's at least prevent the crashes.
+                // We do still want errors that propagate to JS land to keep track of this issue.
+                if (this.pluginMap.objects.containsKey(providerKey)) {
+                    ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).reload();
+                }
+                else {
+                    throw new JSONException("PluginTotalPaveTileLayer.reload could not find provider in pluginMap for key: " + key);
+                }
+                if (this.pluginMap.objects.containsKey(key)) {
+                    this.$clearTileCache((TileOverlay)this.pluginMap.objects.get(key), callbackContext);
+                }
+                else {
+                    throw new JSONException("PluginTotalPaveTileLayer.reload could not find overlay in pluginMap for key: " + key);
+                }
             }
             catch (JSONException e) {
                 e.printStackTrace();
@@ -25,9 +39,9 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         });
     }
 
-    private void $clearTileCache(String id, final CallbackContext callbackContext) {
+    private void $clearTileCache(TileOverlay overlay, final CallbackContext callbackContext) {
         cordova.getActivity().runOnUiThread(() -> {
-            ((TileOverlay) this.pluginMap.objects.get(id)).clearTileCache();
+            overlay.clearTileCache();
             callbackContext.success();
         });
     }
@@ -97,10 +111,23 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
             callbackContext.success();
             return;
         }
-        ((TotalPaveTileProvider)this.pluginMap.objects.get(id + PROVIDER_SUFFIX)).reset();
+        if (this.pluginMap.objects.containsKey(id + PROVIDER_SUFFIX)) {
+            ((TotalPaveTileProvider)this.pluginMap.objects.get(id + PROVIDER_SUFFIX)).reset();
+        }
+        else {
+            callbackContext.error("PluginTotalPaveTileLayer.remove could not find overlay in pluginMap for key: " + id);
+            return;
+        }
+        if (this.pluginMap.objects.containsKey((id))) {
+            TileOverlay overlay = (TileOverlay)this.pluginMap.objects.get(id);
+            this.$clearTileCache(overlay, callbackContext);
+        }
+        else {
+            callbackContext.error("PluginTotalPaveTileLayer.remove could not find overlay in pluginMap for key: " + id);
+            return;
+        }
         this.pluginMap.objects.remove(id);
         this.pluginMap.objects.remove(id + PROVIDER_SUFFIX);
 
-        this.$clearTileCache(args.getString(0), callbackContext);
     }
 }
