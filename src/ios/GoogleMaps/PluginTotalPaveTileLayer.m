@@ -138,4 +138,16 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
   [super pluginInitialize];
 }
 
+-(void)querySourceData:(CDVInvokedUrlCommand *)command {
+    [self.commandDelegate runInBackground:^{
+        TotalPaveTileProvider* provider = [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
+        NSArray<NSNumber*>* output = [provider querySourceData:[command.arguments objectAtIndex:1]
+            maxLon:[command.arguments objectAtIndex:2]
+            minLat:[command.arguments objectAtIndex:3]
+            maxLat:[command.arguments objectAtIndex:4]
+        ];
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:output] callbackId:command.callbackId];
+    }];
+}
+
 @end

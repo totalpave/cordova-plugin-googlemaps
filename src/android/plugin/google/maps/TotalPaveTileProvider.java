@@ -116,4 +116,8 @@ public class TotalPaveTileProvider implements TileProvider {
             return TileProvider.NO_TILE;
         }
     }
+
+    public int[] querySourceData(double minLon, double maxLon, double minLat, double maxLat) {
+        return TileGenerator.queryGeometryData(minLon, maxLon, minLat, maxLat);
+    }
 }

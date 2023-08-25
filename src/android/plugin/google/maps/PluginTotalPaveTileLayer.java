@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.totalpave.libtilegen.TileGenerator;
 
 public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterface  {
     protected final String PROVIDER_SUFFIX = "_Provider";
@@ -128,6 +129,27 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         }
         this.pluginMap.objects.remove(id);
         this.pluginMap.objects.remove(id + PROVIDER_SUFFIX);
+    }
 
+    public void querySourceData(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        cordova.getThreadPool().execute(() -> {
+            try {
+                String key = args.getString(0);
+                String providerKey = key + PROVIDER_SUFFIX;
+                // The objects should exist 99% of the time but we'd had odd crash reports that indicate it didn't exist. So let's at least prevent the crashes.
+                // We do still want errors that propagate to JS land to keep track of this issue.
+                if (this.pluginMap.objects.containsKey(providerKey)) {
+                    ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).querySourceData(args.getDouble(1), args.getDouble(2), args.getDouble(3), args.getDouble(4));
+                }
+                else {
+                    throw new JSONException("PluginTotalPaveTileLayer.reload could not find provider in pluginMap for key: " + key);
+                }
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+                callbackContext.error("" + e.getMessage());
+                return;
+            }
+        });
     }
 }

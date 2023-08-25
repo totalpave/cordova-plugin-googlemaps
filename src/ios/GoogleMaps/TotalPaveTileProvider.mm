@@ -147,4 +147,13 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
     }
 }
 
+- (NSArray<NSNumber*>*) querySourceData:(NSNumber*)minLon maxLon:(NSNumber*)maxLon minLat:(NSNumber*)minLat maxLat:(NSNumber*)maxLat {
+    std::vector<uint32_t> data = TP::TileGenerator::getInstance()->queryGeometryData([minLon doubleValue], [maxLon doubleValue], [minLat doubleValue], [maxLat doubleValue]);
+    NSMutableArray<NSNumber*>* output = [[NSMutableArray alloc] init];
+    for (NSInteger i = 0, length = data.size(); i < length; ++i) {
+        [output addObject:@(data[i])];
+    }
+    return [output copy];
+}
+
 @end

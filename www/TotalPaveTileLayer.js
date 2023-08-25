@@ -16,6 +16,12 @@ TotalPaveTileLayer.prototype.reload = function () {
   });
 }
 
+TotalPaveTileLayer.prototype.querySourceData = function(minLon, maxLon, minLat, maxLat) {
+  return new Promise((resolve, reject) => {
+    this.exec.call(this, resolve, reject, this.getPluginName(), 'querySourceData', [this.getId(), minLon, maxLon, minLat, maxLat]);
+  });
+}
+
 TotalPaveTileLayer.prototype.remove = function (callback) {
   var self = this;
   if (self._isRemoved) {
