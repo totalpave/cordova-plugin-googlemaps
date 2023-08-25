@@ -30,6 +30,15 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
         return;
     }
 
+    NSString* reloadSelectQuery = [opts valueForKey:@"reloadSelectQuery"];
+    if ([reloadSelectQuery isEqual:[NSNull null]] || reloadSelectQuery == nil) {
+        [self.commandDelegate
+            sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Reload Select Query is required."]
+            callbackId:command.callbackId
+        ];
+        return;
+    }
+
     NSArray* scale = [opts valueForKey:@"scale"];
     if ([scale isEqual:[NSNull null]] || scale == nil) {
         [self.commandDelegate
@@ -41,7 +50,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
     
     [self.commandDelegate runInBackground:^{
         NSError* error;
-        TotalPaveTileProvider* provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery scale:scale error:&error];
+        TotalPaveTileProvider* provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery reloadSelectQuery:reloadSelectQuery scale:scale error:&error];
         if (![error isEqual:[NSNull null]] && error != nil) {
             [self.commandDelegate
                 sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]
@@ -76,7 +85,18 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
 -(void)reload:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
         NSError* error;
-        [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error];
+
+        NSArray* ids = nil;
+        if (command.arguments.count > 1) {
+            ids = [command.arguments objectAtIndex:1];
+        }
+        
+        if (ids == nil) {
+            [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error];
+        }
+        else {
+            [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error ids:ids];
+        }
         if ([error isEqual:[NSNull null]] || error == nil) {
             [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK] callbackId:command.callbackId];
         }
@@ -136,6 +156,40 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
   }
   self.initialized = YES;
   [super pluginInitialize];
+}
+
+-(void)querySourceData:(CDVInvokedUrlCommand *)command {
+    [self.commandDelegate runInBackground:^{
+        TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
+        NSArray<NSNumber*>* output = [provider querySourceData:[command.arguments objectAtIndex:1]
+            maxLon:[command.arguments objectAtIndex:2]
+            minLat:[command.arguments objectAtIndex:3]
+            maxLat:[command.arguments objectAtIndex:4]
+        ];
+        [self.commandDelegate sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:output] callbackId:command.callbackId];
+    }];
+}
+
+-(void)setVisible:(CDVInvokedUrlCommand *)command {
+    TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
+    [provider setOpacity: [(NSNumber*)[command.arguments objectAtIndex:1]  isEqual: @1] ? 1 : 0];
+    [self.commandDelegate
+        sendPluginResult:[CDVPluginResult
+            resultWithStatus:CDVCommandStatus_OK
+        ]
+        callbackId:command.callbackId
+    ];
+}
+
+-(void)isVisible:(CDVInvokedUrlCommand *)command {
+    TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
+    [self.commandDelegate
+        sendPluginResult:[CDVPluginResult
+            resultWithStatus:CDVCommandStatus_OK
+            messageAsBool:((int)provider.opacity) == 1
+        ]
+        callbackId:command.callbackId
+    ];
 }
 
 @end

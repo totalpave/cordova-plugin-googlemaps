@@ -10,7 +10,7 @@
 
 NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
-- (id)initWithDB:(NSString *)dbPathStr selectQuery:(NSString *)selectQuery scale:(NSArray*)scale error:(NSError*_Nonnull*_Nonnull) error {
+- (id)initWithDB:(NSString *)dbPathStr selectQuery:(NSString *)selectQuery reloadSelectQuery:(NSString *)reloadSelectQuery scale:(NSArray*)scale error:(NSError*_Nonnull*_Nonnull) error {
     self = [super init];
     
     $scale = scale;
@@ -38,11 +38,13 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
     TPITilegenGeneratorSettingsBuilder* builder = [[TPITilegenGeneratorSettingsBuilder alloc] init];
     [builder setDBPath: [[NSURL URLWithString:dbPathStr] path]];
     [builder setSQLString: selectQuery];
+    [builder setReloadSQLString: reloadSelectQuery];
     [builder setDPIScale: dpiScale];
+    [builder setMinStrokeWidth: 4];
     [builder setAntiAlias: 1];
     [builder setTileSize: 512];
-    [builder setZoomModifier: 0.3f];
-    [builder setZoomModifierThreshold:16];
+    [builder setZoomModifier: 0.2f];
+    [builder setZoomModifierThreshold: 16];
         
     for (NSUInteger i = 0, length = scale.count; i < length; ++i) {
         NSDictionary* item = scale[i];
@@ -100,6 +102,55 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
     }];
 }
 
+- (void) reload:(NSError*_Nonnull*_Nonnull) error ids:(NSArray*) ids {
+    int status = 0;
+    [TPITilegenTileGenerator reloadData:status ids: ids];
+    if (status == 0) {} // No error occurred.
+    else if (status == TPITilegen_DATASET_LOAD_ERROR) {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Could not reload dataset."
+            }
+        ];
+        return;
+    }
+    else if (status == TPITilegen_INVALID_FEATURE) {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Dataset contained invalid features on reload."
+            }
+        ];
+        return;
+    }
+    else if (status == TPITilegen_UNSUPPORTED_GEOMETRY) {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Dataset contained unsupported features on reload. Only LineString and Polygons are supported."
+            }
+        ];
+        return;
+    }
+    else {
+        *error = [[NSError alloc]
+            initWithDomain:LIB_TILE_GEN_DOMAIN
+            code:status
+            userInfo: @{
+                NSLocalizedDescriptionKey: @"Reload received unexpected error received from libtilegen."
+            }
+        ];
+        return;
+    }
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [self clearTileCache];
+    }];
+}
+
 - (void) $load:(NSError*_Nonnull*_Nonnull) error {
     int status = 0;
     [TPITilegenTileGenerator load:status withSettings: $settings];
@@ -145,6 +196,10 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
         ];
         return;
     }
+}
+
+- (NSArray<NSNumber*>*) querySourceData:(NSNumber*)minLon maxLon:(NSNumber*)maxLon minLat:(NSNumber*)minLat maxLat:(NSNumber*)maxLat {
+    return [TPITilegenTileGenerator queryGeometryData:[minLon doubleValue] maxLon:[maxLon doubleValue] minLat:[minLat doubleValue] maxLat:[maxLat doubleValue]];
 }
 
 @end
