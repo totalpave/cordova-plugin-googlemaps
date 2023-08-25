@@ -31,24 +31,24 @@ public class TotalPaveTileProvider implements TileProvider {
     private static final int TILE_SIZE_DP = 256;
     private int tileSize;
 
-    public TotalPaveTileProvider(DisplayMetrics displayMetrics, String dbPath, String selectQuery, JSONArray scale) throws IllegalArgumentException {
+    public TotalPaveTileProvider(DisplayMetrics displayMetrics, String dbPath, String selectQuery, String reloadSelectQuery, JSONArray scale) throws IllegalArgumentException {
         super();
 
         File fdbPath = new File(URI.create(dbPath));
 
         this.tileSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, TILE_SIZE_DP, displayMetrics);
-
         this.settings = new GeneratorSettings();
         this.settings.setDBPath(fdbPath.getAbsolutePath())
             .setSQLString(selectQuery)
-            .setDpiScale(1.0f)
-            .setMinStrokeWidth(1)
+            .setReloadSQLString(reloadSelectQuery)
+            .setMinStrokeWidth(2)
+            .setStrokeWidth((int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 1, displayMetrics)))
+            .setDpiScale(displayMetrics.density)
             .setTileSize(this.tileSize)
-            .setAntiAlias(2)
-            .setZoomModifier(1f)
+            .setAntiAlias(1)
+            .setZoomModifier(0.2f)
             .setZoomModifierThreshold(16);
-
-
+        
         try {
             for (int i = 0; i < scale.length(); i++) {
                 JSONObject scaleObj = scale.getJSONObject(i);
@@ -100,6 +100,24 @@ public class TotalPaveTileProvider implements TileProvider {
         // Tile cache is cleared in PluginTotalPaveTileLayer.
     }
 
+    public void reload(int[] ids) {
+        int status = TileGenerator.reloadData(ids);
+        if (status == 0) {}
+        else if (status == TileGenerator.DATASET_LOAD_ERROR) {
+            throw new IllegalArgumentException("Could not reload dataset. Logcat may contain addition error messages.");
+        }
+        else if (status == TileGenerator.INVALID_FEATURE) {
+            throw new IllegalArgumentException("Dataset contained invalid features on reload. Logcat may contain addition error messages.");
+        }
+        else if (status == TileGenerator.UNSUPPORTED_GEOMETRY) {
+            throw new IllegalArgumentException("Dataset contained unsupported features on reload. Only LineString and Polygons are supported. Logcat may contain addition error messages.");
+        }
+        else {
+            throw new RuntimeException("Reload received unexpected error received from libtilegen. Error Code: " + status);
+        }
+        // Tile cache is cleared in PluginTotalPaveTileLayer.
+    }
+
     public void reset() {
         TileGenerator.reset();
         // Tile cache is cleared in PluginTotalPaveTileLayer.
@@ -115,5 +133,9 @@ public class TotalPaveTileProvider implements TileProvider {
         catch (NoTilesToRenderException | TileUnavailableException ex) {
             return TileProvider.NO_TILE;
         }
+    }
+
+    public int[] querySourceData(double minLon, double maxLon, double minLat, double maxLat) {
+        return TileGenerator.queryGeometryData(minLon, maxLon, minLat, maxLat);
     }
 }
