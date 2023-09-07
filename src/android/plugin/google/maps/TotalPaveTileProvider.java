@@ -37,12 +37,16 @@ public class TotalPaveTileProvider implements TileProvider {
         File fdbPath = new File(URI.create(dbPath));
 
         this.tileSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, TILE_SIZE_DP, displayMetrics);
-
         this.settings = new GeneratorSettings();
         this.settings.setDBPath(fdbPath.getAbsolutePath())
             .setSQLString(selectQuery)
             .setDpiScale(1.0f)
             .setMinStrokeWidth(1)
+            // stroke width and dpi scale settings had some problems on android, which makes the liners considerably thinner than ios
+            // IRI has this issue. libtilegen has been mostly fixed but strokeWidth default value is not available for android atm. It's inside the native c code.
+            // Because of that, applying dimensions to it causes an exception because it's null.
+            // .setStrokeWidth((int)Math.ceil(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.settings.strokeWidth, displayMetrics)))
+            // .setDpiScale(displayMetrics.density)
             .setTileSize(this.tileSize)
             .setAntiAlias(2)
             .setZoomModifier(1f)
