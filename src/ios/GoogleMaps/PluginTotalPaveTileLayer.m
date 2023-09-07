@@ -140,7 +140,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
 
 -(void)querySourceData:(CDVInvokedUrlCommand *)command {
     [self.commandDelegate runInBackground:^{
-        TotalPaveTileProvider* provider = [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
+        TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
         NSArray<NSNumber*>* output = [provider querySourceData:[command.arguments objectAtIndex:1]
             maxLon:[command.arguments objectAtIndex:2]
             minLat:[command.arguments objectAtIndex:3]

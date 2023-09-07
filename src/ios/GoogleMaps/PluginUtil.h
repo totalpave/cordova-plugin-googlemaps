@@ -6,12 +6,12 @@
 //
 //
 
-#ifndef MIN
-#import <NSObjCRuntime.h>
-#endif
+// #ifndef MIN
+// #import <NSObjCRuntime.h>
+// #endif
 #import <Foundation/Foundation.h>
 #import <Cordova/CDV.h>
-#import "MainViewController.h"
+// #import "MainViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 //#import "MFGoogleMapAdditions/GMSCoordinateBounds+Geometry.h"

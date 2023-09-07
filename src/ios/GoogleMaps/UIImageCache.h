@@ -9,6 +9,7 @@
 #define UIImageCache_h
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 @interface UIImageCache : NSObject
 

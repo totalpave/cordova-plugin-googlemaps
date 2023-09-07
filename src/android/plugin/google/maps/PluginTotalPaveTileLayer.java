@@ -139,7 +139,8 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
                 // The objects should exist 99% of the time but we'd had odd crash reports that indicate it didn't exist. So let's at least prevent the crashes.
                 // We do still want errors that propagate to JS land to keep track of this issue.
                 if (this.pluginMap.objects.containsKey(providerKey)) {
-                    ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).querySourceData(args.getDouble(1), args.getDouble(2), args.getDouble(3), args.getDouble(4));
+                    int[] ids = ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).querySourceData(args.getDouble(1), args.getDouble(2), args.getDouble(3), args.getDouble(4));
+                    callbackContext.success(new JSONArray(ids));
                 }
                 else {
                     throw new JSONException("PluginTotalPaveTileLayer.reload could not find provider in pluginMap for key: " + key);
