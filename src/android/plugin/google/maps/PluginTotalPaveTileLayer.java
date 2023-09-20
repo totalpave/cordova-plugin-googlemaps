@@ -105,6 +105,30 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         });
     }
 
+    public void setVisible(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        String id = args.getString(0);
+        Boolean isVisible = args.getBoolean(1);
+        if (this.pluginMap.objects.containsKey((id))) {
+            TileOverlay overlay = (TileOverlay) this.pluginMap.objects.get(id);
+            overlay.setVisible(isVisible);
+            callbackContext.success();
+        }
+        else {
+            callbackContext.error("PluginTotalPaveTileLayer.setVisible could not find overlay in pluginMap for key: " + id);
+        }
+    }
+
+    public void isVisible(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        String id = args.getString(0);
+        if (this.pluginMap.objects.containsKey((id))) {
+            TileOverlay overlay = (TileOverlay) this.pluginMap.objects.get(id);
+            callbackContext.success(overlay.isVisible() ? 1 : 0);
+        }
+        else {
+            callbackContext.error("PluginTotalPaveTileLayer.setVisible could not find overlay in pluginMap for key: " + id);
+        }
+    }
+
     public void remove(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         String id = args.getString(0);
         final PluginTotalPaveTileLayer tileLayer = this.getTotalPaveTileLayer(id);
@@ -140,7 +164,8 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
                 // We do still want errors that propagate to JS land to keep track of this issue.
                 if (this.pluginMap.objects.containsKey(providerKey)) {
                     int[] ids = ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).querySourceData(args.getDouble(1), args.getDouble(2), args.getDouble(3), args.getDouble(4));
-                    callbackContext.success(new JSONArray(ids));
+                    JSONArray data = new JSONArray(ids);
+                    callbackContext.success(data);
                 }
                 else {
                     throw new JSONException("PluginTotalPaveTileLayer.reload could not find provider in pluginMap for key: " + key);

@@ -150,4 +150,26 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
     }];
 }
 
+-(void)setVisible:(CDVInvokedUrlCommand *)command {
+    TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
+    [provider setOpacity: [(NSNumber*)[command.arguments objectAtIndex:1]  isEqual: @1] ? 1 : 0];
+    [self.commandDelegate
+        sendPluginResult:[CDVPluginResult
+            resultWithStatus:CDVCommandStatus_OK
+        ]
+        callbackId:command.callbackId
+    ];
+}
+
+-(void)isVisible:(CDVInvokedUrlCommand *)command {
+    TotalPaveTileProvider* provider = (TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]];
+    [self.commandDelegate
+        sendPluginResult:[CDVPluginResult
+            resultWithStatus:CDVCommandStatus_OK
+            messageAsBool:((int)provider.opacity) == 1
+        ]
+        callbackId:command.callbackId
+    ];
+}
+
 @end
