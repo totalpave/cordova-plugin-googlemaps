@@ -15,11 +15,11 @@ import java.net.URI;
 import java.lang.IllegalArgumentException;
 import java.lang.RuntimeException;
 
-import com.totalpave.libtilegen.TileGenerator;
-import com.totalpave.libtilegen.GeneratorSettings;
-import com.totalpave.libtilegen.ScaleItem;
-import com.totalpave.libtilegen.NoTilesToRenderException;
-import com.totalpave.libtilegen.TileUnavailableException;
+import com.totalpave.tilegen.TileGenerator;
+import com.totalpave.tilegen.GeneratorSettings;
+import com.totalpave.tilegen.ScaleItem;
+import com.totalpave.tilegen.NoTilesToRenderException;
+import com.totalpave.tilegen.TileUnavailableException;
 
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -41,7 +41,7 @@ public class TotalPaveTileProvider implements TileProvider {
         this.settings = new GeneratorSettings();
         this.settings.setDBPath(fdbPath.getAbsolutePath())
             .setSQLString(selectQuery)
-            .setDpiScale(1)
+            .setDpiScale(1.0f)
             .setMinStrokeWidth(1)
             .setTileSize(this.tileSize)
             .setAntiAlias(2)

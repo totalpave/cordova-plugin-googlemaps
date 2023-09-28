@@ -1,24 +1,22 @@
 
 #import "TotalPaveTileProvider.h"
-#import <libtilegen/tp/TileGenerator.h>
-#import <libtilegen/tp/Logger.h>
-#import <libtilegen/tp/ErrorCode.h>
-#import <libtilegen/tp/Scale.h>
-#import <libtilegen/tp/GeneratorSettings.h>
+#import <tilegen/tilegen.h>
 
 @implementation TotalPaveTileProvider {
-    NSArray* scale;
-    TP::Logger* logger;
-    TP::GeneratorSettings settings;
+    NSArray* $scale;
+    TPITilegenLogger* $logger;
+    TPITilegenGeneratorSettings* $settings;
 }
 
 NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
 - (id)initWithDB:(NSString *)dbPathStr selectQuery:(NSString *)selectQuery scale:(NSArray*)scale error:(NSError*_Nonnull*_Nonnull) error {
     self = [super init];
-    self->scale = scale;
-    self->logger = new TP::Logger("TotalPaveTileProvider");
-    TP::Logger::setActiveLogger(self->logger);
+    
+    $scale = scale;
+    
+    $logger = [[TPITilegenLogger alloc] init:@"TotalPaveTileProvider"];
+    [TPITilegenLogger setActiveLogger: $logger];
 
     /**
         https://developer.apple.com/documentation/uikit/uiscreen/1617836-scale?language=objc
@@ -37,55 +35,62 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
         dpiScale = 9;
     }
     
-    TP::GeneratorSettingsBuilder builder;
-    builder.setDBPath([[[NSURL URLWithString:dbPathStr] path] UTF8String])
-        .setSQLString([selectQuery UTF8String])
-        .setDpiScale(dpiScale)
-        .setAntiAlias(1)
-        .setTileSize(512)
-        .setZoomModifier(0.3)
-        .setZoomModifierThreshold(16);
+    TPITilegenGeneratorSettingsBuilder* builder = [[TPITilegenGeneratorSettingsBuilder alloc] init];
+    [builder setDBPath: [[NSURL URLWithString:dbPathStr] path]];
+    [builder setSQLString: selectQuery];
+    [builder setDPIScale: dpiScale];
+    [builder setAntiAlias: 1];
+    [builder setTileSize: 512];
+    [builder setZoomModifier: 0.3f];
+    [builder setZoomModifierThreshold:16];
         
     for (NSUInteger i = 0, length = scale.count; i < length; ++i) {
-        NSDictionary *item = scale[i];
-        TP::Scale::Item scaleItem;
-        scaleItem.low = [(NSNumber*)[item valueForKey:@"low"] doubleValue];
-        NSNumber* high = [item valueForKey:@"high"];
-        if (![high isEqual:[NSNull null]]) {
-            scaleItem.high = [high doubleValue];
+        NSDictionary* item = scale[i];
+        
+        NSNumber* ohigh = [item valueForKey:@"high"];
+        double high = std::numeric_limits<double>::infinity();
+        if (![ohigh isEqual:[NSNull null]]) {
+            high = [ohigh doubleValue];
         }
-        // Minor Concern, we are assigning uint to uint32_t.
-        scaleItem.strokeColor = [(NSNumber*)[item valueForKey:@"stroke"] unsignedIntValue];
-        scaleItem.fillColor = [(NSNumber*)[item valueForKey:@"fill"] unsignedIntValue];
-        builder.addScaleItem(scaleItem);
+        
+        TPITilegenScaleItem* scaleItem = [
+            [TPITilegenScaleItem alloc]
+            initLow: [(NSNumber*)[item valueForKey:@"low"] doubleValue]
+            high: high
+            stroke: [(NSNumber*)[item valueForKey:@"stroke"] unsignedIntValue]
+            fill: [(NSNumber*)[item valueForKey:@"fill"] unsignedIntValue]
+        ];
+        
+        [builder addScaleItem: scaleItem];
     }
     
-    self->settings = builder.build();
+    $settings = [builder build];
     [self $load:error];
     return self;
 }
 
  - (void) reset {
-    TP::TileGenerator::getInstance()->reset();
+     [TPITilegenTileGenerator reset];
     [[NSOperationQueue mainQueue] addOperationWithBlock:^{
         [self clearTileCache];
     }];
  }
 
 - ( UIImage * _Nullable ) tileForX:(NSUInteger)x y:(NSUInteger)y zoom:(NSUInteger)zoom {
-    std::vector<uint8_t> buffer;
+    NSMutableData* buffer = [[NSMutableData alloc] init];
+    
+    int status = [TPITilegenTileGenerator render:buffer x:(unsigned int)x y:(unsigned int)y z:(unsigned int)zoom];
 
-    int status = TP::TileGenerator::getInstance()->render(buffer, (int)x, (int)y, (int)zoom);
-    if (status == TP::ErrorCode::TILE_UNAVAILABLE) {
+    if (status == TPITilegen_TILE_UNAVAILABLE) {
         return nil;
     }
-    if (status == TP::ErrorCode::NO_FEATURES_TO_RENDER) {
+    if (status == TPITilegen_NO_FEATURES_TO_RENDER) {
         return kGMSTileLayerNoTile;
     }
     else if (status != 0) {
         NSLog(@"Error during tile render, code: %i", status);
     }
-    return [[UIImage alloc] initWithData: [[NSData alloc] initWithBytes:buffer.data() length:buffer.size()]];
+    return [[UIImage alloc] initWithData: buffer];
 }
 
 - (void) reload:(NSError*_Nonnull*_Nonnull) error {
@@ -97,9 +102,10 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
 - (void) $load:(NSError*_Nonnull*_Nonnull) error {
     int status = 0;
-    TP::TileGenerator::getInstance()->load(status, self->settings);
+    [TPITilegenTileGenerator load:status withSettings: $settings];
+    
     if (status == 0) {} // No error occurred.
-    else if (status == TP::ErrorCode::DATASET_LOAD_ERROR) {
+    else if (status == TPITilegen_DATASET_LOAD_ERROR) {
         *error = [[NSError alloc]
             initWithDomain:LIB_TILE_GEN_DOMAIN
             code:status
@@ -109,7 +115,7 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
         ];
         return;
     }
-    else if (status == TP::ErrorCode::INVALID_FEATURE) {
+    else if (status == TPITilegen_INVALID_FEATURE) {
         *error = [[NSError alloc]
             initWithDomain:LIB_TILE_GEN_DOMAIN
             code:status
@@ -119,7 +125,7 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
         ];
         return;
     }
-    else if (status == TP::ErrorCode::UNSUPPORTED_GEOMETRY) {
+    else if (status == TPITilegen_UNSUPPORTED_GEOMETRY) {
         *error = [[NSError alloc]
             initWithDomain:LIB_TILE_GEN_DOMAIN
             code:status
