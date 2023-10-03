@@ -168,7 +168,7 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
                     callbackContext.success(data);
                 }
                 else {
-                    throw new JSONException("PluginTotalPaveTileLayer.reload could not find provider in pluginMap for key: " + key);
+                    throw new JSONException("PluginTotalPaveTileLayer.querySourceData could not find provider in pluginMap for key: " + key);
                 }
             }
             catch (JSONException e) {
