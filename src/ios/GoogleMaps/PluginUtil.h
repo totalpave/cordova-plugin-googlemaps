@@ -4,14 +4,15 @@
 //
 //  Created by Masashi Katsumata.
 //
-//
+// ================================================================================================
+// TotalPave Modifications
+// - Renamed MainViewController.h -> ViewController.h
+// - Removed NSObjCRuntime.h import. Header was removed in iOS 11, the TotalPave min iOS is currently 13.
+// ================================================================================================
 
-#ifndef MIN
-#import <NSObjCRuntime.h>
-#endif
 #import <Foundation/Foundation.h>
 #import <Cordova/CDV.h>
-#import "MainViewController.h"
+#import "ViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 //#import "MFGoogleMapAdditions/GMSCoordinateBounds+Geometry.h"
