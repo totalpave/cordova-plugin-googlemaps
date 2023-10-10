@@ -932,41 +932,16 @@ Map.prototype.fromLatLngToPoint = function(latLng, callback) {
 };
 /**
  * Maps a point coordinate in the map's view to an Earth coordinate.
+ * pixel - [x,y]
  */
 Map.prototype.fromPointToLatLng = function(pixel, callback) {
-  var self = this;
-  if (typeof pixel === 'object' && 'x' in pixel && 'y' in pixel) {
-    pixel = [pixel.x, pixel.y];
-  }
-  if (pixel.length == 2 && utils.isArray(pixel)) {
-
-    var resolver = function(resolve, reject) {
-      self.exec.call(self,
-        function(result) {
-          var latLng = new LatLng(result[0] || 0, result[1] || 0);
-          resolve.call(self, latLng);
-        },
-        reject.bind(self),
-        self.__pgmId, 'fromPointToLatLng', [pixel[0], pixel[1]]);
-    };
-
-    if (typeof callback === 'function') {
-      resolver(callback, self.errorHandler);
-    } else {
-      return new Promise(resolver);
-    }
-  } else {
-    var rejector = function(resolve, reject) {
-      reject('The pixel[] argument is invalid');
-    };
-
-    if (typeof callback === 'function') {
-      rejector(callback, self.errorHandler);
-    } else {
-      return new Promise(rejector);
-    }
-  }
-
+  this.exec.call(this,
+    function(result) {
+      callback(new LatLng(result[0] || 0, result[1] || 0));
+    },
+    this.errorHandler,
+    this.__pgmId, 'fromPointToLatLng', [pixel[0], pixel[1]]
+  );
 };
 
 Map.prototype.setPadding = function(p1, p2, p3, p4) {
