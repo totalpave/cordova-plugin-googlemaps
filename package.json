@@ -60,8 +60,7 @@
   "homepage": "https://github.com/mapsplugin/cordova-plugin-googlemaps",
   "devDependencies": {
     "cordova-js": "^4.2.4",
-    "eslint": "^5.7.0",
-    "jest": "^23.6.0"
+    "eslint": "^5.7.0"
   },
   "dependencies": {
     "cordova-common": "4.1.0"
