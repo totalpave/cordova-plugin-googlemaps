@@ -12,7 +12,6 @@
 
 #import <Foundation/Foundation.h>
 #import <Cordova/CDV.h>
-#import "ViewController.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 //#import "MFGoogleMapAdditions/GMSCoordinateBounds+Geometry.h"
