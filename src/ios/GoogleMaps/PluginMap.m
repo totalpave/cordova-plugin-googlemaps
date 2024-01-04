@@ -586,25 +586,6 @@
         [CATransaction setAnimationTimingFunction:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut]];
 
         [CATransaction setCompletionBlock:^{
-          if (self.isRemoved) {
-            return;
-          }
-          if (cameraBounds != nil){
-
-            GMSCameraPosition *cameraPosition2 = [GMSCameraPosition cameraWithLatitude:self.mapCtrl.map.camera.target.latitude
-                                                                             longitude:self.mapCtrl.map.camera.target.longitude
-                                                                                  zoom:self.mapCtrl.map.camera.zoom
-                                                                               bearing:bearing
-                                                                          viewingAngle:angle];
-
-            [self.mapCtrl.map setCamera:cameraPosition2];
-
-          } else {
-            if (bearing == 0) {
-              GMSCoordinateBounds *bounds = [[GMSCoordinateBounds alloc] initWithRegion:self.mapCtrl.map.projection.visibleRegion];
-              [self.mapCtrl.map cameraForBounds:bounds insets:paddingUiEdgeInsets];
-            }
-          }
           [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }];
 
