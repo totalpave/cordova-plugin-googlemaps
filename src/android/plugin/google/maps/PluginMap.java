@@ -2289,16 +2289,16 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
           e.printStackTrace();
         }
         if (disableAutoPan) {
-          marker.showInfoWindow();
+          // marker.showInfoWindow();
           return true;
         } else {
-          marker.showInfoWindow();
+          // marker.showInfoWindow();
           return false;
         }
       }
     }
 
-    marker.showInfoWindow();
+    // marker.showInfoWindow();
     return true;
     //return false;
   }
