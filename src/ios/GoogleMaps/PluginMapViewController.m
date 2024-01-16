@@ -405,7 +405,7 @@
   if ([clusterId_markerId containsString:@"markercluster_"]) {
     if ([clusterId_markerId containsString:@"-marker_"]) {
       //NSLog(@"--->activeMarker = %@", marker.userData);
-      self.map.selectedMarker = marker;
+      // self.map.selectedMarker = marker;
       self.activeMarker = marker;
       NSString *markerTag = [NSString stringWithFormat:@"%@", marker.userData];
       if ([markerTag hasPrefix:@"markercluster_"]) {
@@ -430,7 +430,7 @@
     [self execJS:@"javascript:if(window.cordova){cordova.fireDocumentEvent('plugin_touch', {});}"];
     [self triggerMarkerEvent:@"marker_click" marker:marker];
     //NSLog(@"--->activeMarker = %@", marker.userData);
-    self.map.selectedMarker = marker;
+    // self.map.selectedMarker = marker;
     self.activeMarker = marker;
   }
 

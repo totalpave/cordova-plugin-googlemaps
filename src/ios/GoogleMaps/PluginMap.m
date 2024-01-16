@@ -634,7 +634,7 @@
     NSString *markerId = [command.arguments objectAtIndex:0];
     GMSMarker *marker = [self.mapCtrl.objects objectForKey:markerId];
     if (marker != nil) {
-      self.mapCtrl.map.selectedMarker = marker;
+      // self.mapCtrl.map.selectedMarker = marker;
       self.mapCtrl.activeMarker = marker;
     }
 

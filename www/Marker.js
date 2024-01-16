@@ -21,6 +21,8 @@ var Marker = function(map, markerOptions, _exec, extras) {
     self.set('position', markerOptions.position);
   }
 
+  self.set('shouldShowInfoWindow', false);
+
   //-----------------------------------------------
   // Sets event listeners
   //-----------------------------------------------
@@ -313,11 +315,17 @@ Marker.prototype.setRotation = function(rotation) {
 Marker.prototype.getRotation = function() {
   return this.get('rotation');
 };
+Marker.prototype.setShouldShowInfoWindow = function(shouldShow) {
+  this.set('shouldShowInfoWindow', shouldShow);
+};
+Marker.prototype.getShouldShowInfoWindow = function() {
+  return this.get('shouldShowInfoWindow');
+};
 Marker.prototype.showInfoWindow = function() {
   var self = this;
   //if (!self.get('title') && !self.get('snippet') ||
   //    self.get('isInfoWindowVisible')) {
-  if (!self.get('title') && !self.get('snippet')) {
+  if (!self.get('shouldShowInfoWindow') || (!self.get('title') && !self.get('snippet'))) {
     return;
   }
   self.set('isInfoWindowVisible', true);
