@@ -9,7 +9,7 @@ var commandQueue = [];
 var _isWaitMethod = null;
 var _isExecuting = false;
 var _executingCnt = 0;
-var MAX_EXECUTE_CNT = 10;
+var MAX_EXECUTE_CNT = 100;
 var _lastGetMapExecuted = 0;
 var _isResizeMapExecuting = false;
 
