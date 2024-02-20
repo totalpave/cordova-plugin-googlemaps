@@ -130,6 +130,8 @@
     <engine name="apple-ios" version=">=10.0.0" />
   </engines>
 
+  <dependency id="@totalpave/cordova-plugin-tilegen" version="0.3.6" />
+
   <!-- android -->
   <platform name="android">
     <info>
@@ -228,7 +230,6 @@
     <resource-file src="src/android/frameworks/tbxml-android.aar" target="libs/tbxml-android.aar"/>
     <resource-file src="src/android/frameworks/tbxml-android.aar" target="app/src/libs/tbxml-android.aar"/>
 
-    <framework src="totalpave:tilegen:0.3.3" />
     <framework src="src/android/frameworks/pgm-custom.gradle" custom="true" type="gradleReference"/>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -285,7 +286,6 @@
 
   <!-- ios -->
   <platform name="ios">
-    <dependency id="@totalpave/cordova-plugin-tilegen" version="0.3.3" />
 
     <preference name="LOCATION_WHEN_IN_USE_DESCRIPTION" default="This app wants to get your location while this app runs only."/>
     <preference name="LOCATION_ALWAYS_USAGE_DESCRIPTION" default="This app wants to get your location always, even this app runs in background."/>
