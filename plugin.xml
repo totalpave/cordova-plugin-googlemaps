@@ -297,6 +297,8 @@
       <runs/>
     </js-module>
 
+    <resource-file src="src/ios/GoogleMapsPrivacy.bundle" target="GoogleMapsPrivacy.bundle" />
+
     <info>
       Official document https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/v2.6.0/README.md Please consider to buy a beer for us 🍺 https://github.com/mapsplugin/cordova-plugin-googlemaps#buy-us-a-beer
     </info>
@@ -471,7 +473,7 @@
             <source url="https://github.com/CocoaPods/Specs.git"/>
         </config>
         <pods>
-          <pod name="GoogleMaps" spec="7.4.0" />
+          <pod name="GoogleMaps" spec="8.4.0" />
         </pods>
     </podspec>
 
