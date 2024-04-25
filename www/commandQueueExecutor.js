@@ -1,16 +1,19 @@
 /*****************************************************************************
  * Command queue mechanism
  * (Save the number of method executing at the same time)
- *****************************************************************************/
+ * 
+ * Changes:
+ * Removed most excess variables.
+ * Removed multi-getMap call guards. This is an app usage problem.
+ * Removed code that discarded calls if passing call count.
+ * Refactored "queue" loop to run batches of queued calls before breaking for 50 milliseconds. This should preserve some intended purpose of this queue but may need to be tweaked later.
+ * Moved _exec calls to after adding to the command queue and at the end of an _exec call, instead of inside the success and fail callbacks on each item in the queue. Appropriate if-conditions were also added to prevent calling _exec while it is running.
+*****************************************************************************/
 var cordova_exec = require('cordova/exec'),
   common = require('./Common');
 
 var commandQueue = [];
-var _isWaitMethod = null;
 var _isExecuting = false;
-var _executingCnt = 0;
-var MAX_EXECUTE_CNT = 100;
-var _lastGetMapExecuted = 0;
 var _isResizeMapExecuting = false;
 
 // This flag becomes true when the page will be unloaded.
@@ -18,6 +21,10 @@ var _stopRequested = false;
 
 
 function execCmd(success, error, pluginName, methodName, args, execOptions) {
+  if (_stopRequested) {
+    return;
+  }
+
   execOptions = execOptions || {};
 
   // The JavaScript special keyword 'this' indicates `who call this function`.
@@ -52,101 +59,68 @@ function execCmd(success, error, pluginName, methodName, args, execOptions) {
         if (methodName === 'resizeMap') {
           _isResizeMapExecuting = false;
         }
+      
+        if (_stopRequested) {
+          return;
+        }
 
-        // Even if the method was successful,
-        // but the _stopRequested flag is true,
-        // do not execute further code.
-        if (!_stopRequested && success) {
+        if (success) {
           var results = Array.prototype.slice.call(arguments, 0);
-          common.nextTick(function() {
+          ((overlay, results) => {
             success.apply(overlay,results);
-          });
+          })(overlay, results);
         }
-
-        // Insert small delays only for `map.getMap()`,
-        // because if you execute three or four `map.getMap()` at the same time,
-        // Android OS itself crashes.
-        // In order to prevent this error, insert small delays.
-        var delay = 0;
-        if (methodName === _isWaitMethod) {
-          if (_isWaitMethod === 'getMap' && Date.now() - _lastGetMapExecuted < 1500) {
-            delay = 1500;
-          }
-          _lastGetMapExecuted = Date.now();
-          _isWaitMethod = null;
-        }
-        setTimeout(function() {
-          _executingCnt--;
-          common.nextTick(_exec);
-        }, delay);
       },
       function() {
         //-------------------------------
         // error callback
         //-------------------------------
+
         if (methodName === 'resizeMap') {
           _isResizeMapExecuting = false;
         }
-        if (!_stopRequested && error) {
+      
+        if (_stopRequested) {
+          return;
+        }
+
+        if (error) {
           var results = Array.prototype.slice.call(arguments, 0);
+          ((overlay, results) => {
+            error(overlay,results);
+          })(overlay, results);
+
           common.nextTick(function() {
             error.apply(overlay,results);
           });
         }
-
-        if (methodName === _isWaitMethod) {
-          _isWaitMethod = null;
-        }
-        _executingCnt--;
-        common.nextTick(_exec);
       },
       pluginName, methodName, args]
   });
 
-  // In order to execute all methods in safe,
-  // the maps plugin limits the number of execution in a moment to 10.
-  //
-  // Note that Cordova-Android drops has also another internal queue,
-  // and the internal queue drops our statement if the app send too much.
-  //
-  // Also executing too much statements at the same time,
-  // it would cause many errors in native side, such as out-of-memory.
-  //
-  // In order to prevent these troubles, the maps plugin limits the number of execution is 10.
-  if (_isExecuting || _executingCnt >= MAX_EXECUTE_CNT || _isWaitMethod || commandQueue.length === 0) {
-    return;
+  if (!_isExecuting) {
+    common.nextTick(_exec);
   }
-  common.nextTick(_exec);
 }
 function _exec() {
-
-  // You probably wonder why there is this code because it's already simular code at the end of the execCmd function.
-  //
-  // Because the commandQueue might change after the last code of the execCmd.
-  // (And yes, it was occurred.)
-  // In order to block surely, block the execution again.
-  if (_isExecuting || _executingCnt >= MAX_EXECUTE_CNT || _isWaitMethod || commandQueue.length === 0) {
+  if (commandQueue.length === 0) {
+    _isExecuting = false;
     return;
   }
   _isExecuting = true;
 
-  // Execute some execution requests (up to 10) from the commandQueue.
-  var methodName;
-  while (commandQueue.length > 0 && _executingCnt < MAX_EXECUTE_CNT) {
-    if (!_stopRequested) {
-      _executingCnt++;
-    }
+  var batchCounter = 0;
 
-    // Pick up the head one.
+  while (commandQueue.length > 0 && batchCounter < 100) {
+    batchCounter++;
     var commandParams = commandQueue.shift();
-    methodName = commandParams.args[3];
+    var methodName = commandParams.args[3];
 
     // If the request is `map.refreshLayout()` and another `map.refreshLayout()` is executing,
     // skip it.
     // This prevents to execute multiple `map.refreshLayout()` at the same time.
     if (methodName === 'resizeMap') {
       if (_isResizeMapExecuting) {
-        _executingCnt--;
         continue;
       }
       _isResizeMapExecuting = true;
@@ -155,21 +129,20 @@ function _exec() {
     // If the `_stopRequested` flag is true,
     // do not execute any statements except `remove()` or `clear()` methods.
     if (_stopRequested && (!commandParams.execOptions.remove || methodName !== 'clear')) {
-      _executingCnt--;
       continue;
     }
 
     // Some methods have to block other execution requests, such as `map.clear()`
     if (commandParams.execOptions.sync) {
-      _isWaitMethod = methodName;
       cordova_exec.apply(this, commandParams.args);
       break;
     }
     cordova_exec.apply(this, commandParams.args);
   }
 
-  _isExecuting = false;
-
+  setTimeout(function() {
+    common.nextTick(_exec);
+  }, 50);
 }
 
 
