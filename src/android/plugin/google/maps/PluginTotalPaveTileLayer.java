@@ -16,10 +16,24 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
             try {
                 String key = args.getString(0);
                 String providerKey = key + PROVIDER_SUFFIX;
+                // Nullable
+                JSONArray jids = args.optJSONArray(1);
+
                 // The objects should exist 99% of the time but we'd had odd crash reports that indicate it didn't exist. So let's at least prevent the crashes.
                 // We do still want errors that propagate to JS land to keep track of this issue.
                 if (this.pluginMap.objects.containsKey(providerKey)) {
-                    ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).reload();
+                    if (jids == null) {
+                        ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).reload();
+                    }
+                    else {
+                        int[] ids = new int[jids.length()];
+
+                        for (int i = 0, length = jids.length(); i < length; ++i) {
+                            ids[i] = jids.getInt(i);
+                        }
+
+                        ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).reload(ids);
+                    }
                 }
                 else {
                     throw new JSONException("PluginTotalPaveTileLayer.reload could not find provider in pluginMap for key: " + key);
@@ -61,6 +75,11 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
             return;
         }
 
+        if (!opts.has("reloadSelectQuery")) {
+            callbackContext.error("Reload Select Query is required.");
+            return;
+        }
+
         if (!opts.has("scale")) {
             callbackContext.error("scale is required.");
             return;
@@ -73,6 +92,7 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
                     cordova.getContext().getResources().getDisplayMetrics(),
                     opts.getString("dbPath"),
                     opts.getString("selectQuery"),
+                    opts.getString("reloadSelectQuery"),
                     opts.getJSONArray("scale")
                 );
             }
@@ -104,6 +124,32 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         });
     }
 
+    public void setVisible(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        String id = args.getString(0);
+        Boolean isVisible = args.getBoolean(1);
+        if (this.pluginMap.objects.containsKey((id))) {
+            cordova.getActivity().runOnUiThread(() -> {
+                TileOverlay overlay = (TileOverlay) this.pluginMap.objects.get(id);
+                overlay.setVisible(isVisible);
+                callbackContext.success();
+            });
+        }
+        else {
+            callbackContext.error("PluginTotalPaveTileLayer.setVisible could not find overlay in pluginMap for key: " + id);
+        }
+    }
+
+    public void isVisible(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        String id = args.getString(0);
+        if (this.pluginMap.objects.containsKey((id))) {
+            TileOverlay overlay = (TileOverlay) this.pluginMap.objects.get(id);
+            callbackContext.success(overlay.isVisible() ? 1 : 0);
+        }
+        else {
+            callbackContext.error("PluginTotalPaveTileLayer.isVisible could not find overlay in pluginMap for key: " + id);
+        }
+    }
+
     public void remove(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
         String id = args.getString(0);
         final PluginTotalPaveTileLayer tileLayer = this.getTotalPaveTileLayer(id);
@@ -128,6 +174,29 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
         }
         this.pluginMap.objects.remove(id);
         this.pluginMap.objects.remove(id + PROVIDER_SUFFIX);
+    }
 
+    public void querySourceData(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
+        cordova.getThreadPool().execute(() -> {
+            try {
+                String key = args.getString(0);
+                String providerKey = key + PROVIDER_SUFFIX;
+                // The objects should exist 99% of the time but we'd had odd crash reports that indicate it didn't exist. So let's at least prevent the crashes.
+                // We do still want errors that propagate to JS land to keep track of this issue.
+                if (this.pluginMap.objects.containsKey(providerKey)) {
+                    int[] ids = ((TotalPaveTileProvider)this.pluginMap.objects.get(providerKey)).querySourceData(args.getDouble(1), args.getDouble(2), args.getDouble(3), args.getDouble(4));
+                    JSONArray data = new JSONArray(ids);
+                    callbackContext.success(data);
+                }
+                else {
+                    throw new JSONException("PluginTotalPaveTileLayer.querySourceData could not find provider in pluginMap for key: " + key);
+                }
+            }
+            catch (JSONException e) {
+                e.printStackTrace();
+                callbackContext.error("" + e.getMessage());
+                return;
+            }
+        });
     }
 }

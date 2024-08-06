@@ -10,9 +10,20 @@ utils.extend(TotalPaveTileLayer, Overlay);
 // Setup prototype here
 // ex: Polyline.prototype.setPoints = function (points) {
 
-TotalPaveTileLayer.prototype.reload = function () {
+/**
+ * 
+ * @param {Array<int>} ids Optional array to reload specific parts of the dataset. If not provided entire dataset will be reloaded. 
+ * @returns 
+ */
+TotalPaveTileLayer.prototype.reload = function (ids) {
   return new Promise((resolve, reject) => {
-    this.exec.call(this, resolve, reject, this.getPluginName(), 'reload', [this.getId()]);
+    this.exec.call(this, resolve, reject, this.getPluginName(), 'reload', [this.getId(), ids]);
+  });
+}
+
+TotalPaveTileLayer.prototype.querySourceData = function(minLon, maxLon, minLat, maxLat) {
+  return new Promise((resolve, reject) => {
+    this.exec.call(this, resolve, reject, this.getPluginName(), 'querySourceData', [this.getId(), minLon, maxLon, minLat, maxLat]);
   });
 }
 
@@ -55,6 +66,28 @@ TotalPaveTileLayer.prototype.remove = function (callback) {
   self.trigger(self.__pgmId + '_remove');
 
   return result;
-};
+}
+
+TotalPaveTileLayer.prototype.setVisible = function (isVisible) {
+  return new Promise((resolve, reject) => {
+    this.exec.call(this, resolve, reject, this.getPluginName(), 'setVisible', [this.getId(), isVisible]);
+  });
+}
+
+TotalPaveTileLayer.prototype.isVisible = function () {
+  return new Promise((resolve, reject) => {
+    this.exec.call(
+      this,
+      (isVisible) => {
+        resolve(isVisible === 1);
+      },
+      reject,
+      this.getPluginName(),
+      'isVisible',
+      [this.getId()]
+    );
+  });
+}
+
 module.exports = TotalPaveTileLayer;
   

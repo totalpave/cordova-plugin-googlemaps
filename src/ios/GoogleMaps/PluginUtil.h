@@ -7,9 +7,12 @@
 // ================================================================================================
 // TotalPave Modifications
 // - Renamed MainViewController.h -> ViewController.h
-// - Removed NSObjCRuntime.h import. Header was removed in iOS 11, the TotalPave min iOS is currently 13.
+// - Commented out NSObjCRuntime.h import. Header was removed in iOS 11, the TotalPave min iOS is currently 13.
 // ================================================================================================
 
+// #ifndef MIN
+// #import <NSObjCRuntime.h>
+// #endif
 #import <Foundation/Foundation.h>
 #import <Cordova/CDV.h>
 #import <QuartzCore/QuartzCore.h>
