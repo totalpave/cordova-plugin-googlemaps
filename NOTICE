@@ -1,0 +1,9 @@
+
+This project is forked from Masashi Katsumata (https://github.com/mapsplugin/cordova-plugin-googlemaps).
+The fork (https://github.com/totalpave/cordova-plugin-googlemaps) introduces v3 which contains new code, features and additional fixes over the original codebase.
+
+This fork contains a propreitary library ("libtilegen") owned by Total Pave Inc. All rights reserved.
+
+New source files is licensed under Apache 2.0 License.
+Modifications to existing source files is licensed under Apache 2.0 License.
+libtilegen is used under licensed.
