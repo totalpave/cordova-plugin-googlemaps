@@ -265,13 +265,6 @@ var tileOverlay = map.addTileOverlay({
 });</pre></td>
 </tr>
 <tr>
-  <td><a href="https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/v2.6.0/class/KmlOverlay/README.md"><img src="https://github.com/mapsplugin/cordova-plugin-googlemaps/blob/multiple_maps/images/kmloverlay.png?raw=true"><br>KmlOverlay</a></td>
-  <td><pre>
-map.addKmlOverlay({
-  'url': 'polygon.kml'
-}, function(kmlOverlay) { ... });</pre></td>
-</tr>
-<tr>
   <td><a href="https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/v2.6.0/class/Geocoder/README.md"><img src="https://github.com/mapsplugin/cordova-plugin-googlemaps/blob/master/images/geocoder.png?raw=true"><br>Geocoder</a></td>
   <td><pre>
 plugin.google.maps.Geocoder.geocode({
@@ -392,7 +385,6 @@ You can write your code `similar to` the Google Maps JavaScript API v3.
 | google.maps.geometry.encoding     | plugin.google.maps.geometry.encoding  |
 | google.maps.geometry.poly         | plugin.google.maps.geometry.poly      |
 | (not available)                   | MarkerCluster                         |
-| google.maps.KmlLayer              | KmlOverlay                            |
 | (not available)                   | LocationService                       |
 | google.maps.StreetView            | StreetView :sparkles:                 |
 | google.maps.Data                  | (not available)                       |
