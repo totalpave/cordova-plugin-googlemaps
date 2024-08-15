@@ -26,7 +26,6 @@ module.exports = {
   MAP_DRAG: 'map_drag',
   MAP_DRAG_START: 'map_drag_start',
   MAP_DRAG_END: 'map_drag_end',
-  KML_CLICK: 'kml_click',
   FUSION_TABLE_CLICK: 'fusion_table_click',
   PANORAMA_READY: 'panorama_ready',
   PANORAMA_CAMERA_CHANGE: 'panorama_camera_change',

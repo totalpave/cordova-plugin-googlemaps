@@ -16,8 +16,6 @@ var utils = require('cordova/utils'),
   Polygon = require('./Polygon'),
   TileOverlay = require('./TileOverlay'),
   GroundOverlay = require('./GroundOverlay'),
-  KmlOverlay = require('./KmlOverlay'),
-  KmlLoader = require('./KmlLoader'),
   MarkerCluster = require('./MarkerCluster'),
   TotalPaveTileLayer = require('./TotalPaveTileLayer');
 
@@ -983,65 +981,6 @@ Map.prototype.setPadding = function(p1, p2, p3, p4) {
   return this;
 };
 
-
-Map.prototype.addKmlOverlay = function(kmlOverlayOptions, callback) {
-  var self = this;
-  kmlOverlayOptions = kmlOverlayOptions || {};
-  kmlOverlayOptions.url = kmlOverlayOptions.url || null;
-  kmlOverlayOptions.clickable = common.defaultTrueOption(kmlOverlayOptions.clickable);
-  kmlOverlayOptions.suppressInfoWindows = kmlOverlayOptions.suppressInfoWindows === true;
-
-  if (kmlOverlayOptions.url) {
-
-    var link = document.createElement('a');
-    link.href = kmlOverlayOptions.url;
-    kmlOverlayOptions.url = link.protocol+'//'+link.host+link.pathname + link.search;
-
-    var invisible_dot = self.get('invisible_dot');
-    if (!invisible_dot || invisible_dot._isRemoved) {
-      // Create an invisible marker for kmlOverlay
-      self.set('invisible_dot', self.addMarker({
-        position: {
-          lat: 0,
-          lng: 0
-        },
-        icon: 'skyblue',
-        visible: false
-      }));
-    }
-    if ('icon' in kmlOverlayOptions) {
-      self.get('invisible_dot').setIcon(kmlOverlayOptions.icon);
-    }
-
-    var resolver = function(resolve, reject) {
-
-      var loader = new KmlLoader(self, self.exec, kmlOverlayOptions);
-      loader.parseKmlFile(function(camera, kmlData) {
-        if (kmlData instanceof BaseClass) {
-          kmlData = new BaseArrayClass([kmlData]);
-        }
-        var kmlId = 'kmloverlay_' + Math.floor(Math.random() * Date.now());
-        var kmlOverlay = new KmlOverlay(self, kmlId, camera, kmlData, kmlOverlayOptions);
-        self.OVERLAYS[kmlId] = kmlOverlay;
-        resolve.call(self, kmlOverlay);
-      }, reject);
-
-    };
-
-    if (typeof callback === 'function') {
-      resolver(callback, self.errorHandler);
-    } else {
-      return new Promise(resolver);
-    }
-  } else {
-
-    if (typeof callback === 'function') {
-      throw new Error('KML file url is required.');
-    } else {
-      return Promise.reject('KML file url is required.');
-    }
-  }
-};
 
 
 //-------------
