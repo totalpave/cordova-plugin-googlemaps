@@ -90,6 +90,10 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
         if (command.arguments.count > 1) {
             ids = [command.arguments objectAtIndex:1];
         }
+
+        if ([ids isKindOfClass:[NSNull class]]) {
+            ids = nil;
+        }
         
         if (ids == nil) {
             [(TotalPaveTileProvider*)[self.mapCtrl.objects objectForKey:[command.arguments objectAtIndex:0]] reload:&error];
