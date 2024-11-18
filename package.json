@@ -46,21 +46,11 @@
       "version": ">=10.0.0"
     }
   ],
-  "scripts": {
-    "test": "jest && npm run eslint",
-    "jest": "jest",
-    "test:watch": "jest --watch"
-  },
+  "scripts": {},
   "author": "Masashi Katsumata, Hirbod Mirjavadi",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/totalpave/cordova-plugin-googlemaps/issues"
   },
-  "homepage": "https://github.com/totalpave/cordova-plugin-googlemaps",
-  "devDependencies": {
-    "cordova-js": "^4.2.4"
-  },
-  "dependencies": {
-    "cordova-common": "4.1.0"
-  }
+  "homepage": "https://github.com/totalpave/cordova-plugin-googlemaps"
 }
