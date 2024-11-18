@@ -1261,6 +1261,8 @@ Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callba
 
   if (totalPaveTileLayerOptions.scale) {
     if (!isUsingScaleMap) {
+      console.warn('Scale is deprecated. Use scaleMap instead');
+      
       // Migrate scale to scaleMap for backwards compatibility
       totalPaveTileLayerOptions.scaleMap = {
         '0': totalPaveTileLayerOptions.scale
