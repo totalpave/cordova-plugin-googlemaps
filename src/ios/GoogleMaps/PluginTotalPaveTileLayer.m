@@ -39,10 +39,10 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
         return;
     }
 
-    NSArray* scale = [opts valueForKey:@"scale"];
-    if ([scale isEqual:[NSNull null]] || scale == nil) {
+    NSObject* scaleMap = [opts valueForKey:@"scaleMap"];
+    if ([scaleMap isEqual:[NSNull null]] || scaleMap == nil) {
         [self.commandDelegate
-            sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"Scale is required."]
+            sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"scaleMap is required."]
             callbackId:command.callbackId
         ];
         return;
@@ -50,7 +50,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
     
     [self.commandDelegate runInBackground:^{
         NSError* error;
-        TotalPaveTileProvider* provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery reloadSelectQuery:reloadSelectQuery scale:scale error:&error];
+        TotalPaveTileProvider* provider = [[TotalPaveTileProvider alloc] initWithDB:dbPath selectQuery:selectQuery reloadSelectQuery:reloadSelectQuery scaleMap:scaleMap error:&error];
         if (![error isEqual:[NSNull null]] && error != nil) {
             [self.commandDelegate
                 sendPluginResult:[CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]]

@@ -3,17 +3,17 @@
 #import <tilegen/tilegen.h>
 
 @implementation TotalPaveTileProvider {
-    NSArray* $scale;
+    NSDictionary* $scaleMap;
     TPITilegenLogger* $logger;
     TPITilegenGeneratorSettings* $settings;
 }
 
 NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
-- (id)initWithDB:(NSString *)dbPathStr selectQuery:(NSString *)selectQuery reloadSelectQuery:(NSString *)reloadSelectQuery scale:(NSArray*)scale error:(NSError*_Nonnull*_Nonnull) error {
+- (id)initWithDB:(NSString *)dbPathStr selectQuery:(NSString *)selectQuery reloadSelectQuery:(NSString *)reloadSelectQuery scaleMap:(NSDictionary*)scaleMap error:(NSError*_Nonnull*_Nonnull) error {
     self = [super init];
     
-    $scale = scale;
+    $scaleMap = scaleMap;
     
     $logger = [[TPITilegenLogger alloc] init:@"TotalPaveTileProvider"];
     [TPITilegenLogger setActiveLogger: $logger];
@@ -45,26 +45,32 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
     [builder setTileSize: 512];
     [builder setZoomModifier: 0.2f];
     [builder setZoomModifierThreshold: 16];
+    
+//    NSEnumerator* enumerator = [$scaleMap keyEnumerator];
+    [$scaleMap enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
+        NSString* scaleID = key;
+        NSArray* scale = obj;
         
-    for (NSUInteger i = 0, length = scale.count; i < length; ++i) {
-        NSDictionary* item = scale[i];
-        
-        NSNumber* ohigh = [item valueForKey:@"high"];
-        double high = std::numeric_limits<double>::infinity();
-        if (![ohigh isEqual:[NSNull null]]) {
-            high = [ohigh doubleValue];
+        for (NSUInteger i = 0, length = scale.count; i < length; ++i) {
+            NSDictionary* item = scale[i];
+            
+            NSNumber* ohigh = [item valueForKey:@"high"];
+            double high = std::numeric_limits<double>::infinity();
+            if (![ohigh isEqual:[NSNull null]]) {
+                high = [ohigh doubleValue];
+            }
+            
+            TPITilegenScaleItem* scaleItem = [
+                [TPITilegenScaleItem alloc]
+                initLow: [(NSNumber*)[item valueForKey:@"low"] doubleValue]
+                high: high
+                stroke: [(NSNumber*)[item valueForKey:@"stroke"] unsignedIntValue]
+                fill: [(NSNumber*)[item valueForKey:@"fill"] unsignedIntValue]
+            ];
+            
+            [builder addScaleItem: [[NSNumber alloc] initWithLong: [scaleID integerValue]] item: scaleItem];
         }
-        
-        TPITilegenScaleItem* scaleItem = [
-            [TPITilegenScaleItem alloc]
-            initLow: [(NSNumber*)[item valueForKey:@"low"] doubleValue]
-            high: high
-            stroke: [(NSNumber*)[item valueForKey:@"stroke"] unsignedIntValue]
-            fill: [(NSNumber*)[item valueForKey:@"fill"] unsignedIntValue]
-        ];
-        
-        [builder addScaleItem: scaleItem];
-    }
+    }];
     
     $settings = [builder build];
     [self $load:error];
