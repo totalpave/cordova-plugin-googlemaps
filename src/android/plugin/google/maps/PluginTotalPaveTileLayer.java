@@ -80,8 +80,8 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
             return;
         }
 
-        if (!opts.has("scale")) {
-            callbackContext.error("scale is required.");
+        if (!opts.has("scaleMap")) {
+            callbackContext.error("scaleMap is required.");
             return;
         }
 
@@ -93,7 +93,7 @@ public class PluginTotalPaveTileLayer extends MyPlugin implements MyPluginInterf
                     opts.getString("dbPath"),
                     opts.getString("selectQuery"),
                     opts.getString("reloadSelectQuery"),
-                    opts.getJSONArray("scale")
+                    opts.getJSONObject("scaleMap")
                 );
             }
             catch (Exception ex) {
