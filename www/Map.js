@@ -1,5 +1,3 @@
-
-
 var utils = require('cordova/utils'),
   cordova_exec = require('cordova/exec'),
   common = require('./Common'),
@@ -1255,8 +1253,12 @@ Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callba
     isUsingScaleMap = true;
   }
 
-  if (totalPaveTileLayerOptions.scale && !(totalPaveTileLayerOptions.scale instanceof Array) || totalPaveTileLayerOptions.scale.length === 0) {
+  if (totalPaveTileLayerOptions.scale && !(totalPaveTileLayerOptions.scale instanceof Array)) {
     throw new Error('Invalid state. Scale expects Array of {low: number, high: number, stroke: hex color string, fill: hex color string}. low and high are used with the select query value.');
+  }
+
+  if (totalPaveTileLayerOptions.scale && totalPaveTileLayerOptions.scale.length === 0) {
+    throw new Error('Invalid State. Scale expects an array of at least 1 item');
   }
 
   if (totalPaveTileLayerOptions.scale) {
