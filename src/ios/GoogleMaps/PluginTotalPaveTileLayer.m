@@ -39,7 +39,7 @@ NSString * const PROPERTY_PREFIX = @"totalpavetilelayer_property";
         return;
     }
 
-    NSObject* scaleMap = [opts valueForKey:@"scaleMap"];
+    NSDictionary* scaleMap = [opts valueForKey:@"scaleMap"];
     if ([scaleMap isEqual:[NSNull null]] || scaleMap == nil) {
         [self.commandDelegate
             sendPluginResult: [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"scaleMap is required."]

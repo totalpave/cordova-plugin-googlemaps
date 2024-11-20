@@ -46,7 +46,6 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
     [builder setZoomModifier: 0.2f];
     [builder setZoomModifierThreshold: 16];
     
-//    NSEnumerator* enumerator = [$scaleMap keyEnumerator];
     [$scaleMap enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
         NSString* scaleID = key;
         NSArray* scale = obj;
