@@ -1,5 +1,3 @@
-
-
 var utils = require('cordova/utils'),
   cordova_exec = require('cordova/exec'),
   common = require('./Common'),
@@ -1242,30 +1240,70 @@ Map.prototype.addTotalPaveTileLayer = function(totalPaveTileLayerOptions, callba
     throw new Error('totalPaveTileLayerOptions.reloadSelectQuery is required. Should be the same as selectQuery, except with a WHERE id IN (:ids) condition.');
   }
 
-  if (!totalPaveTileLayerOptions.scale || !(totalPaveTileLayerOptions.scale instanceof Array) || totalPaveTileLayerOptions.scale.length === 0) {
-    throw new Error('totalPaveTileLayerOptions.scale is required. Array of {low: number, high: number, stroke: hex color string, fill: hex color string}. low and high are used with the select query value.');
+  if (totalPaveTileLayerOptions.scale && totalPaveTileLayerOptions.scaleMap) {
+    throw new Error('both scale and scaleMap is defined. This is not a supported configuration. Preferably use scaleMap instead.');
   }
 
-  for (var i = 0, items = totalPaveTileLayerOptions.scale, length = items.length; i < length - 1; ++i) {
-    var item = items[i];
-    if (typeof item !== 'object') {
-      throw new Error('totalPaveTileLayerOptions.scale[x] must be an Object: {low: floating number, high: floating number, fill: RGBA numerical hex color code, stroke: RGBA numberical hex color code}');
+  if (!totalPaveTileLayerOptions.scale && !totalPaveTileLayerOptions.scaleMap) {
+    throw new Error('Neither scale or scaleMap is defined. One is required, preferably scaleMap');
+  }
+  
+  let isUsingScaleMap = false;
+  if (totalPaveTileLayerOptions.scaleMap) {
+    isUsingScaleMap = true;
+  }
+
+  if (totalPaveTileLayerOptions.scale && !(totalPaveTileLayerOptions.scale instanceof Array)) {
+    throw new Error('Invalid state. Scale expects Array of {low: number, high: number, stroke: hex color string, fill: hex color string}. low and high are used with the select query value.');
+  }
+
+  if (totalPaveTileLayerOptions.scale && totalPaveTileLayerOptions.scale.length === 0) {
+    throw new Error('Invalid State. Scale expects an array of at least 1 item');
+  }
+
+  if (totalPaveTileLayerOptions.scale) {
+    if (!isUsingScaleMap) {
+      console.warn('Scale is deprecated. Use scaleMap instead');
+      
+      // Migrate scale to scaleMap for backwards compatibility
+      totalPaveTileLayerOptions.scaleMap = {
+        '0': totalPaveTileLayerOptions.scale
+      };
+      delete totalPaveTileLayerOptions.scale;
     }
-    if (typeof item.low !== 'number') {
-      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].low is required. Floating point number.');
-    }
-    if (typeof item.stroke !== 'number') {
-      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].stroke is required. RGBA Numerical hex color code.');
-    }
-    if (typeof item.fill !== 'number') {
-      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].fill is required. RGBA Numerical hex color code.');
+  }
+
+  for (let x in totalPaveTileLayerOptions.scaleMap) {
+    let scale = totalPaveTileLayerOptions.scaleMap[x];
+
+    if (!(scale instanceof Array) || scale.length === 0) {
+      throw new Error('Invalid state. Scale expects Array of {low: number, high: number, stroke: hex color string, fill: hex color string}. low and high are used with the select query value.');
     }
 
-    if (i === length - 1 && (typeof items[i] !== 'object' || items[i].high !== null)) {
-      throw new Error('totalPaveTileLayerOptions.scale[<last item\'s index>].high must be null.');
-    }
-    else if (typeof items[i] !== 'object' || typeof items[i].high !== 'number') {
-      throw new Error('totalPaveTileLayerOptions.scale[' + i + '].high must be a floating point number.');
+    for (let i = 0; i < scale.length; i++) {
+      let item = scale[i];
+      if (typeof item !== 'object') {
+        throw new Error(`totalPaveTileLayerOptions.scaleMap[${x}][${i}] must be an Object: {low: floating number, high: floating number, fill: RGBA numerical hex color code, stroke: RGBA numberical hex color code}`);
+      }
+      if (typeof item.low !== 'number') {
+        throw new Error(`totalPaveTileLayerOptions.scaleMap[${x}][${i}].low is required. Floating point number.`);
+      }
+      if (typeof item.stroke !== 'number') {
+        throw new Error(`totalPaveTileLayerOptions.scaleMap[${x}][${i}].stroke is required. RGBA Numerical hex color code.`);
+      }
+      if (typeof item.fill !== 'number') {
+        throw new Error(`totalPaveTileLayerOptions.scaleMap[${x}][${i}].fill is required. RGBA Numerical hex color code.`);
+      }
+
+      let isLastScaleItem = i === scale.length - 1;
+      if (isLastScaleItem) {
+        if (item.high !== null && typeof item.high !== 'number') {
+          throw new Error(`totalPaveTileLayerOptions.scaleMap[${x}][${i}].high is required. Must be Floating point number or null`);
+        }
+      }
+      else if (typeof item.high !== 'number') {
+        throw new Error(`totalPaveTileLayerOptions.scaleMap[${x}][${i}].high is required. Floating point number.`);
+      }
     }
   }
 
