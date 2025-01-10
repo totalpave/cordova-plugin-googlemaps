@@ -27,6 +27,7 @@
 - (id)initWithWebView:(UIView *)webView {
     self.executeQueue = [NSOperationQueue new];
     self._lockObject = [[NSObject alloc] init];
+    self._htmlNodeLock = [[NSObject alloc] init];
     self.CACHE_FIND_DOM = [NSMutableDictionary dictionary];
 
     self = [super initWithFrame:[webView frame]];
@@ -103,7 +104,7 @@
   self.pluginScrollView.contentOffset = offset;
 }
 - (void)clearHTMLElements {
-    @synchronized(self.pluginScrollView.HTMLNodes) {
+    @synchronized(self._htmlNodeLock) {
       NSMutableDictionary *domInfo;
       NSString *domId;
       NSArray *keys=[self.pluginScrollView.HTMLNodes allKeys];
@@ -132,7 +133,7 @@
         NSMutableDictionary *domInfo, *size;
         NSString *domId;
 
-        @synchronized(self._lockObject) {
+        @synchronized(self._htmlNodeLock) {
 
           if (self.pluginScrollView.HTMLNodes != nil) {
             NSArray *keys=[self.pluginScrollView.HTMLNodes allKeys];
@@ -242,7 +243,7 @@
     }
 
     NSDictionary *domInfo = nil;
-    @synchronized(self.pluginScrollView.HTMLNodes) {
+    @synchronized(self._htmlNodeLock) {
       domInfo = [self.pluginScrollView.HTMLNodes objectForKey:pluginViewCtrl.divId];
       if (domInfo == nil) {
           return;
@@ -397,7 +398,7 @@
 
   NSDictionary *domInfo;
 
-  @synchronized(self.pluginScrollView.HTMLNodes) {
+  @synchronized(self._htmlNodeLock) {
     //NSLog(@"--->browserClickPoint = %f, %f", browserClickPoint.x, browserClickPoint.y);
     clickedDomId = [self findClickedDom:@"root" withPoint:browserClickPoint isMapChild:NO overflow:nil];
     //NSLog(@"--->clickedDomId = %@", clickedDomId);

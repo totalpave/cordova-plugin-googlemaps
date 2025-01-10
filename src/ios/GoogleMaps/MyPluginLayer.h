@@ -31,6 +31,7 @@
 @property (nonatomic) BOOL isSuspended;
 @property (nonatomic) NSOperationQueue *executeQueue;
 @property (atomic, strong) NSObject *_lockObject;
+@property (atomic, strong) NSObject* _htmlNodeLock;
 @property (atomic, strong) NSMutableDictionary *CACHE_FIND_DOM;
 
 - (id)initWithWebView:(UIView *)webView;
