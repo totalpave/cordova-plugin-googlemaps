@@ -3,7 +3,6 @@ package plugin.google.maps;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONException;
-import android.content.Context;
 
 import androidx.annotation.Nullable;
 
@@ -14,6 +13,7 @@ import java.io.File;
 import java.net.URI;
 import java.lang.IllegalArgumentException;
 import java.lang.RuntimeException;
+import java.util.Iterator;
 
 import com.totalpave.tilegen.TileGenerator;
 import com.totalpave.tilegen.GeneratorSettings;
@@ -22,16 +22,17 @@ import com.totalpave.tilegen.NoTilesToRenderException;
 import com.totalpave.tilegen.TileUnavailableException;
 
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 
 public class TotalPaveTileProvider implements TileProvider {
-    JSONArray scale;
+    JSONObject scale;
     GeneratorSettings settings;
 
     private static final int TILE_SIZE_DP = 256;
     private int tileSize;
 
-    public TotalPaveTileProvider(DisplayMetrics displayMetrics, String dbPath, String selectQuery, String reloadSelectQuery, JSONArray scale) throws IllegalArgumentException {
+    public TotalPaveTileProvider(DisplayMetrics displayMetrics, String dbPath, String selectQuery, String reloadSelectQuery, JSONObject scaleMap) throws IllegalArgumentException {
         super();
 
         File fdbPath = new File(URI.create(dbPath));
@@ -50,31 +51,40 @@ public class TotalPaveTileProvider implements TileProvider {
             .setZoomModifierThreshold(16);
         
         try {
-            for (int i = 0; i < scale.length(); i++) {
-                JSONObject scaleObj = scale.getJSONObject(i);
+            Iterator<String> scaleMapIterator = scaleMap.keys();
+            while (scaleMapIterator.hasNext()) {
+                String key = scaleMapIterator.next();
+                JSONArray scale = scaleMap.getJSONArray(key);
+                byte byteKey = Byte.parseByte(key);
 
-                Double low = null;
-                Double high = null;
+                Log.d("TotalPaveTileProvider", "Adding Scale Key: " + Byte.toString(byteKey));
 
-                if (!scaleObj.isNull("low")) {
-                    low = scaleObj.getDouble("low");
+                for (int i = 0; i < scale.length(); i++) {
+                    JSONObject scaleObj = scale.getJSONObject(i);
+
+                    Double low = null;
+                    Double high = null;
+
+                    if (!scaleObj.isNull("low")) {
+                        low = scaleObj.getDouble("low");
+                    }
+
+                    if (!scaleObj.isNull("high")) {
+                        high = scaleObj.getDouble("high");
+                    }
+
+                    int strokeColor = scaleObj.getInt("stroke");
+                    int fillColor = scaleObj.getInt("fill");
+
+                    settings.addScaleItem(byteKey, new ScaleItem(low, high, strokeColor, fillColor));
                 }
-
-                if (!scaleObj.isNull("high")) {
-                    high = scaleObj.getDouble("high");
-                }
-
-                int strokeColor = scaleObj.getInt("stroke");
-                int fillColor = scaleObj.getInt("fill");
-
-                settings.addScaleItem(new ScaleItem(low, high, strokeColor, fillColor));
             }
         }
         catch (JSONException ex) {
             throw new IllegalArgumentException("Could not parse Scale array.", ex);
         }
         
-        this.scale = scale;
+        this.scale = scaleMap;
         this.$load();
     }
 
