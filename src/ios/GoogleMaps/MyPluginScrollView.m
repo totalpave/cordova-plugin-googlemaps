@@ -24,6 +24,7 @@
   if (@available(iOS 11, *)) {
     self.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
   }
+  self.htmlNodesLock = [[NSObject alloc] init];
   self.HTMLNodes = [[NSMutableDictionary alloc] init];
   self.mapCtrls = [[NSMutableDictionary alloc] init];
   self.scrollEnabled = false;

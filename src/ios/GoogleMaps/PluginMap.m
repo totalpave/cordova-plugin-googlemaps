@@ -209,15 +209,16 @@
     CDVViewController *cdvViewController = (CDVViewController*)self.viewController;
     CordovaGoogleMaps *googlemaps = [cdvViewController getCommandInstance:@"CordovaGoogleMaps"];
 
-    // Save the map rectangle.
-    if (![googlemaps.pluginLayer.pluginScrollView.HTMLNodes objectForKey:self.mapCtrl.divId]) {
-      NSMutableDictionary *dummyInfo = [[NSMutableDictionary alloc] init];;
-      [dummyInfo setObject:@"{{0,-3000} - {50,50}}" forKey:@"size"];
-      [dummyInfo setObject:[NSNumber numberWithDouble:-999] forKey:@"depth"];
-      [googlemaps.pluginLayer.pluginScrollView.HTMLNodes setObject:dummyInfo forKey:self.mapCtrl.divId];
-    }
-
-
+      @synchronized (googlemaps.pluginLayer.pluginScrollView.htmlNodesLock) {
+            // Save the map rectangle.
+            if (![googlemaps.pluginLayer.pluginScrollView.HTMLNodes objectForKey:self.mapCtrl.divId]) {
+              NSMutableDictionary *dummyInfo = [[NSMutableDictionary alloc] init];;
+              [dummyInfo setObject:@"{{0,-3000} - {50,50}}" forKey:@"size"];
+              [dummyInfo setObject:[NSNumber numberWithDouble:-999] forKey:@"depth"];
+              [googlemaps.pluginLayer.pluginScrollView.HTMLNodes setObject:dummyInfo forKey:self.mapCtrl.divId];
+            }
+      }
+    
     dispatch_async(dispatch_get_main_queue(), ^{
       [googlemaps.pluginLayer updateViewPosition:self.mapCtrl];
 

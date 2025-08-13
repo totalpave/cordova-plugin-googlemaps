@@ -27,7 +27,6 @@
 - (id)initWithWebView:(UIView *)webView {
     self.executeQueue = [NSOperationQueue new];
     self._lockObject = [[NSObject alloc] init];
-    self._htmlNodeLock = [[NSObject alloc] init];
     self.CACHE_FIND_DOM = [NSMutableDictionary dictionary];
 
     self = [super initWithFrame:[webView frame]];
@@ -104,7 +103,7 @@
   self.pluginScrollView.contentOffset = offset;
 }
 - (void)clearHTMLElements {
-    @synchronized(self._htmlNodeLock) {
+    @synchronized(self.pluginScrollView.htmlNodesLock) {
       NSMutableDictionary *domInfo;
       NSString *domId;
       NSArray *keys=[self.pluginScrollView.HTMLNodes allKeys];
@@ -133,7 +132,7 @@
         NSMutableDictionary *domInfo, *size;
         NSString *domId;
 
-        @synchronized(self._htmlNodeLock) {
+        @synchronized(self.pluginScrollView.htmlNodesLock) {
 
           if (self.pluginScrollView.HTMLNodes != nil) {
             NSArray *keys=[self.pluginScrollView.HTMLNodes allKeys];
@@ -255,7 +254,7 @@
     }
 
     NSDictionary *domInfo = nil;
-    @synchronized(self._htmlNodeLock) {
+    @synchronized(self.pluginScrollView.htmlNodesLock) {
       domInfo = [self.pluginScrollView.HTMLNodes objectForKey:pluginViewCtrl.divId];
       if (domInfo == nil) {
           return;
@@ -410,7 +409,7 @@
 
   NSDictionary *domInfo;
 
-  @synchronized(self._htmlNodeLock) {
+  @synchronized(self.pluginScrollView.htmlNodesLock) {
     //NSLog(@"--->browserClickPoint = %f, %f", browserClickPoint.x, browserClickPoint.y);
     clickedDomId = [self findClickedDom:@"root" withPoint:browserClickPoint isMapChild:NO overflow:nil];
     //NSLog(@"--->clickedDomId = %@", clickedDomId);
@@ -516,8 +515,16 @@
   zIndexProp = [domInfo objectForKey:@"zIndex"];
   NSArray *children = [domInfo objectForKey:@"children"];
   int maxZIndex = -1215752192;  //  -1 * pow(2, 32) + 1;
-  if ((containMapCnt > 0 || isMapChild || [@"none" isEqualToString:pointerEvents] ||
-       [[zIndexProp objectForKey:@"isInherit"] boolValue]) && children != nil && children.count > 0) {
+  if (
+    (
+        containMapCnt > 0 ||
+        isMapChild ||
+        [@"none" isEqualToString:pointerEvents] ||
+        [[zIndexProp objectForKey:@"isInherit"] boolValue]
+    ) &&
+    children != nil &&
+    children.count > 0
+  ) {
 
     int zIndexValue;
     NSString *childId, *grandChildId;

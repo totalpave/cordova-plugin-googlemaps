@@ -12,6 +12,8 @@
 
 @property (nonatomic) NSMutableDictionary *mapCtrls;
 @property (nonatomic) NSMutableDictionary *HTMLNodes;
+@property (nonatomic) NSObject* htmlNodesLock;
+
 - (void)attachView:(UIView *)view depth:(NSInteger)depth;
 - (void)detachView:(UIView *)view;
 @end

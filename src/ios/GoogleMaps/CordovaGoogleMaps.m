@@ -129,7 +129,7 @@
     }
     [self.viewPlugins removeAllObjects];
 
-    @synchronized(self.pluginLayer.pluginScrollView.HTMLNodes) {
+    @synchronized(self.pluginLayer.pluginScrollView.htmlNodesLock) {
       [self.pluginLayer.pluginScrollView.HTMLNodes removeAllObjects];
       self.pluginLayer.pluginScrollView.HTMLNodes = nil;
     }
@@ -474,7 +474,7 @@
       NSString *domId;
       CGRect rect = CGRectMake(0, 0, 0, 0);
       NSMutableDictionary *domInfo, *size, *currentDomInfo;
-      @synchronized(self.pluginLayer.pluginScrollView.HTMLNodes) {
+      @synchronized(self.pluginLayer.pluginScrollView.htmlNodesLock) {
         for (domId in elementsDic) {
 
           domInfo = [elementsDic objectForKey:domId];
