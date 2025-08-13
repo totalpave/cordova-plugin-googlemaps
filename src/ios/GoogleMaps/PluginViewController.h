@@ -34,4 +34,12 @@
 
 - (id)initWithOptions:(NSDictionary *) options;
 - (void)execJS: (NSString *)jsString;
+
+/**
+    Returns true if the view is loaded and is an instance of GMapsView*
+    There are flaws in the codebase where `.view` can be nil, but concurrently `.view` can be accessed.
+    Because this controller does not implement the `loadView` method, a base `UIView*` is created instead,
+    leading to crashes when things unsafely cast to `GMapsView*` and attempt to use `GMapView*` methods or properties.
+*/
+- (BOOL) hasGMapsView;
 @end

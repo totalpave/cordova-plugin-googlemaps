@@ -59,4 +59,14 @@
   }
 }
 
+- (BOOL) hasGMapsView {
+  UIView* loadedView = self.viewIfLoaded;
+
+  if (loadedView == nil) {
+    return false;
+  }
+
+  return [loadedView isKindOfClass: [GMSMapView class]];
+}
+
 @end

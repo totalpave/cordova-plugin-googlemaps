@@ -177,6 +177,10 @@
 - (void)addPluginOverlay:(PluginViewController *)pluginViewCtrl {
 
   [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+      if (![pluginViewCtrl hasGMapsView]) {
+        return;
+      }
+      
       // Hold the mapCtrl instance with mapId.
       [self.pluginScrollView.mapCtrls setObject:pluginViewCtrl forKey:pluginViewCtrl.overlayId];
 
@@ -197,6 +201,10 @@
 
 - (void)removePluginOverlay:(PluginViewController *)pluginViewCtrl {
   [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+      if (![pluginViewCtrl hasGMapsView]) {
+        return;
+      }
+      
       pluginViewCtrl.attached = NO;
 
       // Remove the mapCtrl instance with mapId.
@@ -230,6 +238,10 @@
 }
 
 - (void)updateViewPosition:(PluginViewController *)pluginViewCtrl {
+    if (![pluginViewCtrl hasGMapsView]) {
+        return;
+    }
+    
     CGFloat zoomScale = self.webView.scrollView.zoomScale;
     [self.pluginScrollView setFrame:self.webView.frame];
 
