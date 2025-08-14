@@ -51,6 +51,7 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.IndoorBuilding;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapColorScheme;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -279,6 +280,8 @@ public class PluginMap extends MyPlugin implements OnMarkerClickListener,
       }
       options.camera(builder.build());
     }
+
+    options.mapColorScheme(MapColorScheme.LIGHT);
 
     mapView = new MapView(activity, options);
 

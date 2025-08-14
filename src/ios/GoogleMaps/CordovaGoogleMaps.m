@@ -7,6 +7,7 @@
 //
 
 #import "CordovaGoogleMaps.h"
+#import <UIKit/UIKit.h>
 
 @implementation CordovaGoogleMaps
 
@@ -324,13 +325,20 @@
       }
       //[pluginMap.mapCtrl.view setHidden:YES];
     }
+    
     camera = [GMSCameraPosition cameraWithLatitude:latitude
                                          longitude:longitude
                                               zoom: zoom
                                            bearing: bearing
                                       viewingAngle: angle];
-
-    viewCtrl.map = [GMSMapView mapWithFrame:rect camera:camera];
+                                      
+    GMSMapViewOptions* mapOptions = [[GMSMapViewOptions alloc] init];
+    mapOptions.frame = rect;
+    mapOptions.camera = camera;
+                                      
+    viewCtrl.map = [[GMSMapView alloc] initWithOptions: mapOptions];
+    viewCtrl.map.overrideUserInterfaceStyle = UIUserInterfaceStyleLight;
+    
     viewCtrl.view = viewCtrl.map;
 
     //mapType
