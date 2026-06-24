@@ -12,7 +12,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "registry": "https://registry.totalpave.com:48731"
+    "registry": "https://registry.internal.totalpave.com"
   },
   "repository": {
     "type": "git",
