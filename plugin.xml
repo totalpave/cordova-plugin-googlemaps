@@ -119,7 +119,7 @@
 
   <engines>
     <engine name="cordova" version=">=7.0.0" />
-    <engine name="cordova-ios" version=">=4.5.0" />
+    <engine name="cordova-ios" version=">=8.0.0" />
     <engine name="apple-xcode" version=">=9.0.0" />
     <engine name="apple-ios" version=">=10.0.0" />
   </engines>
@@ -271,7 +271,7 @@
   </platform>
 
   <!-- ios -->
-  <platform name="ios">
+  <platform name="ios" package="swift">
     <preference name="LOCATION_WHEN_IN_USE_DESCRIPTION" default="This app wants to get your location while this app runs only."/>
     <preference name="LOCATION_ALWAYS_USAGE_DESCRIPTION" default="This app wants to get your location always, even this app runs in background."/>
 
@@ -330,90 +330,6 @@
       </feature>
     </config-file>
 
-    <header-file src="src/ios/GoogleMaps/PluginObjects.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginObjects.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginCircle.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginCircle.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginGeocoder.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginGeocoder.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginLocationService.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginLocationService.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginEnvironment.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginEnvironment.m"/>
-    <header-file src="src/ios/GoogleMaps/CordovaGoogleMaps.h"/>
-    <source-file src="src/ios/GoogleMaps/CordovaGoogleMaps.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginMapViewController.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginMapViewController.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginGroundOverlay.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginGroundOverlay.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginMap.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginMap.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginMarker.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginMarker.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginUtil.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginUtil.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginPolygon.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginPolygon.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginPolyline.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginPolyline.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginTileProvider.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginTileProvider.m"/>
-    <header-file src="src/ios/GoogleMaps/TBXML.h"/>
-    <source-file src="src/ios/GoogleMaps/TBXML.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginTileOverlay.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginTileOverlay.m"/>
-    <header-file src="src/ios/GoogleMaps/MFGoogleMapAdditions/GMSCoordinateBounds+Geometry.h"/>
-    <source-file src="src/ios/GoogleMaps/MFGoogleMapAdditions/GMSCoordinateBounds+Geometry.m"/>
-    <header-file src="src/ios/GoogleMaps/MyPluginLayer.h"/>
-    <source-file src="src/ios/GoogleMaps/MyPluginLayer.m"/>
-    <header-file src="src/ios/GoogleMaps/MyPluginScrollView.h"/>
-    <source-file src="src/ios/GoogleMaps/MyPluginScrollView.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginMarkerCluster.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginMarkerCluster.m"/>
-    <header-file src="src/ios/GoogleMaps/UIImageCache.h"/>
-    <source-file src="src/ios/GoogleMaps/UIImageCache.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginStreetViewPanorama.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginStreetViewPanorama.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginStreetViewPanoramaController.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginStreetViewPanoramaController.m"/>
-    <header-file src="src/ios/GoogleMaps/PluginViewController.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginViewController.m"/>
-    <header-file src="src/ios/GoogleMaps/IPluginView.h"/>
-    <header-file src="src/ios/GoogleMaps/IPluginProtocol.h"/>
-    <header-file src="src/ios/GoogleMaps/PluginTotalPaveTileLayer.h"/>
-    <source-file src="src/ios/GoogleMaps/PluginTotalPaveTileLayer.m"/>
-    <header-file src="src/ios/GoogleMaps/TotalPaveTileProvider.h"/>
-    <source-file src="src/ios/GoogleMaps/TotalPaveTileProvider.mm"/>
-
-    <!-- Base messages -->
-    <resource-file src="src/ios/strings/pgm_Localizable_en.json" target="pgm_Localizable_en.json"/>
-    <!-- localized messages for Spanish -->
-    <resource-file src="src/ios/strings/pgm_Localizable_es.json" target="pgm_Localizable_es.json"/>
-    <!-- localized messages for Japanese -->
-    <resource-file src="src/ios/strings/pgm_Localizable_ja.json" target="pgm_Localizable_ja.json"/>
-    <!-- localized messages for Russian -->
-    <resource-file src="src/ios/strings/pgm_Localizable_ru.json" target="pgm_Localizable_ru.json"/>
-    <!-- localized messages for Ukrainian -->
-    <resource-file src="src/ios/strings/pgm_Localizable_uk.json" target="pgm_Localizable_uk.json"/>
-    <!-- localized messages for Brazilian Portuguese -->
-    <resource-file src="src/ios/strings/pgm_Localizable_pt-BR.json" target="pgm_Localizable_pt-BR.json"/>
-    <!-- localized messages for German -->
-    <resource-file src="src/ios/strings/pgm_Localizable_de.json" target="pgm_Localizable_de.json"/>
-    <!-- localized messages for French -->
-    <resource-file src="src/ios/strings/pgm_Localizable_fr.json" target="pgm_Localizable_fr.json"/>
-    <!-- localized messages for Hindi -->
-    <resource-file src="src/ios/strings/pgm_Localizable_hi.json" target="pgm_Localizable_hi.json"/>
-    <!-- localized messages for Arabic -->
-    <resource-file src="src/ios/strings/pgm_Localizable_ar.json" target="pgm_Localizable_ar.json"/>
-    <!-- localized messages for Dutch -->
-    <resource-file src="src/ios/strings/pgm_Localizable_nl.json" target="pgm_Localizable_nl.json"/>
-    <!-- localized messages for Polish -->
-    <resource-file src="src/ios/strings/pgm_Localizable_pl.json" target="pgm_Localizable_pl.json"/>
-    <!-- localized messages for Denmark -->
-    <resource-file src="src/ios/strings/pgm_Localizable_da.json" target="pgm_Localizable_da.json"/>
-    <!-- localized messages for Vietnamese -->
-    <resource-file src="src/ios/strings/pgm_Localizable_vi.json" target="pgm_Localizable_vi.json"/>
-
     <config-file target="*-Info.plist" parent="NSLocationWhenInUseUsageDescription">
       <string>$LOCATION_WHEN_IN_USE_DESCRIPTION</string>
     </config-file>
@@ -443,14 +359,6 @@
         </dict>
       </array>
     </config-file>
-    <podspec>
-        <config>
-            <source url="https://github.com/CocoaPods/Specs.git"/>
-        </config>
-        <pods>
-          <pod name="GoogleMaps" spec="9.1.1" />
-        </pods>
-    </podspec>
   </platform>
 
   <!-- browser -->
