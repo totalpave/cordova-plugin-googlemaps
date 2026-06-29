@@ -109,7 +109,7 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
 - (void) reload:(NSError*_Nonnull*_Nonnull) error ids:(NSArray*) ids {
     int status = 0;
-    [TPITilegenTileGenerator reloadData:status ids: ids];
+    [TPITilegenTileGenerator reloadData:&status ids: ids];
     if (status == 0) {} // No error occurred.
     else if (status == TPITilegen_DATASET_LOAD_ERROR) {
         *error = [[NSError alloc]
@@ -158,7 +158,7 @@ NSString* const LIB_TILE_GEN_DOMAIN = @"TotalPaveTileProviderLibTileGen";
 
 - (void) $load:(NSError*_Nonnull*_Nonnull) error {
     int status = 0;
-    [TPITilegenTileGenerator load:status withSettings: $settings];
+    [TPITilegenTileGenerator load:&status withSettings: $settings];
     
     if (status == 0) {} // No error occurred.
     else if (status == TPITilegen_DATASET_LOAD_ERROR) {

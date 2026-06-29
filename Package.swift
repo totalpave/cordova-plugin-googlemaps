@@ -12,14 +12,16 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apache/cordova-ios.git", branch: "master"),
-        .package(url: "https://github.com/googlemaps/ios-maps-sdk", exact: "9.1.1")
+        .package(url: "https://github.com/googlemaps/ios-maps-sdk", exact: "9.1.1"),
+        .package(url: "https://github.com/totalpaveinc/libtilegen", exact: "0.5.13")
     ],
     targets: [
         .target(
             name: "cordova-plugin-googlemaps",
             dependencies: [
                 .product(name: "Cordova", package: "cordova-ios"),
-                .product(name: "GoogleMaps", package: "ios-maps-sdk")
+                .product(name: "GoogleMaps", package: "ios-maps-sdk"),
+                .product(name: "@totalpave/cordova-plugin-tilegen", package: "libtilegen")
             ],
             path: "src/ios",
             sources: [

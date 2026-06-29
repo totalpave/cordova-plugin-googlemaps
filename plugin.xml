@@ -124,10 +124,12 @@
     <engine name="apple-ios" version=">=10.0.0" />
   </engines>
 
-  <dependency id="@totalpave/cordova-plugin-tilegen" version="0.4.3" />
+  <!-- <dependency id="@totalpave/cordova-plugin-tilegen" version="0.5.9" /> -->
 
   <!-- android -->
   <platform name="android">
+    <framework src="totalpave:tilegen:0.5.13" />
+
     <info>
       Official document https://github.com/mapsplugin/cordova-plugin-googlemaps-doc/blob/master/v2.6.0/README.md Please consider to buy a beer for us 🍺 https://github.com/mapsplugin/cordova-plugin-googlemaps#buy-us-a-beer
     </info>
