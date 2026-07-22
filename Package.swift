@@ -11,8 +11,8 @@ let package = Package(
             targets: ["cordova-plugin-googlemaps"])
     ],
     dependencies: [
-        .package(url: "https://github.com/apache/cordova-ios.git", branch: "master"),
-        .package(url: "https://github.com/googlemaps/ios-maps-sdk", exact: "9.1.1"),
+        .package(url: "https://github.com/apache/cordova-ios.git", from: "8.0.0"),
+        .package(url: "https://github.com/googlemaps/ios-maps-sdk", "9.0.0"..<"11.0.0"),
         .package(url: "https://github.com/totalpaveinc/libtilegen", exact: "0.5.13")
     ],
     targets: [
