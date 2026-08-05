@@ -404,11 +404,50 @@ static char CAAnimationGroupBlockKey;
   return filePath;
 }
 
+// Resolves the SPM resource bundle that contains the pgm_Localizable_*.json files.
+//
+// These files ship as package resources, so they live in the package's own
+// resource bundle rather than [NSBundle mainBundle]. The SPM-generated
+// SWIFTPM_MODULE_BUNDLE macro cannot be used here: it looks up the bundle by a
+// name where every non-alphanumeric character has been replaced with '_'
+// (cordova_plugin_googlemaps_...), while the bundle that actually ships inside
+// the app keeps the original hyphenated package name
+// (cordova-plugin-googlemaps_...). That mismatch makes the accessor throw
+// "unable to find bundle named ...". We resolve it ourselves by trying both the
+// hyphenated and sanitized names across the usual candidate locations, and fall
+// back to mainBundle so a non-SPM build path still works.
++ (NSBundle *)pgmResourceBundle {
+  NSArray<NSString *> *bundleNames = @[
+    @"cordova-plugin-googlemaps_cordova-plugin-googlemaps",
+    @"cordova_plugin_googlemaps_cordova_plugin_googlemaps"
+  ];
+  NSArray<NSURL *> *candidates = @[
+    [NSBundle bundleForClass:[PluginUtil class]].resourceURL ?: [NSNull null],
+    [NSBundle mainBundle].resourceURL ?: [NSNull null],
+    [NSBundle mainBundle].bundleURL ?: [NSNull null]
+  ];
+
+  for (id candidate in candidates) {
+    if (candidate == [NSNull null]) {
+      continue;
+    }
+    for (NSString *bundleName in bundleNames) {
+      NSURL *bundleURL = [(NSURL *)candidate URLByAppendingPathComponent:[bundleName stringByAppendingPathExtension:@"bundle"]];
+      NSBundle *bundle = [NSBundle bundleWithURL:bundleURL];
+      if (bundle != nil) {
+        return bundle;
+      }
+    }
+  }
+
+  return [NSBundle mainBundle];
+}
+
 + (NSString *)PGM_LOCALIZATION:(NSString *)key {
   NSFileManager *fileManager = [NSFileManager defaultManager];
   NSArray<NSString *> *preferredLanguages = [NSLocale preferredLanguages];
   NSString *localeCode, *languageCode, *path, *filename, *fileContents, *foundFilePath = nil;
-  NSBundle *mainBundle = [NSBundle mainBundle];
+  NSBundle *mainBundle = [PluginUtil pgmResourceBundle];
 
   for (int i = 0; i < [preferredLanguages count]; i++) {
     localeCode = [preferredLanguages objectAtIndex:i];
@@ -435,8 +474,19 @@ static char CAAnimationGroupBlockKey;
     foundFilePath  = [mainBundle pathForResource:@"pgm_Localizable_en" ofType:@"json"];
   }
 
+  // Guard against a missing resource: if the file could not be located the raw
+  // key is returned rather than passing nil data to NSJSONSerialization, which
+  // would throw NSInvalidArgumentException and crash the app.
+  if (!foundFilePath) {
+    return key;
+  }
+
   fileContents = [NSString stringWithContentsOfFile:foundFilePath encoding:NSUTF8StringEncoding error:nil];
   NSData *data = [fileContents dataUsingEncoding:NSUTF8StringEncoding];
+  if (!data) {
+    return key;
+  }
+
   NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
   NSString *result = [json objectForKey:key];
   if (!result) {
